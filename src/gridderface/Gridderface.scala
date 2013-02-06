@@ -24,6 +24,9 @@ object Gridderface extends SimpleSwingApplication {
   def createEdgeGrid(rows: Int, cols: Int) = new HomogeneousEdgeGrid(
       new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rows, cols)
   val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(10, 10))
+  
+  var generationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))
+  var generationDimensions: Option[(Int, Int)] = None // (rows, cols)
 
   def computePosition(pt: Point) = prov.computePosition(pt.x, pt.y)
   val modeLabel = new Label()
@@ -64,8 +67,9 @@ object Gridderface extends SimpleSwingApplication {
 
   val griddableList: List[Tuple3[Griddable, Float, String]] = List(
     (bg, 1.0f, "image"),
-    (edgeGridHolder, 0.5f, "grid"),
+    (generationGridSeq, 1.0f, "gengrid"),
     (ggrid, 1.0f, "content"),
+    (edgeGridHolder, 0.5f, "grid"),
     (selectedManager, 0.75f, "cursor"))
   val opacityBufferList = for ((g, opacity, name) <- griddableList) yield {
     val obuf = withOpacity(g, opacity, name)
@@ -136,6 +140,8 @@ object Gridderface extends SimpleSwingApplication {
     for (rctup <- getDimensionPair(args, 10).right) yield {
       val (rows, cols) = rctup
 
+      generationDimensions = Some((rows, cols))
+      
       prov.xOffset = 16
       prov.yOffset = 16
       prov.rowHeight = 32
@@ -192,6 +198,15 @@ object Gridderface extends SimpleSwingApplication {
         case "show" => fixedOpacityCommand(1f, parts.tail)
         case "opacity" => opacityCommand(parts.tail)
         case "op" => opacityCommand(parts.tail)
+        case "plain" => generationDimensions match {
+          case None => Left("Error: not in generation mode")
+          case Some((rows, cols)) => {
+            generationGridSeq.griddable =
+              generationGridSeq.griddable :+ new HomogeneousEdgeGrid(
+                new LineStampContent(Strokes.normalStamp, Color.BLACK), rows, cols);
+            Right("Plain grid added")
+          }
+        }
         case _ => Left("Unrecognized command")
       }
     } else Right("")
