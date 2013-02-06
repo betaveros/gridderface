@@ -51,8 +51,13 @@ object CommandUtilities {
   }
   def writeImage(img: RenderedImage, filename: String) = {
     try {
-      ImageIO.write(img, "png", new File(filename));
-      Right("Written image to " + filename)
+      val file = new File(filename)
+      // Some weird ImageIO implementation weakness makes doing this naively screw up.
+      // http://stackoverflow.com/questions/12074858/java-imageio-exception-weirdness
+      if (file.canWrite()){
+        ImageIO.write(img, "png", file);
+        Right("Written image to " + filename)
+      } else Left("Error: cannot write to file: " + filename)
     } catch {
       case e: IOException => Left("Error: IOException: " + e.getMessage())
     }
