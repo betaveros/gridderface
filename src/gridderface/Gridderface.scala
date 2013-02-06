@@ -21,6 +21,10 @@ object Gridderface extends SimpleSwingApplication {
   val bg = new GriddableImageHolder(None)
   val prov = new MutableGridProvider(32.0, 32.0)
 
+  def createEdgeGrid(rows: Int, cols: Int) = new HomogeneousEdgeGrid(
+      new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rows, cols)
+  val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(10, 10))
+
   def computePosition(pt: Point) = prov.computePosition(pt.x, pt.y)
   val modeLabel = new Label()
   val statusLabel = new Label()
@@ -60,8 +64,7 @@ object Gridderface extends SimpleSwingApplication {
 
   val griddableList: List[Tuple3[Griddable, Float, String]] = List(
     (bg, 1.0f, "image"),
-    (new HomogeneousEdgeGrid(new LineStampContent(
-      Strokes.normalDashedStamp, Color.BLACK), 10, 10), 0.5f, "grid"),
+    (edgeGridHolder, 0.5f, "grid"),
     (ggrid, 1.0f, "content"),
     (selectedManager, 0.75f, "cursor"))
   val opacityBufferList = for ((g, opacity, name) <- griddableList) yield {
@@ -108,7 +111,7 @@ object Gridderface extends SimpleSwingApplication {
     for (
       arg <- CommandUtilities.getSingleElement(args).right;
       buf <- getOpacityBufferAsEither(arg).right
-    ) yield {buf.opacity = op; ""}
+    ) yield { buf.opacity = op; "" }
   }
   def opacityCommand(args: Array[String]): Either[String, String] = {
     for (
@@ -139,6 +142,7 @@ object Gridderface extends SimpleSwingApplication {
       prov.colWidth = 32
       bg.image = Some(CommandUtilities.createFilledImage(
         32 * (1 + cols), 32 * (1 + rows), Color.WHITE))
+      edgeGridHolder.griddable = createEdgeGrid(rows, cols)
       "Ready for generation"
     }
   }
