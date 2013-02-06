@@ -2,7 +2,7 @@ package gridderface
 
 import java.awt.Graphics2D
 
-class GriddableAdaptor(private var _griddable: Griddable) extends Griddable {
+class GriddableAdaptor[A <: Griddable](private var _griddable: A) extends Griddable {
   def griddable = _griddable
   listenTo(_griddable)
   
@@ -11,7 +11,7 @@ class GriddableAdaptor(private var _griddable: Griddable) extends Griddable {
   }
   
   
-  def griddable_=(other: Griddable) = {
+  def griddable_=(other: A) = {
     deafTo(_griddable)
     _griddable = other
     listenTo(_griddable)
