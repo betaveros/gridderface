@@ -94,31 +94,6 @@ object Gridderface extends SimpleSwingApplication {
     focusable = true
     requestFocus
   }
-  def tryToFloat(str: String): Either[String, Float] = {
-    // There's a cool Try object in Scala 2.10 that lets you do this more monadically.
-    try {
-      Right(str.toFloat)
-    } catch {
-      case e: NumberFormatException => Left("Error: cannot parse float: " + str)
-    }
-  }
-  def tryToInt(str: String): Either[String, Int] = {
-    try {
-      Right(str.toInt)
-    } catch {
-      case e: NumberFormatException => Left("Error: cannot parse int: " + str)
-    }
-  }
-  def fixedOpacityCommand(op: Float, args: Array[String]): Either[String, String] = {
-    if (args.length != 1) Left("Error: wrong # of arguments")
-    else {
-      opacityBufferMap get args(0) match {
-        case None => Left("Error: no such buffer")
-        case Some(buf) => buf.opacity = op; Right("")
-      }
-
-    }
-  }
   def getOpacityBufferAsEither(name: String): Either[String, OpacityBufferGriddable] = {
     opacityBufferMap get name match {
       case None => Left("Error: no such buffer: " + name)
@@ -129,31 +104,31 @@ object Gridderface extends SimpleSwingApplication {
     if (0 <= a && a <= 1) Right(a)
     else Left("Error: alpha out of range: " + a)
   }
+  def fixedOpacityCommand(op: Float, args: Array[String]): Either[String, String] = {
+    for (
+      arg <- CommandUtilities.getSingleArgument(args).right;
+      buf <- getOpacityBufferAsEither(arg).right
+    ) yield {buf.opacity = op; ""}
+  }
   def opacityCommand(args: Array[String]): Either[String, String] = {
-    if (args.length != 2) Left("Error: wrong number of arguments")
-    else {
-      for (
-        buf <- getOpacityBufferAsEither(args(0)).right;
-        a <- tryToFloat(args(1)).right;
-        a2 <- safeAlpha(a).right
-      ) yield { buf.opacity = a2; "" }
-    }
+    for (
+      cargs <- CommandUtilities.countedArguments(args, 2 ==).right;
+      buf <- getOpacityBufferAsEither(cargs(0)).right;
+      a <- CommandUtilities.tryToFloat(cargs(1)).right;
+      a2 <- safeAlpha(a).right
+    ) yield { buf.opacity = a2; "" }
   }
   def getDimensionPair(args: Array[String], defaultVal: Int): Either[String, (Int, Int)] = {
-    args.length match {
-      case 0 => Right((defaultVal, defaultVal))
-      case 1 => for (v <- tryToInt(args(0)).right) yield (v, v)
-      case 2 => for (a <- tryToInt(args(0)).right; b <- tryToInt(args(1)).right) yield (a, b)
-      case _ => Left("Error: wrong number of arguments")
+    for (ints <- CommandUtilities.countedIntArguments(args, Set(0, 1, 2).contains(_)).right) yield {
+      ints.length match {
+        case 0 => (defaultVal, defaultVal)
+        case 1 =>
+          val v = ints(0); (v, v)
+        case 2 => (ints(0), ints(1))
+      }
     }
   }
-  def makeWhiteImage(w: Int, h: Int) = {
-    val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
-    val g = img.getGraphics()
-    g.setColor(Color.WHITE)
-    g.fillRect(0, 0, w, h)
-    img
-  }
+
   def initGeneration(args: Array[String]) = {
     for (rctup <- getDimensionPair(args, 10).right) yield {
       val (rows, cols) = rctup
@@ -162,7 +137,8 @@ object Gridderface extends SimpleSwingApplication {
       prov.yOffset = 16
       prov.rowHeight = 32
       prov.colWidth = 32
-      bg.image = Some(makeWhiteImage(32 * (1 + cols), 32 * (1 + rows)))
+      bg.image = Some(CommandUtilities.createFilledImage(
+        32 * (1 + cols), 32 * (1 + rows), Color.WHITE))
       "Ready for generation"
     }
   }
@@ -181,21 +157,17 @@ object Gridderface extends SimpleSwingApplication {
     if (args.length != 1) Left("Error: wrong number of arguments")
     else generateImage() match {
       case None => Left("Error: no background")
-      case Some(img) => try {
-        ImageIO.write(img, "png", new File(args(0))); Right("Written image to " + args(0))
-      } catch {
-        case e: IOException => Left("Error: IOException: " + e.getMessage())
-      }
-      
+      case Some(img) => CommandUtilities.writeImage(img, args(0))
+
     }
-    
+
   }
   def handleColonCommand(str: String): Either[String, String] = {
     val parts = "\\s+".r.split(str.trim)
     if (parts.length > 0) {
       parts(0) match {
         case "hello" => Right("Hello world!")
-        
+
         // just pretend this is for testing if errors work
         case "Ni!" => Left("Do you demand a shrubbery?")
         case "quit" => sys.exit()
