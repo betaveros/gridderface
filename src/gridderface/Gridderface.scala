@@ -106,15 +106,15 @@ object Gridderface extends SimpleSwingApplication {
   }
   def fixedOpacityCommand(op: Float, args: Array[String]): Either[String, String] = {
     for (
-      arg <- CommandUtilities.getSingleArgument(args).right;
+      arg <- CommandUtilities.getSingleElement(args).right;
       buf <- getOpacityBufferAsEither(arg).right
     ) yield {buf.opacity = op; ""}
   }
   def opacityCommand(args: Array[String]): Either[String, String] = {
     for (
-      cargs <- CommandUtilities.countedArguments(args, 2 ==).right;
-      buf <- getOpacityBufferAsEither(cargs(0)).right;
-      a <- CommandUtilities.tryToFloat(cargs(1)).right;
+      _ <- CommandUtilities.counted(args, 2 ==).right;
+      buf <- getOpacityBufferAsEither(args(0)).right;
+      a <- CommandUtilities.tryToFloat(args(1)).right;
       a2 <- safeAlpha(a).right
     ) yield { buf.opacity = a2; "" }
   }

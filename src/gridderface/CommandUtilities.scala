@@ -7,6 +7,7 @@ import java.awt.image.RenderedImage
 import java.awt.image.BufferedImage
 import java.awt.Paint
 import java.awt.Graphics2D
+import scala.collection.GenSeqLike
 
 object CommandUtilities {
   def tryToFloat(str: String): Either[String, Float] = {
@@ -31,15 +32,22 @@ object CommandUtilities {
   }
   def countedIntArguments(strs: Seq[String], countIsAllowed: Int => Boolean): Either[String, Seq[Int]] = {
     for (
-      args <- countedArguments(strs, countIsAllowed).right;
-      result <- tryToInts(args).right
+      _ <- counted(strs, countIsAllowed).right;
+      result <- tryToInts(strs).right
     ) yield result
   }
-  def countedArguments(strs: Seq[String], countIsAllowed: Int => Boolean): Either[String, Seq[String]] = {
-    if (countIsAllowed(strs.length)) Right(strs) else Left("Error: wrong number of arguments")
+  val wrongArgumentNumberMessage = "Error: wrong number of arguments"
+  // GenSeqLike[Any,Any] is largest type that contains .length
+  // unfortunately, Array is not a GenSeqLike
+  // it must be implicitly converted to WrappedArray, which is one
+  // the <% bound ("can be viewed as") makes the compiler let us take Arrays
+  // here, this generality isn't necessary but it's interesting Scala practice
+  def counted[A <% GenSeqLike[Any,Any]](strs: A, countIsAllowed: Int => Boolean, 
+      leftMessage: String = wrongArgumentNumberMessage): Either[String, A] = {
+    if (countIsAllowed(strs.length)) Right(strs) else Left(leftMessage)
   }
-  def getSingleArgument(strs: Seq[String]): Either[String, String] = {
-    for (args <- countedArguments(strs, 1 ==).right) yield args(0)
+  def getSingleElement[Elt,A <% GenSeqLike[Elt,Any]](strs: A): Either[String, Elt] = {
+    for (_ <- counted(strs, 1 ==).right) yield strs(0)
   }
   def writeImage(img: RenderedImage, filename: String) = {
     try {
