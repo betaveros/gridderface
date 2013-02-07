@@ -172,9 +172,8 @@ object Gridderface extends SimpleSwingApplication {
     }
   }
   def setColor(arg: String) = {
-    GridderfaceStringParser.parseColor(arg) match {
-      case Some(set) => drawMode.setPaintSet(set); Right("Set color to " + arg)
-      case None => Left("Could not parse color: " + arg)
+    for (set <- GridderfaceStringParser.parseColorString(arg).right) yield {
+      drawMode.setPaintSet(set); "Set color to " + arg
     }
   }
   def readColorCommand(args: Array[String]) = {
