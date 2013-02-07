@@ -170,7 +170,15 @@ object Gridderface extends SimpleSwingApplication {
       case Some(img) => CommandUtilities.writeImage(img, args(0))
 
     }
-
+  }
+  def setColor(arg: String) = {
+    GridderfaceStringParser.parseColor(arg) match {
+      case Some(set) => drawMode.setPaintSet(set); Right("Set color to " + arg)
+      case None => Left("Could not parse color: " + arg)
+    }
+  }
+  def readColorCommand(args: Array[String]) = {
+    CommandUtilities.getSingleElement(args).right flatMap setColor 
   }
   def handleColonCommand(str: String): Either[String, String] = {
     val parts = "\\s+".r.split(str.trim)
@@ -198,6 +206,7 @@ object Gridderface extends SimpleSwingApplication {
         case "show" => fixedOpacityCommand(1f, parts.tail)
         case "opacity" => opacityCommand(parts.tail)
         case "op" => opacityCommand(parts.tail)
+        case "color" => readColorCommand(parts.tail)
         case "plain" => generationDimensions match {
           case None => Left("Error: not in generation mode")
           case Some((rows, cols)) => {

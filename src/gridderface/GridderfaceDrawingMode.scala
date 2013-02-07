@@ -52,8 +52,8 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   }
 
   val keyReactions = (moveReactions
-    orElse (BuiltinStamps.defaultMap andThen putStampSet)
-    orElse (BuiltinPaints.defaultMap andThen setPaintSet))
+    orElse (StampSet.defaultMap andThen putStampSet)
+    orElse (PaintSet.defaultMap andThen setPaintSet))
   val mouseReactions: PartialFunction[MouseEvent, Unit] = event => event match {
     case MousePressed(_, pt, _, _, _) => sel.selected = Some(point2pos(pt))
     case MouseClicked(_, pt, _, _, _) => sel.selected = Some(point2pos(pt))
