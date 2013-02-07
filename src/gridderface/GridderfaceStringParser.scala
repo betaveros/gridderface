@@ -29,10 +29,11 @@ object GridderfaceStringParser {
     }
   }
   val lineStampMap = HashMap(
-    "e" -> Strokes.normalStamp,
+    "n" -> Strokes.normalStamp,
     "t" -> Strokes.thickStamp,
     "s" -> Strokes.thinStamp,
-    "d" -> Strokes.normalDashedStamp)
+    "d" -> Strokes.thinDashedStamp,
+    "nd" -> Strokes.normalDashedStamp)
   def parseLineStampString(str: String): Either[String,LineStamp] = lineStampMap get str match {
     case Some(s) => Right(s)
     case None => Left("Error: could not parse LineStamp " + str)
@@ -90,7 +91,7 @@ object GridderfaceStringParser {
     val colonParts = str.split(":")
     val paintEither = colonParts.length match {
       case 1 => Right(defaultPaint)
-      case 2 => parseColorString(colonParts(2)).right map (_.paint)
+      case 2 => parseColorString(colonParts(1)).right map (_.paint)
       case _ => Left("Error: extra colon while parsing LineContent")
     }
     for (paint <- paintEither.right; stamp <- parseLineStampString(colonParts(0)).right) yield {

@@ -46,9 +46,13 @@ object CommandUtilities {
       leftMessage: String = wrongArgumentNumberMessage): Either[String, A] = {
     if (countIsAllowed(strs.length)) Right(strs) else Left(leftMessage)
   }
-  def getSingleElement[Elt,A <% GenSeqLike[Elt,Any]](strs: A): Either[String, Elt] = {
-    for (_ <- counted(strs, 1 ==).right) yield strs(0)
+  def getSingleElement[Elt,A <% GenSeqLike[Elt,Any]](args: A): Either[String, Elt] = {
+    for (_ <- counted(args, 1 ==).right) yield args(0)
   }
+  def getTwoElements[Elt,A <% GenSeqLike[Elt,Any]](args: A): Either[String, (Elt, Elt)] = {
+    for (_ <- counted(args, 2 ==).right) yield (args(0), args(1))
+  }
+  
   def writeImage(img: RenderedImage, filename: String) = {
     try {
       val file = new File(filename)

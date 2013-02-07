@@ -22,10 +22,10 @@ object Gridderface extends SimpleSwingApplication {
   val prov = new MutableGridProvider(32.0, 32.0)
 
   def createEdgeGrid(rows: Int, cols: Int) = new HomogeneousEdgeGrid(
-      new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rows, cols)
+    new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rows, cols)
   val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(10, 10))
-  
-  var generationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))
+
+  var decorationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))
   var generationDimensions: Option[(Int, Int)] = None // (rows, cols)
 
   def computePosition(pt: Point) = prov.computePosition(pt.x, pt.y)
@@ -67,7 +67,7 @@ object Gridderface extends SimpleSwingApplication {
 
   val griddableList: List[Tuple3[Griddable, Float, String]] = List(
     (bg, 1.0f, "image"),
-    (generationGridSeq, 1.0f, "gengrid"),
+    (decorationGridSeq, 1.0f, "decoration"),
     (ggrid, 1.0f, "content"),
     (edgeGridHolder, 0.5f, "grid"),
     (selectedManager, 0.75f, "cursor"))
@@ -141,7 +141,7 @@ object Gridderface extends SimpleSwingApplication {
       val (rows, cols) = rctup
 
       generationDimensions = Some((rows, cols))
-      
+
       prov.xOffset = 16
       prov.yOffset = 16
       prov.rowHeight = 32
@@ -177,7 +177,57 @@ object Gridderface extends SimpleSwingApplication {
     }
   }
   def readColorCommand(args: Array[String]) = {
-    CommandUtilities.getSingleElement(args).right flatMap setColor 
+    CommandUtilities.getSingleElement(args).right flatMap setColor
+  }
+  def parseHomogeneousGrid(pair: (String, String), rows: Int, cols: Int) = {
+    val (choice, str) = pair
+    choice match {
+      case "edge" => GridderfaceStringParser.parseLineContentString(str).right map {
+        new HomogeneousEdgeGrid(_, rows, cols)
+      }
+    }
+  }
+  def decorationClearCommand(restArgs: Array[String]) = {
+    for (_ <- CommandUtilities.counted(
+        restArgs, 0 ==, "Error: decorate clear takes no extra arguments").right) yield {
+      decorationGridSeq.griddable = List.empty
+      "Cleared decoration grids"
+    }
+  }
+  def decorationEdgeCommand(restArgs: Array[String], rows: Int, cols: Int) = {
+    for (arg <- CommandUtilities.getSingleElement(restArgs).right;
+      econt <- GridderfaceStringParser.parseLineContentString(arg).right
+    ) yield {
+      decorationGridSeq.griddable = decorationGridSeq.griddable :+
+        new HomogeneousEdgeGrid(econt, rows, cols)
+      "Added decoration edge grid"
+    }
+  }
+  def decorationBorderCommand(restArgs: Array[String], rows: Int, cols: Int) = {
+    for (arg <- CommandUtilities.getSingleElement(restArgs).right;
+      econt <- GridderfaceStringParser.parseLineContentString(arg).right
+    ) yield {
+      decorationGridSeq.griddable = decorationGridSeq.griddable :+
+        new HomogeneousBorderGrid(econt, rows, cols)
+      "Added decoration edge grid"
+    }
+  }
+  def decorationCommand(args: Array[String]) = {
+    generationDimensions match {
+      case Some((rows, cols)) => {
+        
+        for (
+          _ <- CommandUtilities.counted(args, 0 <, "Error: decorate requires arguments").right;
+          result <- (args(0) match {
+            case "clear" => decorationClearCommand(args.tail)
+            case "edge" => decorationEdgeCommand(args.tail, rows, cols)
+            case "border" => decorationBorderCommand(args.tail, rows, cols)
+            case sc => Left("Error: unrecognized decorate subcommand: " + sc)
+          }).right
+        ) yield result
+      }
+      case None => Left("Error: not in generation mode")
+    }
   }
   def handleColonCommand(str: String): Either[String, String] = {
     val parts = "\\s+".r.split(str.trim)
@@ -206,15 +256,7 @@ object Gridderface extends SimpleSwingApplication {
         case "opacity" => opacityCommand(parts.tail)
         case "op" => opacityCommand(parts.tail)
         case "color" => readColorCommand(parts.tail)
-        case "plain" => generationDimensions match {
-          case None => Left("Error: not in generation mode")
-          case Some((rows, cols)) => {
-            generationGridSeq.griddable =
-              generationGridSeq.griddable :+ new HomogeneousEdgeGrid(
-                new LineStampContent(Strokes.normalStamp, Color.BLACK), rows, cols);
-            Right("Plain grid added")
-          }
-        }
+        case "decorate" => decorationCommand(parts.tail)
         case _ => Left("Unrecognized command")
       }
     } else Right("")
