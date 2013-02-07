@@ -8,7 +8,7 @@ import scala.collection.immutable.HashMap
 class StampSet(val name: String,
   val rectStamp: Option[RectStamp], val lineStamp: Option[LineStamp], val pointStamp: Option[PointStamp])
 
-object BuiltinStamps {
+object StampSet {
   val fillSet = new StampSet(
     "Fill", Some(FillRectStamp), Some(Strokes.normalStamp), Some(FixedMark.createFilledSquareStamp(0.125)))
   val thickSet = new StampSet(
