@@ -38,6 +38,7 @@ object StampSet {
         KeyTypedData('e') -> eSet,
         
       KeyTypedData('t') -> thickSet,
+      KeyTypedData('c') -> clearSet,
       KeyTypedData(' ') -> clearSet,
       KeyTypedData('x') -> crossSet)
     val digitMappings = (0 to 9) map (i => KeyTypedData(('0' + i).toChar) ->
