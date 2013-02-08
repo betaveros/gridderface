@@ -25,7 +25,8 @@ object Gridderface extends SimpleSwingApplication {
     new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rows, cols)
   val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(10, 10))
 
-  var decorationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))
+  val decorationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))
+  val decorator = new GridderfaceDecorator(decorationGridSeq)
   var generationDimensions: Option[(Int, Int)] = None // (rows, cols)
 
   def computePosition(pt: Point) = prov.computePosition(pt.x, pt.y)
@@ -187,45 +188,9 @@ object Gridderface extends SimpleSwingApplication {
       }
     }
   }
-  def decorationClearCommand(restArgs: Array[String]) = {
-    for (_ <- CommandUtilities.counted(
-        restArgs, 0 ==, "Error: decorate clear takes no extra arguments").right) yield {
-      decorationGridSeq.griddable = List.empty
-      "Cleared decoration grids"
-    }
-  }
-  def decorationEdgeCommand(restArgs: Array[String], rows: Int, cols: Int) = {
-    for (arg <- CommandUtilities.getSingleElement(restArgs).right;
-      econt <- GridderfaceStringParser.parseLineContentString(arg).right
-    ) yield {
-      decorationGridSeq.griddable = decorationGridSeq.griddable :+
-        new HomogeneousEdgeGrid(econt, rows, cols)
-      "Added decoration edge grid"
-    }
-  }
-  def decorationBorderCommand(restArgs: Array[String], rows: Int, cols: Int) = {
-    for (arg <- CommandUtilities.getSingleElement(restArgs).right;
-      econt <- GridderfaceStringParser.parseLineContentString(arg).right
-    ) yield {
-      decorationGridSeq.griddable = decorationGridSeq.griddable :+
-        new HomogeneousBorderGrid(econt, rows, cols)
-      "Added decoration edge grid"
-    }
-  }
   def decorationCommand(args: Array[String]) = {
     generationDimensions match {
-      case Some((rows, cols)) => {
-        
-        for (
-          _ <- CommandUtilities.counted(args, 0 <, "Error: decorate requires arguments").right;
-          result <- (args(0) match {
-            case "clear" => decorationClearCommand(args.tail)
-            case "edge" => decorationEdgeCommand(args.tail, rows, cols)
-            case "border" => decorationBorderCommand(args.tail, rows, cols)
-            case sc => Left("Error: unrecognized decorate subcommand: " + sc)
-          }).right
-        ) yield result
-      }
+      case Some(dim) => decorator.decorationCommand(args, dim)
       case None => Left("Error: not in generation mode")
     }
   }
