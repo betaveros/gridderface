@@ -3,7 +3,7 @@ package gridderface.stamp
 import java.awt._
 
 class StrokeLineStamp(stroke: Stroke) extends ScalableLineStamp {
-
+  def this(width: Float) = this(new BasicStroke(width))
   def drawUnit(g2d: Graphics2D): Unit = {
     g2d.setStroke(stroke)
     g2d.draw(unitLine)

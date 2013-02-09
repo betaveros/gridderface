@@ -19,7 +19,8 @@ object Gridderface extends SimpleSwingApplication {
   val selectedManager = new SelectedPositionManager(Some(new IntersectionPosition(0, 0)))
   val ggrid = new GriddableGrid
   val bg = new GriddableImageHolder(None)
-  val prov = new MutableGridProvider(32.0, 32.0)
+  val prov = new MutableGridProvider(32.0, 32.0, 0.0, 0.0)
+  // the default arguments work, but Eclipse randomly bugs me about it meh
 
   def createEdgeGrid(rows: Int, cols: Int) = new HomogeneousEdgeGrid(
     new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rows, cols)
@@ -160,6 +161,7 @@ object Gridderface extends SimpleSwingApplication {
       val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
       val g = img.createGraphics()
       g.drawImage(baseImg, 0, 0, w, h, null)
+      decorationGridSeq.grid(prov, g)
       ggrid.grid(prov, g)
       img
     })
@@ -188,7 +190,7 @@ object Gridderface extends SimpleSwingApplication {
       }
     }
   }
-  def decorationCommand(args: Array[String]) = {
+  def decorationCommand(args: Array[String]): Either[String, String] = {
     generationDimensions match {
       case Some(dim) => decorator.decorationCommand(args, dim)
       case None => Left("Error: not in generation mode")
@@ -222,6 +224,7 @@ object Gridderface extends SimpleSwingApplication {
         case "op" => opacityCommand(parts.tail)
         case "color" => readColorCommand(parts.tail)
         case "decorate" => decorationCommand(parts.tail)
+        case "dec" => decorationCommand(parts.tail)
         case _ => Left("Unrecognized command")
       }
     } else Right("")
