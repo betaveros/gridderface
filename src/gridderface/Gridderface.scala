@@ -143,6 +143,8 @@ object Gridderface extends SimpleSwingApplication {
       val (rows, cols) = rctup
 
       generationDimensions = Some((rows, cols))
+      
+      decorationGridSeq.griddable = GriddableSeq.empty
 
       prov.xOffset = 16
       prov.yOffset = 16
@@ -172,6 +174,12 @@ object Gridderface extends SimpleSwingApplication {
       case None => Left("Error: no background")
       case Some(img) => CommandUtilities.writeImage(img, args(0))
 
+    }
+  }
+  def readImageFrom(args: Array[String]) = {
+    for (arg <- CommandUtilities.getSingleElement(args).right;
+         result <- CommandUtilities.readImage(arg).right) yield {
+      bg.image = result; "OK"
     }
   }
   def setColor(arg: String) = {
@@ -217,6 +225,8 @@ object Gridderface extends SimpleSwingApplication {
           Right("Grid reset")
         }
         case "write" => writeGeneratedImage(parts.tail)
+        case "read" => readImageFrom(parts.tail)
+        case "init" => initGeneration(parts.tail)
         case "initgen" => initGeneration(parts.tail)
         case "hide" => fixedOpacityCommand(0f, parts.tail)
         case "show" => fixedOpacityCommand(1f, parts.tail)

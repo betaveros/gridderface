@@ -71,6 +71,18 @@ object CommandUtilities {
       case e: IOException => Left("Error: IOException: " + e.getMessage())
     }
   }
+  def readImage(filename: String): Either[String, BufferedImage] = {
+    try {
+      val file = new File(filename)
+      if (file.exists() && file.canRead()){
+        Right(ImageIO.read(file))
+      } else {
+        Left("Error: file does not exist or is not readable: " + filename)
+      }
+    } catch {
+      case e: IOException => Left("Error: IOException: " + e.getMessage())
+    }
+  }
   def createFilledImage(w: Int, h: Int, p: Paint) = {
     val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
     val g = img.getGraphics().asInstanceOf[Graphics2D]
