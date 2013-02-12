@@ -15,6 +15,5 @@ object KeyData {
     case KeyPressed(_, code, mods, _) => new KeyPressedData(code, mods)
     case KeyReleased(_, code, mods, _) => new KeyReleasedData(code, mods)
   }
-  implicit def charData(c: Char): KeyTypedData = new KeyTypedData(c)
 }
 

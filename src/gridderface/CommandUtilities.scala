@@ -47,10 +47,10 @@ object CommandUtilities {
     if (countIsAllowed(strs.length)) Right(strs) else Left(leftMessage)
   }
   def getSingleElement[Elt,A <% GenSeqLike[Elt,Any]](args: A): Either[String, Elt] = {
-    for (_ <- counted(args, 1 ==).right) yield args(0)
+    for (_ <- counted(args, (1 == _)).right) yield args(0)
   }
   def getTwoElements[Elt,A <% GenSeqLike[Elt,Any]](args: A): Either[String, (Elt, Elt)] = {
-    for (_ <- counted(args, 2 ==).right) yield (args(0), args(1))
+    for (_ <- counted(args, (2 == _)).right) yield (args(0), args(1))
   }
   
   def writeImage(img: RenderedImage, filename: String) = {

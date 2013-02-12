@@ -1,6 +1,6 @@
 package gridderface
 
-abstract class Position extends Ordered[Position] {
+sealed abstract class Position extends Ordered[Position] {
   def horizontalPosition: Int
   def verticalPosition: Int
   def deltaPosition(verticalDelta: Int, horizontalDelta: Int) =

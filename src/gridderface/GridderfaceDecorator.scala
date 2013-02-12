@@ -10,9 +10,9 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   def decorationClearCommand(restArgs: Array[String]) = {
     for (
       _ <- CommandUtilities.counted(
-        restArgs, 0 ==, "Error: decorate clear takes no extra arguments").right
+        restArgs, (0 == _), "Error: decorate clear takes no extra arguments").right
     ) yield {
-      seq.griddable = List.empty
+      seq.griddable = GriddableSeq.empty
       "Cleared decoration grids"
     }
   }
@@ -81,13 +81,13 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
         )
     // only do the decorating if we're certain all presets exist
     for (presets <- presetsEither.right) yield {
-      seq.griddable = presets map (_.createGriddable(rows, cols)); ""
+      seq.griddable = new GriddableSeq(presets map (_.createGriddable(rows, cols))); ""
     }
   }
   def decorationCommand(args: Array[String], dim: (Int, Int)): Either[String, String] = {
     val (rows, cols) = dim
     for (
-      _ <- CommandUtilities.counted(args, 0 <, "Error: decorate requires arguments").right;
+      _ <- CommandUtilities.counted(args, (0 < _), "Error: decorate requires arguments").right;
       result <- (args(0) match {
         case "clear" => decorationClearCommand(args.tail)
         case "edge" => decorationEdgeCommand(args.tail, rows, cols)

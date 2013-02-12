@@ -121,7 +121,7 @@ object Gridderface extends SimpleSwingApplication {
   }
   def opacityCommand(args: Array[String]): Either[String, String] = {
     for (
-      _ <- CommandUtilities.counted(args, 2 ==).right;
+      _ <- CommandUtilities.counted(args, (2 == _)).right;
       buf <- getOpacityBufferAsEither(args(0)).right;
       a <- CommandUtilities.tryToFloat(args(1)).right;
       a2 <- safeAlpha(a).right
