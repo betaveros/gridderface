@@ -60,10 +60,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   }
   def handleCommand(prefix: Char, str: String) = prefix match {
     case '=' =>
-      putStampAtSelected(Some(new TextRectStamp(str))); Right("You put " + str)
+      putStampAtSelected(Some(new TextRectStamp(str))); Success("You put " + str)
     case ';' =>
-      putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont))); Right("You put " + str)
-    case c => Left("Drawing Mode can't handle this prefix: " + c)
+      putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont))); Success("You put " + str)
+    case c => Failed("Drawing Mode can't handle this prefix: " + c)
   }
   def setPaintSet(ps: PaintSet) {
     paint = ps.paint

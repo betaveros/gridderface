@@ -7,29 +7,29 @@ import gridderface.stamp.StrokeLineStamp
 import gridderface.stamp.FixedMark
 
 class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
-  def decorationClearCommand(restArgs: Array[String]) = {
+  def decorationClearCommand(restArgs: Array[String]): Status[String] = {
     for (
       _ <- CommandUtilities.counted(
-        restArgs, (0 == _), "Error: decorate clear takes no extra arguments").right
+        restArgs, (0 == _), "Error: decorate clear takes no extra arguments")
     ) yield {
       seq.griddable = GriddableSeq.empty
       "Cleared decoration grids"
     }
   }
-  def decorationEdgeCommand(restArgs: Array[String], rows: Int, cols: Int) = {
+  def decorationEdgeCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(restArgs).right;
-      econt <- GridderfaceStringParser.parseLineContentString(arg).right
+      arg <- CommandUtilities.getSingleElement(restArgs);
+      econt <- GridderfaceStringParser.parseLineContentString(arg)
     ) yield {
       seq.griddable = seq.griddable :+
         new HomogeneousEdgeGrid(econt, rows, cols)
       "Added decoration edge grid"
     }
   }
-  def decorationBorderCommand(restArgs: Array[String], rows: Int, cols: Int) = {
+  def decorationBorderCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(restArgs).right;
-      econt <- GridderfaceStringParser.parseLineContentString(arg).right
+      arg <- CommandUtilities.getSingleElement(restArgs);
+      econt <- GridderfaceStringParser.parseLineContentString(arg)
     ) yield {
       seq.griddable = seq.griddable :+
         new HomogeneousBorderGrid(econt, rows, cols)
@@ -65,36 +65,36 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
         new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))), 
         new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY)))
   )
-  def getPresetAsEither(presetName: String) = {
+  def getPresetAsStatus(presetName: String) = {
     presetMap get presetName match {
-      case Some(list) => Right(list)
-      case None => Left("Error: no such preset: " + presetName)
+      case Some(list) => Success(list)
+      case None => Failed("Error: no such preset: " + presetName)
     }
   }
-  def decorationPresetCommand(restArgs: Array[String], rows: Int, cols: Int) = {
-    val presetsEither = (restArgs map getPresetAsEither).foldLeft(
-        Right(List.empty): Either[String, List[PresetGriddable]])(
-            (list, preset) => for (li <- list.right; p <- preset.right) yield (p ++ li)
+  def decorationPresetCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
+    val presetsStat = (restArgs map getPresetAsStatus).foldLeft(
+        Success(List.empty): Status[List[PresetGriddable]])(
+            (list, preset) => for (li <- list; p <- preset) yield (p ++ li)
             // note: each preset list is to be applied left-to-right
             // but multiple preset args are applied right-to-left
             // blah, I find it more intuitive that way
         )
     // only do the decorating if we're certain all presets exist
-    for (presets <- presetsEither.right) yield {
+    for (presets <- presetsStat) yield {
       seq.griddable = new GriddableSeq(presets map (_.createGriddable(rows, cols))); ""
     }
   }
-  def decorationCommand(args: Array[String], dim: (Int, Int)): Either[String, String] = {
+  def decorationCommand(args: Array[String], dim: (Int, Int)): Status[String] = {
     val (rows, cols) = dim
     for (
-      _ <- CommandUtilities.counted(args, (0 < _), "Error: decorate requires arguments").right;
+      _ <- CommandUtilities.counted(args, (0 < _), "Error: decorate requires arguments");
       result <- (args(0) match {
         case "clear" => decorationClearCommand(args.tail)
         case "edge" => decorationEdgeCommand(args.tail, rows, cols)
         case "border" => decorationBorderCommand(args.tail, rows, cols)
         case "pre" => decorationPresetCommand(args.tail, rows, cols)
-        case sc => Left("Error: unrecognized decorate subcommand: " + sc)
-      }).right
+        case sc => Failed("Error: unrecognized decorate subcommand: " + sc)
+      })
     ) yield result
   }
 }

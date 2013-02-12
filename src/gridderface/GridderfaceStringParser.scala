@@ -21,11 +21,11 @@ object GridderfaceStringParser {
       optionToInt(str substring prefix.length)
     } else None
   }
-  def parseRectStampString(str: String): Either[String,RectStamp] = {
+  def parseRectStampString(str: String): Status[RectStamp] = {
     ((optionToInt(str) map (int => new TextRectStamp(int.toString))) orElse
       (stripOptionToInt("o", str) map (int => new TextRectStamp(int.toString))) orElse None) match {
-      case Some(s) => Right(s)
-      case None => Left("Error: could not parse RectStamp " + str)
+      case Some(s) => Success(s)
+      case None => Failed("Error: could not parse RectStamp " + str)
     }
   }
   val lineStampMap = HashMap(
@@ -34,9 +34,9 @@ object GridderfaceStringParser {
     "s" -> Strokes.thinStamp,
     "d" -> Strokes.thinDashedStamp,
     "nd" -> Strokes.normalDashedStamp)
-  def parseLineStampString(str: String): Either[String,LineStamp] = lineStampMap get str match {
-    case Some(s) => Right(s)
-    case None => Left("Error: could not parse LineStamp " + str)
+  def parseLineStampString(str: String): Status[LineStamp] = lineStampMap get str match {
+    case Some(s) => Success(s)
+    case None => Failed("Error: could not parse LineStamp " + str)
   }
 
   val namedPaintMap = HashMap(
@@ -74,27 +74,27 @@ object GridderfaceStringParser {
       case _ => None
     }
   }
-  def parseColorString(str: String): Either[String, PaintSet] = {
+  def parseColorString(str: String): Status[PaintSet] = {
     if (str.length > 0 && str(0) == '#') {
       optionHexStringToColor(str.substring(1)) map (PaintSet.createColorSet(_)) match {
-        case Some(set) => Right(set)
-        case None => Left("Error: could not parse hex color: " + str)
+        case Some(set) => Success(set)
+        case None => Failed("Error: could not parse hex color: " + str)
       }
     } else {
       namedPaintMap get str match {
-        case Some(set) => Right(set)
-        case None => Left("Error: undefined color name: " + str)
+        case Some(set) => Success(set)
+        case None => Failed("Error: undefined color name: " + str)
       }
     }
   }
-  def parseLineContentString(str: String, defaultPaint: Paint = Color.BLACK): Either[String,LineContent] = {
+  def parseLineContentString(str: String, defaultPaint: Paint = Color.BLACK): Status[LineContent] = {
     val colonParts = str.split(":")
-    val paintEither = colonParts.length match {
-      case 1 => Right(defaultPaint)
-      case 2 => parseColorString(colonParts(1)).right map (_.paint)
-      case _ => Left("Error: extra colon while parsing LineContent")
+    val paintStat = colonParts.length match {
+      case 1 => Success(defaultPaint)
+      case 2 => parseColorString(colonParts(1)) map (_.paint)
+      case _ => Failed("Error: extra colon while parsing LineContent")
     }
-    for (paint <- paintEither.right; stamp <- parseLineStampString(colonParts(0)).right) yield {
+    for (paint <- paintStat; stamp <- parseLineStampString(colonParts(0))) yield {
       new LineStampContent(stamp, paint)
     }
   }

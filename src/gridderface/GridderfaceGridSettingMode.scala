@@ -40,7 +40,7 @@ class GridderfaceGridSettingMode(prov: MutableGridProvider) extends GridderfaceM
   val keyReactions = (moveGridReactions orElse resizeGridReactions orElse
       setGridMultiplierReactions orElse negateMultiplierReactions)
   def commandPrefixMap = Map.empty
-  def handleCommand(prefix: Char, str: String) = Right("")
+  def handleCommand(prefix: Char, str: String) = Success("")
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
 
 }

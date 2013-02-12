@@ -5,7 +5,7 @@ import scala.swing.event._
 import java.awt.Font
 import java.awt.Color
 
-class CommandLinePanel(val responder: (Char, String) => Either[String, String]) extends BoxPanel(Orientation.Horizontal) {
+class CommandLinePanel(val responder: (Char, String) => Status[String]) extends BoxPanel(Orientation.Horizontal) {
   private val prefixLabel = new Label
   private val field = new TextField
   field.font = new Font("Monospaced", Font.PLAIN, 20)
@@ -40,8 +40,8 @@ class CommandLinePanel(val responder: (Char, String) => Either[String, String]) 
       val message = responder(prefix, field.text)
       stopCommandMode
       message match {
-        case Left(text) => field.background = errorColor; field.text = text
-        case Right(text) => field.text = text
+        case Failed(text) => field.background = errorColor; field.text = text
+        case Success(text) => field.text = text
       }
     }
   }

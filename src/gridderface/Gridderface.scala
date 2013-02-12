@@ -103,32 +103,32 @@ object Gridderface extends SimpleSwingApplication {
     focusable = true
     requestFocus
   }
-  def getOpacityBufferAsEither(name: String): Either[String, OpacityBufferGriddable] = {
+  def getOpacityBufferAsStatus(name: String): Status[OpacityBufferGriddable] = {
     opacityBufferMap get name match {
-      case None => Left("Error: no such buffer: " + name)
-      case Some(buf) => Right(buf)
+      case None => Failed("Error: no such buffer: " + name)
+      case Some(buf) => Success(buf)
     }
   }
-  def safeAlpha(a: Float): Either[String, Float] = {
-    if (0 <= a && a <= 1) Right(a)
-    else Left("Error: alpha out of range: " + a)
+  def safeAlpha(a: Float): Status[Float] = {
+    if (0 <= a && a <= 1) Success(a)
+    else Failed("Error: alpha out of range: " + a)
   }
-  def fixedOpacityCommand(op: Float, args: Array[String]): Either[String, String] = {
+  def fixedOpacityCommand(op: Float, args: Array[String]): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(args).right;
-      buf <- getOpacityBufferAsEither(arg).right
+      arg <- CommandUtilities.getSingleElement(args);
+      buf <- getOpacityBufferAsStatus(arg)
     ) yield { buf.opacity = op; "" }
   }
-  def opacityCommand(args: Array[String]): Either[String, String] = {
+  def opacityCommand(args: Array[String]): Status[String] = {
     for (
-      _ <- CommandUtilities.counted(args, (2 == _)).right;
-      buf <- getOpacityBufferAsEither(args(0)).right;
-      a <- CommandUtilities.tryToFloat(args(1)).right;
-      a2 <- safeAlpha(a).right
+      _ <- CommandUtilities.counted(args, (2 == _));
+      buf <- getOpacityBufferAsStatus(args(0));
+      a <- CommandUtilities.tryToFloat(args(1));
+      a2 <- safeAlpha(a)
     ) yield { buf.opacity = a2; "" }
   }
-  def getDimensionPair(args: Array[String], defaultVal: Int): Either[String, (Int, Int)] = {
-    for (ints <- CommandUtilities.countedIntArguments(args, Set(0, 1, 2).contains(_)).right) yield {
+  def getDimensionPair(args: Array[String], defaultVal: Int): Status[(Int, Int)] = {
+    for (ints <- CommandUtilities.countedIntArguments(args, Set(0, 1, 2).contains(_))) yield {
       ints.length match {
         case 0 => (defaultVal, defaultVal)
         case 1 =>
@@ -138,8 +138,8 @@ object Gridderface extends SimpleSwingApplication {
     }
   }
 
-  def initGeneration(args: Array[String]) = {
-    for (rctup <- getDimensionPair(args, 10).right) yield {
+  def initGeneration(args: Array[String]): Status[String] = {
+    for (rctup <- getDimensionPair(args, 10)) yield {
       val (rows, cols) = rctup
 
       generationDimensions = Some((rows, cols))
@@ -168,61 +168,61 @@ object Gridderface extends SimpleSwingApplication {
       img
     })
   }
-  def writeGeneratedImage(args: Array[String]) = {
-    if (args.length != 1) Left("Error: wrong number of arguments")
+  def writeGeneratedImage(args: Array[String]): Status[String] = {
+    if (args.length != 1) Failed("Error: wrong number of arguments")
     else generateImage() match {
-      case None => Left("Error: no background")
+      case None => Failed("Error: no background")
       case Some(img) => CommandUtilities.writeImage(img, args(0))
 
     }
   }
-  def readImageFrom(args: Array[String]) = {
-    for (arg <- CommandUtilities.getSingleElement(args).right;
-         result <- CommandUtilities.readImage(arg).right) yield {
+  def readImageFrom(args: Array[String]): Status[String] = {
+    for (arg <- CommandUtilities.getSingleElement(args);
+         result <- CommandUtilities.readImage(arg)) yield {
       bg.image = result; "OK"
     }
   }
   def setColor(arg: String) = {
-    for (set <- GridderfaceStringParser.parseColorString(arg).right) yield {
+    for (set <- GridderfaceStringParser.parseColorString(arg)) yield {
       drawMode.setPaintSet(set); "Set color to " + arg
     }
   }
   def readColorCommand(args: Array[String]) = {
-    CommandUtilities.getSingleElement(args).right flatMap setColor
+    CommandUtilities.getSingleElement(args) flatMap setColor
   }
   def parseHomogeneousGrid(pair: (String, String), rows: Int, cols: Int) = {
     val (choice, str) = pair
     choice match {
-      case "edge" => GridderfaceStringParser.parseLineContentString(str).right map {
+      case "edge" => GridderfaceStringParser.parseLineContentString(str) map {
         new HomogeneousEdgeGrid(_, rows, cols)
       }
     }
   }
-  def decorationCommand(args: Array[String]): Either[String, String] = {
+  def decorationCommand(args: Array[String]): Status[String] = {
     generationDimensions match {
       case Some(dim) => decorator.decorationCommand(args, dim)
-      case None => Left("Error: not in generation mode")
+      case None => Failed("Error: not in generation mode")
     }
   }
-  def handleColonCommand(str: String): Either[String, String] = {
+  def handleColonCommand(str: String): Status[String] = {
     val parts = "\\s+".r.split(str.trim)
     if (parts.length > 0) {
       parts(0) match {
-        case "hello" => Right("Hello world!")
+        case "hello" => Success("Hello world!")
 
         // just pretend this is for testing if errors work
-        case "Ni!" => Left("Do you demand a shrubbery?")
+        case "Ni!" => Failed("Do you demand a shrubbery?")
         case "quit" => sys.exit()
         case "clear" =>
-          ggrid.clear(); Right("Content cleared")
+          ggrid.clear(); Success("Content cleared")
         case "clearimage" =>
-          bg.image = None; Right("Image cleared")
+          bg.image = None; Success("Image cleared")
         case "resetgrid" => {
           prov.xOffset = 0
           prov.yOffset = 0
           prov.rowHeight = 32
           prov.colWidth = 32
-          Right("Grid reset")
+          Success("Grid reset")
         }
         case "write" => writeGeneratedImage(parts.tail)
         case "read" => readImageFrom(parts.tail)
@@ -235,9 +235,9 @@ object Gridderface extends SimpleSwingApplication {
         case "color" => readColorCommand(parts.tail)
         case "decorate" => decorationCommand(parts.tail)
         case "dec" => decorationCommand(parts.tail)
-        case _ => Left("Unrecognized command")
+        case _ => Failed("Unrecognized command")
       }
-    } else Right("")
+    } else Success("")
   }
   val commandLine = new CommandLinePanel((char, str) => char match {
     case ':' => handleColonCommand(str)

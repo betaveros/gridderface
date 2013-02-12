@@ -15,7 +15,7 @@ trait GridderfaceMode extends Publisher {
   def mouseReactions: PartialFunction[MouseEvent, Unit]
   def status: String
   def commandPrefixMap: PartialFunction[KeyData, Char]
-  def handleCommand(prefix: Char, str: String): Either[String, String]
+  def handleCommand(prefix: Char, str: String): Status[String]
 }
 case class StatusChanged(src: GridderfaceMode) extends Event
 

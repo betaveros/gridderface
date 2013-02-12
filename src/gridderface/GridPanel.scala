@@ -6,9 +6,11 @@ import java.awt.Graphics2D
 import scala.collection.immutable._
 import gridderface.stamp._
 import scala.collection.mutable.ListBuffer
+import java.awt.geom.AffineTransform
 
 class GridPanel(val provider: GridProvider) extends Panel {
   var griddables: ListBuffer[Griddable] = ListBuffer()
+  var transform: AffineTransform = new AffineTransform()
 //  sample stuff:
 //  ListBuffer(
 //    new CellGriddable(new RectStampContent(FillRectStamp, Color.RED),
@@ -22,9 +24,9 @@ class GridPanel(val provider: GridProvider) extends Panel {
 //    new EdgeGriddable(new LineStampContent(FixedMark.createCrossStamp(0.125), Color.RED),
 //        new EdgePosition(2,4,EdgeOrientation.Vertical))
 //  )
-   
   override def paintComponent(g: Graphics2D) {
     super.paintComponent(g)
+    g.transform(transform)
     griddables.foreach(gb => gb.grid(provider, g))
   }
   

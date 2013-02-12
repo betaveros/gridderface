@@ -10,30 +10,29 @@ import java.awt.Graphics2D
 import scala.collection.GenSeqLike
 
 object CommandUtilities {
-  def tryToFloat(str: String): Either[String, Float] = {
-    // There's a cool Try object in Scala 2.10 that lets you do this more monadically.
+  def tryToFloat(str: String): Status[Float] = {
     try {
-      Right(str.toFloat)
+      Success(str.toFloat)
     } catch {
-      case e: NumberFormatException => Left("Error: cannot parse float: " + str)
+      case e: NumberFormatException => Failed("Error: cannot parse float: " + str)
     }
   }
-  def tryToInt(str: String): Either[String, Int] = {
+  def tryToInt(str: String): Status[Int] = {
     try {
-      Right(str.toInt)
+      Success(str.toInt)
     } catch {
-      case e: NumberFormatException => Left("Error: cannot parse int: " + str)
+      case e: NumberFormatException => Failed("Error: cannot parse int: " + str)
     }
   }
-  def tryToInts(strs: Seq[String]): Either[String, Seq[Int]] = {
-    (strs map tryToInt).foldLeft(Right(List.empty): Either[String, Seq[Int]])(
+  def tryToInts(strs: Seq[String]): Status[Seq[Int]] = {
+    (strs map tryToInt).foldLeft(Success(List.empty): Status[Seq[Int]])(
       (collected, next) =>
-        for (c <- collected.right; n <- next.right) yield (c :+ n))
+        for (c <- collected; n <- next) yield (c :+ n))
   }
-  def countedIntArguments(strs: Seq[String], countIsAllowed: Int => Boolean): Either[String, Seq[Int]] = {
+  def countedIntArguments(strs: Seq[String], countIsAllowed: Int => Boolean): Status[Seq[Int]] = {
     for (
-      _ <- counted(strs, countIsAllowed).right;
-      result <- tryToInts(strs).right
+      _ <- counted(strs, countIsAllowed);
+      result <- tryToInts(strs)
     ) yield result
   }
   val wrongArgumentNumberMessage = "Error: wrong number of arguments"
@@ -43,17 +42,17 @@ object CommandUtilities {
   // the <% bound ("can be viewed as") makes the compiler let us take Arrays
   // here, this generality isn't necessary but it's interesting Scala practice
   def counted[A <% GenSeqLike[Any,Any]](strs: A, countIsAllowed: Int => Boolean, 
-      leftMessage: String = wrongArgumentNumberMessage): Either[String, A] = {
-    if (countIsAllowed(strs.length)) Right(strs) else Left(leftMessage)
+      leftMessage: String = wrongArgumentNumberMessage): Status[A] = {
+    if (countIsAllowed(strs.length)) Success(strs) else Failed(leftMessage)
   }
-  def getSingleElement[Elt,A <% GenSeqLike[Elt,Any]](args: A): Either[String, Elt] = {
-    for (_ <- counted(args, (1 == _)).right) yield args(0)
+  def getSingleElement[Elt,A <% GenSeqLike[Elt,Any]](args: A): Status[Elt] = {
+    for (_ <- counted(args, (1 == _))) yield args(0)
   }
-  def getTwoElements[Elt,A <% GenSeqLike[Elt,Any]](args: A): Either[String, (Elt, Elt)] = {
-    for (_ <- counted(args, (2 == _)).right) yield (args(0), args(1))
+  def getTwoElements[Elt,A <% GenSeqLike[Elt,Any]](args: A): Status[(Elt, Elt)] = {
+    for (_ <- counted(args, (2 == _))) yield (args(0), args(1))
   }
   
-  def writeImage(img: RenderedImage, filename: String) = {
+  def writeImage(img: RenderedImage, filename: String): Status[String] = {
     try {
       val file = new File(filename)
       // Some weird ImageIO implementation weakness makes doing this naively screw up.
@@ -61,26 +60,26 @@ object CommandUtilities {
       if (!file.exists()){
         if (file.createNewFile()) {
           ImageIO.write(img, "png", file)
-          Right("Created and written image to file " + filename)
-        } else Left("Error: cannot create file: " + filename) 
+          Success("Created and written image to file " + filename)
+        } else Failed("Error: cannot create file: " + filename) 
       } else if (file.canWrite()){
         ImageIO.write(img, "png", file)
-        Right("Written image to file " + filename)
-      } else Left("Error: cannot write to file: " + filename)
+        Success("Written image to file " + filename)
+      } else Failed("Error: cannot write to file: " + filename)
     } catch {
-      case e: IOException => Left("Error: IOException: " + e.getMessage())
+      case e: IOException => Failed("Error: IOException: " + e.getMessage())
     }
   }
-  def readImage(filename: String): Either[String, BufferedImage] = {
+  def readImage(filename: String): Status[BufferedImage] = {
     try {
       val file = new File(filename)
       if (file.exists() && file.canRead()){
-        Right(ImageIO.read(file))
+        Success(ImageIO.read(file))
       } else {
-        Left("Error: file does not exist or is not readable: " + filename)
+        Failed("Error: file does not exist or is not readable: " + filename)
       }
     } catch {
-      case e: IOException => Left("Error: IOException: " + e.getMessage())
+      case e: IOException => Failed("Error: IOException: " + e.getMessage())
     }
   }
   def createFilledImage(w: Int, h: Int, p: Paint) = {
