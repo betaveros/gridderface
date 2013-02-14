@@ -228,6 +228,9 @@ object Gridderface extends SimpleSwingApplication {
         case "color" => readColorCommand(parts.tail)
         case "decorate" => decorationCommand(parts.tail)
         case "dec" => decorationCommand(parts.tail)
+        case "lock" => drawMode.lockedToCells = true; Success("Locked")
+        case "unlock" => drawMode.lockedToCells = false; Success("Unlocked")
+        
         case _ => Failed("Unrecognized command")
       }
     } else Success("")

@@ -6,6 +6,7 @@ sealed abstract class Position extends Ordered[Position] {
   def deltaPosition(verticalDelta: Int, horizontalDelta: Int) =
     Position.getPosition(verticalPosition + verticalDelta,
     		horizontalPosition + horizontalDelta)
+  def roundToCell: CellPosition
 }
 case class CellPosition(row: Int, col: Int) extends Position {
   def horizontalPosition = col * 2 + 1
@@ -16,7 +17,7 @@ case class CellPosition(row: Int, col: Int) extends Position {
     }
     case _ => -1
   }
-    
+  def roundToCell = this
 }
 case class IntersectionPosition(row: Int, col: Int) extends Position {
   def horizontalPosition = col * 2
@@ -27,6 +28,7 @@ case class IntersectionPosition(row: Int, col: Int) extends Position {
     }
     case _ => 1
   }
+  def roundToCell = new CellPosition(row, col)
 }
 object EdgeOrientation extends Enumeration {
   type EdgeOrientation = Value
@@ -55,6 +57,7 @@ case class EdgePosition(row: Int, col: Int, orientation: EdgeOrientation) extend
     case CellPosition(_, _) => 1
     case IntersectionPosition(_, _) => -1
   }
+  def roundToCell = new CellPosition(row, col)
 }
 
 object Position {

@@ -7,6 +7,7 @@ import scala.swing.event.{ MouseEvent, MouseClicked }
 import scala.swing.event.MousePressed
 import gridderface.stamp.FillRectStamp
 import gridderface.stamp.ClearStamp
+import java.awt.Point
 
 class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter, point2pos: java.awt.Point => Position) extends GridderfaceMode {
   val name = "Draw"
@@ -15,6 +16,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   private var backgroundPaint: Option[Paint] = None
   private var backgroundPaintName: String = "-"
   private var waitingForBackground = false
+  private var _lockedToCells = false
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, paint)
     backgroundPaint match {
@@ -22,6 +24,14 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       case Some(paint) => putter.putCell(cpos, CombinedRectContent(
           new RectStampContent(FillRectStamp, paint), fgContent))
     }
+  }
+  def lockedToCells = _lockedToCells
+  def lockedToCells_=(b: Boolean) = {
+    _lockedToCells = b
+    ensureLock()
+  }
+  def ensureLock() {
+    if (_lockedToCells) sel.selected = sel.selected map (_.roundToCell)
   }
     
   def putLineStamp(epos: EdgePosition, st: LineStamp) =
@@ -48,7 +58,12 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   def status = "%s / %s".format(paintName, 
       if (waitingForBackground) "?" else backgroundPaintName)
   def putStampSet(s: StampSet) = putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
-  val moveReactions = KeyDataCombinations.keyDataRCFunction(sel.moveSelected)
+  def moveSelected(rd: Int, cd: Int) = {
+    val mult = if (lockedToCells) 2 else 1
+    sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
+    ensureLock()
+  }
+  val moveReactions = KeyDataCombinations.keyDataRCFunction(moveSelected)
 
   private val cellMap: Map[KeyData, Char] = HashMap(KeyTypedData('=') -> '=', KeyTypedData(';') -> ';')
   def commandPrefixMap: Map[KeyData, Char] = {
@@ -102,8 +117,12 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     orElse (PaintSet.defaultMap andThen setPaintSet)
     orElse backgroundReactions)
   }
+  def selectNear(pt: Point) {
+    sel.selected = Some(point2pos(pt))
+    ensureLock()
+  }
   val mouseReactions: PartialFunction[MouseEvent, Unit] = event => event match {
-    case MousePressed(_, pt, _, _, _) => sel.selected = Some(point2pos(pt))
-    case MouseClicked(_, pt, _, _, _) => sel.selected = Some(point2pos(pt))
+    case MousePressed(_, pt, _, _, _) => selectNear(pt)
+    case MouseClicked(_, pt, _, _, _) => selectNear(pt)
   }
 }
