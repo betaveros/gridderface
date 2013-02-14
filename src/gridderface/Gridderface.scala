@@ -30,25 +30,20 @@ object Gridderface extends SimpleSwingApplication {
   val decorator = new GridderfaceDecorator(decorationGridSeq)
   var generationDimensions: Option[(Int, Int)] = None // (rows, cols)
 
-  def computePosition(pt: Point) = prov.computePosition(pt.x, pt.y)
-  val modeLabel = new Label()
-  val statusLabel = new Label()
-  val drawMode = new GridderfaceDrawingMode(selectedManager, ggrid, pt => computePosition(pt))
-  val gridMode = new GridderfaceGridSettingMode(prov)
+  def computePosition(pt: Point) = {
+    val gridpt = gridPanel.viewToGrid(pt)
+    prov.computePosition(gridpt.getX(), gridpt.getY())
+  }
   val globalReactions: PartialFunction[KeyData, Unit] = {
     case KeyTypedData(':') => commandLine.startCommandMode(':')
     case KeyPressedData(Key.D, Key.Modifier.Control) => setMode(drawMode)
     case KeyPressedData(Key.G, Key.Modifier.Control) => setMode(gridMode)
+    case KeyPressedData(Key.P, Key.Modifier.Control) => setMode(viewportMode)
     // Note: Control-V is mapped in java.swing with InputMaps & co.
     // since I can't seem to simulate pasting nicely.
   }
   var currentMode: GridderfaceMode = drawMode
-  listenTo(drawMode, gridMode)
-  reactions += {
-    case StatusChanged(src: GridderfaceMode) => {
-      statusLabel.text = currentMode.status
-    }
-  }
+  
 
   private def currentKeyReactions = (currentMode.keyReactions
     orElse (currentMode.commandPrefixMap andThen commandLine.startCommandMode)
@@ -61,10 +56,8 @@ object Gridderface extends SimpleSwingApplication {
 
   }
 
-  setMode(drawMode)
-
-  private def withOpacity(g: Griddable, alpha: Float, name: String): OpacityBufferGriddable = {
-    new OpacityBufferGriddable(g, () => gridPanel.size, alpha)
+  private def withOpacity(g: Griddable, alpha: Float, name: String): OpacityBuffer = {
+    new OpacityBuffer(g, alpha)
   }
 
   val griddableList: List[Tuple3[Griddable, Float, String]] = List(
@@ -83,7 +76,7 @@ object Gridderface extends SimpleSwingApplication {
     listenTo(keys)
     listenTo(mouse.clicks)
 
-    for ((_, obuf) <- opacityBufferList) { griddables += obuf; listenTo(obuf) }
+    for ((_, obuf) <- opacityBufferList) { buffers += obuf; listenTo(obuf) }
 
     listenTo(prov)
     reactions += {
@@ -91,7 +84,7 @@ object Gridderface extends SimpleSwingApplication {
       // here we just use it to silence uncaught events
       case event: KeyEvent => currentKeyReactions lift (KeyData extract event)
       case event: MouseEvent => currentMouseReactions lift event
-      case event: GriddableChanged => repaint()
+      case event: BufferChanged => repaint()
       case event: GridChanged => repaint()
     }
     // looks like datatransfer will have to fully fall back to java.swing
@@ -103,7 +96,7 @@ object Gridderface extends SimpleSwingApplication {
     focusable = true
     requestFocus
   }
-  def getOpacityBufferAsStatus(name: String): Status[OpacityBufferGriddable] = {
+  def getOpacityBufferAsStatus(name: String): Status[OpacityBuffer] = {
     opacityBufferMap get name match {
       case None => Failed("Error: no such buffer: " + name)
       case Some(buf) => Success(buf)
@@ -243,7 +236,22 @@ object Gridderface extends SimpleSwingApplication {
     case ':' => handleColonCommand(str)
     case _ => currentMode.handleCommand(char, str)
   })
+  val modeLabel = new Label()
+  val statusLabel = new Label()
+  val drawMode = new GridderfaceDrawingMode(selectedManager, ggrid, pt => computePosition(pt))
+  val gridMode = new GridderfaceGridSettingMode(prov)
+  lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
+  // gah, the initialization sequence here is tricky
+  
+  listenTo(drawMode, gridMode, viewportMode)
+  setMode(drawMode)
 
+  
+  reactions += {
+    case StatusChanged(src: GridderfaceMode) => {
+      statusLabel.text = currentMode.status
+    }
+  }
   def top = new MainFrame {
     title = "t3h Gridderface 2.0"
     contents = new BorderPanel {
@@ -259,6 +267,7 @@ object Gridderface extends SimpleSwingApplication {
     }
     size = new java.awt.Dimension(800, 600)
   }
+  
 
 }
 
