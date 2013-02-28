@@ -20,6 +20,7 @@ class GriddableSeq(griddables: scala.collection.immutable.Seq[Griddable])
   def iterator = griddables.iterator
   def length = griddables.length
   def :+(other: Griddable) = new GriddableSeq(griddables :+ other)
+  def ++(other: Seq[Griddable]) = new GriddableSeq(griddables ++ other)
 }
 object GriddableSeq {
   val empty = new GriddableSeq(List.empty)

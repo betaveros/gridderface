@@ -22,9 +22,9 @@ object Gridderface extends SimpleSwingApplication {
   val prov = new MutableGridProvider(32.0, 32.0, 0.0, 0.0)
   // the default arguments work, but Eclipse randomly bugs me about it meh
 
-  def createEdgeGrid(rows: Int, cols: Int) = new HomogeneousEdgeGrid(
-    new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rows, cols)
-  val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(10, 10))
+  def createEdgeGrid(rs: Int, cs: Int, rc: Int, cc: Int) = new HomogeneousEdgeGrid(
+    new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rs, cs, rc, cc)
+  val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(0, 0, 10, 10))
 
   val decorationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))
   val decorator = new GridderfaceDecorator(decorationGridSeq)
@@ -145,7 +145,7 @@ object Gridderface extends SimpleSwingApplication {
       prov.colWidth = 32
       bg.image = Some(CommandUtilities.createFilledImage(
         32 * (1 + cols), 32 * (1 + rows), Color.WHITE))
-      edgeGridHolder.griddable = createEdgeGrid(rows, cols)
+      edgeGridHolder.griddable = createEdgeGrid(0, 0, rows, cols)
       "Ready for generation"
     }
   }
@@ -183,6 +183,7 @@ object Gridderface extends SimpleSwingApplication {
   def readColorCommand(args: Array[String]) = {
     CommandUtilities.getSingleElement(args) flatMap setColor
   }
+  /*
   def parseHomogeneousGrid(pair: (String, String), rows: Int, cols: Int) = {
     val (choice, str) = pair
     choice match {
@@ -191,6 +192,7 @@ object Gridderface extends SimpleSwingApplication {
       }
     }
   }
+  */
   def decorationCommand(args: Array[String]): Status[String] = {
     generationDimensions match {
       case Some(dim) => decorator.decorationCommand(args, dim)

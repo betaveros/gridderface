@@ -51,7 +51,9 @@ object CommandUtilities {
   def getTwoElements[Elt,A <% GenSeqLike[Elt,Any]](args: A): Status[(Elt, Elt)] = {
     for (_ <- counted(args, (2 == _))) yield (args(0), args(1))
   }
-  
+  def getElementByIndex[Elt,A <% GenSeqLike[Elt,Any]](args: A, ix: Int): Status[Elt] = {
+    for (_ <- counted(args, (ix < _))) yield args(ix)
+  }
   def writeImage(img: RenderedImage, filename: String): Status[String] = {
     try {
       val file = new File(filename)

@@ -16,51 +16,66 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
       "Cleared decoration grids"
     }
   }
+  def getBoundTuple(args: Array[String], defRows: Int, defCols: Int): Status[(Int, Int, Int, Int)] = {
+    for (ints <- CommandUtilities.countedIntArguments(args, Set(0, 2, 4).contains(_))) yield {
+      ints.length match {
+        case 0 => (0, 0, defRows, defCols)
+        case 2 => (0, 0, ints(0), ints(1))
+        case 4 => (ints(0), ints(1), ints(2), ints(3))
+      }
+    }
+  }
   def decorationEdgeCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(restArgs);
-      econt <- GridderfaceStringParser.parseLineContentString(arg)
+      ecs <- CommandUtilities.getElementByIndex(restArgs, 0);
+      bt <- getBoundTuple(restArgs.tail, rows, cols);
+      econt <- GridderfaceStringParser.parseLineContentString(ecs)
     ) yield {
       seq.griddable = seq.griddable :+
-        new HomogeneousEdgeGrid(econt, rows, cols)
+        new HomogeneousEdgeGrid(econt, bt._1, bt._2, bt._3, bt._4)
       "Added decoration edge grid"
     }
   }
   def decorationBorderCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(restArgs);
-      econt <- GridderfaceStringParser.parseLineContentString(arg)
+      ecs <- CommandUtilities.getElementByIndex(restArgs, 0);
+      bt <- getBoundTuple(restArgs.tail, rows, cols);
+      econt <- GridderfaceStringParser.parseLineContentString(ecs)
     ) yield {
       seq.griddable = seq.griddable :+
-        new HomogeneousBorderGrid(econt, rows, cols)
+        new HomogeneousBorderGrid(econt, bt._1, bt._2, bt._3, bt._4)
       "Added decoration edge grid"
     }
   }
   abstract class PresetGriddable {
-    def createGriddable(rows: Int, cols: Int): Griddable
+    def createGriddable(rowStart: Int, colStart: Int, rowEnd: Int, colEnd: Int): Griddable
   }
   case class PresetBorder(cont: LineContent) extends PresetGriddable {
-    def createGriddable(rows: Int, cols: Int) = {
-      new HomogeneousBorderGrid(cont, rows, cols)
+    def createGriddable(rowStart: Int, colStart: Int, rowEnd: Int, colEnd: Int) = {
+      new HomogeneousBorderGrid(cont, rowStart, colStart, rowEnd, colEnd)
     }
   }
   case class PresetEdges(cont: LineContent) extends PresetGriddable {
-    def createGriddable(rows: Int, cols: Int) = {
-      new HomogeneousEdgeGrid(cont, rows, cols)
+    def createGriddable(rowStart: Int, colStart: Int, rowEnd: Int, colEnd: Int) = {
+      new HomogeneousEdgeGrid(cont, rowStart, colStart, rowEnd, colEnd)
     }
   }
   case class PresetIntersections(cont: PointContent) extends PresetGriddable {
-    def createGriddable(rows: Int, cols: Int) = {
-      new HomogeneousIntersectionGrid(cont, rows, cols)
+    def createGriddable(rowStart: Int, colStart: Int, rowEnd: Int, colEnd: Int) = {
+      new HomogeneousIntersectionGrid(cont, rowStart, colStart, rowEnd, colEnd)
     }
   }
   val presetMap: Map[String, List[PresetGriddable]] = HashMap(
     "plain" -> List(new PresetEdges(new LineStampContent(Strokes.thinStamp, Color.BLACK))),
     "dashed" -> List(new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY))),
     "bold" -> List(new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))),
-    "nwgrid" -> List(
+    "slither" -> List(
         new PresetEdges(new LineStampContent(new StrokeLineStamp(0.1875f), new Color(254, 254, 254))),
         new PresetIntersections(new PointStampContent(FixedMark.createDiskStamp(0.125), Color.BLACK))),
+    "corral" -> List(
+        new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))), 
+        new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY)),
+        new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))),
     "whitedashed" -> List(
         new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))), 
         new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY)))
@@ -71,17 +86,22 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
       case None => Failed("Error: no such preset: " + presetName)
     }
   }
-  def decorationPresetCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
-    val presetsStat = (restArgs map getPresetAsStatus).foldLeft(
-        Success(List.empty): Status[List[PresetGriddable]])(
+  def decorationPresetCommand(restArgs: Array[String], rows: Int, cols: Int, append: Boolean): Status[String] = {
+    val presetTokens = (for (s <- CommandUtilities.getElementByIndex(restArgs, 0)) yield s split ',')
+
+    val presetStatList = presetTokens map (_ map getPresetAsStatus)
+    val presetListStat = for (psl <- presetStatList; res <- psl.foldLeft(
+      Success(List.empty): Status[List[PresetGriddable]])(
             (list, preset) => for (li <- list; p <- preset) yield (p ++ li)
             // note: each preset list is to be applied left-to-right
             // but multiple preset args are applied right-to-left
             // blah, I find it more intuitive that way
-        )
+      )) yield res
     // only do the decorating if we're certain all presets exist
-    for (presets <- presetsStat) yield {
-      seq.griddable = new GriddableSeq(presets map (_.createGriddable(rows, cols))); ""
+    for (plist <- presetListStat; bd <- getBoundTuple(restArgs.tail, rows, cols)) yield {
+      if (append) seq.griddable = seq.griddable ++ (plist map (_.createGriddable(bd._1, bd._2, bd._3, bd._4)))
+      else seq.griddable = new GriddableSeq(plist map (_.createGriddable(bd._1, bd._2, bd._3, bd._4)))
+      ""
     }
   }
   def decorationCommand(args: Array[String], dim: (Int, Int)): Status[String] = {
@@ -92,7 +112,9 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
         case "clear" => decorationClearCommand(args.tail)
         case "edge" => decorationEdgeCommand(args.tail, rows, cols)
         case "border" => decorationBorderCommand(args.tail, rows, cols)
-        case "pre" => decorationPresetCommand(args.tail, rows, cols)
+        case "pre" => decorationPresetCommand(args.tail, rows, cols, false)
+        case "p" => decorationPresetCommand(args.tail, rows, cols, false)
+        case "padd" => decorationPresetCommand(args.tail, rows, cols, true)
         case sc => Failed("Error: unrecognized decorate subcommand: " + sc)
       })
     ) yield result
