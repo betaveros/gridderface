@@ -15,9 +15,9 @@ class OutlineRectStamp(stroke: Stroke) extends ScalableRectStamp {
   }
 }
 
-class BulbRectStamp(size: Double) extends ScalableRectStamp {
+class BulbRectStamp(size: Double, xOffset: Double = 0, yOffset: Double = 0) extends ScalableRectStamp {
   val sx = 0.5 - size / 2.0
-  val bulb = new Ellipse2D.Double(sx, sx, size, size)
+  val bulb = new Ellipse2D.Double(xOffset + sx, yOffset + sx, size, size)
   override def drawUnit(g2d: Graphics2D) = {
     g2d fill bulb
   }

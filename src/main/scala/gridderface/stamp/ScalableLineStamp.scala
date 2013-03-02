@@ -9,10 +9,12 @@ trait ScalableLineStamp extends LineStamp {
   override def drawLine(g2d: Graphics2D, paint: Paint, x1: Double, y1: Double, x2: Double, y2: Double): Unit = {
     preparedCopy(g2d, paint, x1, y1, x2, y2) foreach drawUnit
   }
+  def isFlipped(x0: Double, y0: Double, x1: Double, y1: Double): Boolean = false
   def spiralSimilarity(x0: Double, y0: Double, x1: Double, y1: Double): AffineTransform = {
     val dx = x1 - x0
     val dy = y1 - y0
-    new AffineTransform(dx, dy, -dy, dx, x0, y0)
+    val sign = if (isFlipped(x0, y0, x1, y1)) -1 else 1
+    new AffineTransform(dx, dy, sign * -dy, sign * dx, x0, y0)
   }
   protected def preparedCopy(g2d: Graphics2D, paint: Paint,
     x1: Double, y1: Double, x2: Double, y2: Double): Option[Graphics2D] = {

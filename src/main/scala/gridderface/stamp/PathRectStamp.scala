@@ -16,12 +16,20 @@ class PathRectStamp(val shapes: Seq[Shape], val stroke: Stroke) extends Scalable
 }
 
 object PathRectStamp {
-  val crossPath = new Path2D.Double
-  crossPath.moveTo(0.0, 0.0)
-  crossPath.lineTo(1.0, 1.0)
-  crossPath.moveTo(0.0, 1.0)
-  crossPath.lineTo(1.0, 0.0)
+  val slash1Path = new Path2D.Double
+  slash1Path.moveTo(0.0, 0.0)
+  slash1Path.lineTo(1.0, 1.0)
+  val slash2Path = new Path2D.Double
+  slash2Path.moveTo(0.0, 1.0)
+  slash2Path.lineTo(1.0, 0.0)
+  val checkPath = new Path2D.Double
+  checkPath.moveTo(0.65, 0.75)
+  checkPath.lineTo(0.75, 0.9)
+  checkPath.lineTo(0.9, 0.6)
   
-  val crossStamp = new PathRectStamp(List(crossPath), Strokes.normalStroke)
+  val crossStamp = new PathRectStamp(List(slash1Path, slash2Path), Strokes.normalStroke)
+  val slash1Stamp = new PathRectStamp(List(slash1Path), Strokes.normalStroke)
+  val slash2Stamp = new PathRectStamp(List(slash2Path), Strokes.normalStroke)
+  val checkStamp = new PathRectStamp(List(checkPath), Strokes.normalStroke)
   
 }
