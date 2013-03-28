@@ -2,7 +2,7 @@ package gridderface
 
 import java.awt.{ Paint, Color }
 import scala.collection.immutable.HashMap
-import gridderface.stamp.{ RectStamp, LineStamp, PointStamp, TextRectStamp }
+import gridderface.stamp.{ RectStamp, LineStamp, PointStamp, TextRectStamp, TwoTextRectStamp, ThreeTextRectStamp, FourTextRectStamp }
 import scala.swing.event.{ MouseEvent, MouseClicked }
 import scala.swing.event.MousePressed
 import gridderface.stamp.FillRectStamp
@@ -65,7 +65,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   }
   val moveReactions = KeyDataCombinations.keyDataRCFunction(moveSelected)
 
-  private val cellMap: Map[KeyData, Char] = HashMap(KeyTypedData('=') -> '=', KeyTypedData(';') -> ';')
+  private val cellMap: Map[KeyData, Char] = HashMap(
+    KeyTypedData('=') -> '=',
+    KeyTypedData(';') -> ';',
+    KeyTypedData('&') -> '&')
   def commandPrefixMap: Map[KeyData, Char] = {
     sel.selected match {
       // bugnote: "case _: Some[CellPosition]" is too lax, I think due to type erasure
@@ -78,6 +81,15 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       putStampAtSelected(Some(new TextRectStamp(str))); Success("You put " + str)
     case ';' =>
       putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont))); Success("You put " + str)
+    case '&' => {
+      val tokens = str.split("\\s+")
+      tokens.length match {
+        case 2 => putStampAtSelected(Some(new TwoTextRectStamp(tokens(0), tokens(1)))); Success("")
+        case 3 => putStampAtSelected(Some(new ThreeTextRectStamp(tokens(0), tokens(1), tokens(2)))); Success("")
+        case 4 => putStampAtSelected(Some(new FourTextRectStamp(tokens(0), tokens(1), tokens(2), tokens(3)))); Success("")
+        case _ => Failed("Wrong number of tokens for &")
+      }
+    }
     case c => Failed("Drawing Mode can't handle this prefix: " + c)
   }
   def setPaintSet(ps: PaintSet) {

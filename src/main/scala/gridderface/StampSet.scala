@@ -55,7 +55,7 @@ object StampSet {
         KeyTypedData('v') -> checkSet,
         KeyTypedData('<') -> lessSet,
         KeyTypedData('>') -> greaterSet,
-        KeyTypedData('c') -> clearSet,
+        KeyTypedData('z') -> clearSet,
         KeyTypedData(' ') -> clearSet,
         KeyTypedData('x') -> crossSet)
     val digitMappings = (0 to 9) map (i => KeyTypedData(('0' + i).toChar) ->
