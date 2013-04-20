@@ -17,7 +17,7 @@ import java.io.File
 object Gridderface extends SimpleSwingApplication {
 
   val selectedManager = new SelectedPositionManager(Some(new IntersectionPosition(0, 0)))
-  val ggrid = new GriddableGrid
+  val gridList = new GriddableGridList()
   val bg = new GriddableImageHolder(None)
   val prov = new MutableGridProvider(32.0, 32.0, 0.0, 0.0)
   // the default arguments work, but Eclipse randomly bugs me about it meh
@@ -63,7 +63,7 @@ object Gridderface extends SimpleSwingApplication {
   val griddableList: List[Tuple3[Griddable, Float, String]] = List(
     (bg, 1.0f, "image"),
     (decorationGridSeq, 1.0f, "decoration"),
-    (ggrid, 1.0f, "content"),
+    (gridList, 1.0f, "content"),
     (edgeGridHolder, 0.5f, "grid"),
     (selectedManager, 0.75f, "cursor"))
   val opacityBufferList = for ((g, opacity, name) <- griddableList) yield {
@@ -157,7 +157,7 @@ object Gridderface extends SimpleSwingApplication {
       val g = img.createGraphics()
       g.drawImage(baseImg, 0, 0, w, h, null)
       decorationGridSeq.grid(prov, g)
-      ggrid.grid(prov, g)
+      gridList.grid(prov, g)
       img
     })
   }
@@ -208,8 +208,12 @@ object Gridderface extends SimpleSwingApplication {
         // just pretend this is for testing if errors work
         case "Ni!" => Failed("Do you demand a shrubbery?")
         case "quit" => sys.exit()
+        case "newgrid" =>
+          gridList.addGrid(); Success("New grid added")
+        case "delgrid" =>
+          gridList.removeGrid(); Success("Current grid removed")
         case "clear" =>
-          ggrid.clear(); Success("Content cleared")
+          gridList.clearGrid(); Success("Content cleared")
         case "clearimage" =>
           bg.image = None; Success("Image cleared")
         case "resetgrid" => {
@@ -221,6 +225,7 @@ object Gridderface extends SimpleSwingApplication {
         }
         case "write" => writeGeneratedImage(parts.tail)
         case "read" => readImageFrom(parts.tail)
+        case "pwd" => Success(new File(".").getAbsolutePath)
         case "init" => initGeneration(parts.tail)
         case "initgen" => initGeneration(parts.tail)
         case "hide" => fixedOpacityCommand(0f, parts.tail)
@@ -243,7 +248,7 @@ object Gridderface extends SimpleSwingApplication {
   })
   val modeLabel = new Label()
   val statusLabel = new Label()
-  val drawMode = new GridderfaceDrawingMode(selectedManager, ggrid, pt => computePosition(pt))
+  val drawMode = new GridderfaceDrawingMode(selectedManager, gridList, pt => computePosition(pt))
   val gridMode = new GridderfaceGridSettingMode(prov)
   lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
   // gah, the initialization sequence here is tricky
