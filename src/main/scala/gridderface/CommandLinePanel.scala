@@ -28,6 +28,11 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
     field.enabled = false
     field.background = disabledColor
   }
+  def showMessage(msg: String, isError: Boolean = false) {
+    field.background = if (isError) errorColor else
+      if (field.enabled) enabledColor else disabledColor
+    field.text = msg
+  }
   field.listenTo(field.keys)
   field.reactions += {
     case _: FocusLost => stopCommandMode
@@ -40,8 +45,8 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
       val message = responder(prefix, field.text)
       stopCommandMode
       message match {
-        case Failed(text) => field.background = errorColor; field.text = text
-        case Success(text) => field.text = text
+        case Failed(text) => showMessage(text, true)
+        case Success(text) => showMessage(text, false)
       }
     }
   }

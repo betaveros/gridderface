@@ -39,6 +39,14 @@ object Gridderface extends SimpleSwingApplication {
     case KeyPressedData(Key.D, Key.Modifier.Control) => setMode(drawMode)
     case KeyPressedData(Key.G, Key.Modifier.Control) => setMode(gridMode)
     case KeyPressedData(Key.P, Key.Modifier.Control) => setMode(viewportMode)
+    case KeyPressedData(Key.Tab, 0) => {
+      gridList.selectNextGrid()
+      commandLine showMessage gridList.status
+    }
+    case KeyPressedData(Key.Tab, Key.Modifier.Shift) => {
+      gridList.selectNextGrid()
+      commandLine showMessage gridList.status
+    }
     // Note: Control-V is mapped in java.swing with InputMaps & co.
     // since I can't seem to simulate pasting nicely.
   }
@@ -73,6 +81,7 @@ object Gridderface extends SimpleSwingApplication {
   val opacityBufferMap = HashMap(opacityBufferList: _*)
 
   val gridPanel = new GridPanel(prov) {
+    peer setFocusTraversalKeysEnabled false // prevent tab key from being consumed
     listenTo(keys)
     listenTo(mouse.clicks)
 
@@ -209,9 +218,9 @@ object Gridderface extends SimpleSwingApplication {
         case "Ni!" => Failed("Do you demand a shrubbery?")
         case "quit" => sys.exit()
         case "newgrid" =>
-          gridList.addGrid(); Success("New grid added")
+          gridList.addGrid(); Success(gridList.status ++ " New grid added")
         case "delgrid" =>
-          gridList.removeGrid(); Success("Current grid removed")
+          gridList.removeGrid(); Success(gridList.status ++ " Current grid removed")
         case "clear" =>
           gridList.clearGrid(); Success("Content cleared")
         case "clearimage" =>

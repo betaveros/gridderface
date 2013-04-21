@@ -7,6 +7,7 @@ import scala.collection.immutable.TreeMap
 // as well as one active grid in the list for modification.
 class GriddableGridList extends Griddable with ContentPutter {
   private var _currentGrid = new GriddableGrid()
+  private var _currentGridIndex = 0
   private var _list: List[GriddableGrid] = List(_currentGrid)
   listenTo(_currentGrid)
   reactions += {
@@ -31,6 +32,7 @@ class GriddableGridList extends Griddable with ContentPutter {
     _currentGrid = new GriddableGrid()
     listenTo(_currentGrid)
     _list = _list :+ _currentGrid
+    _currentGridIndex = _list.length - 1
   }
   def removeGrid() = {
     if (_list.length == 1) {
@@ -41,8 +43,19 @@ class GriddableGridList extends Griddable with ContentPutter {
     } else {
       _list = _list filter (_currentGrid != _)
       _currentGrid = _list.last
+      _currentGridIndex = _list.length - 1
     }
     publish(GriddableChanged(this))
   }
-
+  def selectPreviousGrid() = {
+    _currentGridIndex = (_currentGridIndex - 1 + _list.length) % _list.length
+    _currentGrid = _list(_currentGridIndex)
+  }
+  def selectNextGrid() = {
+    _currentGridIndex = (_currentGridIndex + 1) % _list.length
+    _currentGrid = _list(_currentGridIndex)
+  }
+  def status = {
+    "%d/%d".format(_currentGridIndex + 1, _list.length)
+  }
 }
