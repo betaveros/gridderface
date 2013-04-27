@@ -68,6 +68,8 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   private val cellMap: Map[KeyData, Char] = HashMap(
     KeyTypedData('=') -> '=',
     KeyTypedData(';') -> ';',
+    KeyTypedData('^') -> '^',
+    KeyTypedData('_') -> '_',
     KeyTypedData('&') -> '&')
   def commandPrefixMap: Map[KeyData, Char] = {
     sel.selected match {
@@ -81,6 +83,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       putStampAtSelected(Some(new TextRectStamp(str))); Success("You put " + str)
     case ';' =>
       putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont))); Success("You put " + str)
+    case '^' =>
+      putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont, 0.125f, 0f))); Success("You put " + str)
+    case '_' =>
+      putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont, 0.125f, 1f))); Success("You put " + str)
     case '&' => {
       val tokens = str.split("\\s+")
       tokens.length match {

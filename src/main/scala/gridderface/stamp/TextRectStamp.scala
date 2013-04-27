@@ -4,7 +4,10 @@ import java.awt._
 import java.awt.geom._
 
 class TextRectStamp(string: String, font: Font = TextRectStamp.normalFont,
-  antiAliasRenderingHint: AnyRef = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF) extends ScalableRectStamp {
+  horizontalAlignment: Float = 0.5f,
+  verticalAlignment: Float = 0.5f,
+  antiAliasRenderingHint: AnyRef = RenderingHints.VALUE_TEXT_ANTIALIAS_OFF
+  ) extends ScalableRectStamp {
   val magicScale = 1.0 / 24.0
   def drawUnit(g2d: Graphics2D): Unit = {
     g2d.scale(magicScale, magicScale)
@@ -17,8 +20,14 @@ class TextRectStamp(string: String, font: Font = TextRectStamp.normalFont,
     val descent = fm.getDescent()
     val height = fm.getAscent() + descent
 
-    val baseX = 12.0f - width / 2.0f
-    val baseY = 12.0f + height / 2.0f - descent
+    val baseX0 = 0f
+    val baseX1 = 24.0f - width
+
+    val baseY0 = height - descent
+    val baseY1 = 24.0f - descent
+
+    val baseX = baseX0 + (baseX1 - baseX0) * horizontalAlignment
+    val baseY = baseY0 + (baseY1 - baseY0) * verticalAlignment
     // stack overflow <3
 
     g2d.drawString(string, baseX, baseY)
