@@ -57,17 +57,20 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   }
   val moveReactions = KeyDataCombinations.keyDataRCFunction(moveSelected)
 
+  private val globalMap: Map[KeyData, Char] = HashMap(
+    KeyTypedData('%') -> '%')
   private val cellMap: Map[KeyData, Char] = HashMap(
     KeyTypedData('=') -> '=',
     KeyTypedData(';') -> ';',
     KeyTypedData('^') -> '^',
     KeyTypedData('_') -> '_',
-    KeyTypedData('&') -> '&')
+    KeyTypedData('&') -> '&',
+    KeyTypedData('%') -> '%')
   def commandPrefixMap: Map[KeyData, Char] = {
     sel.selected match {
       // bugnote: "case _: Some[CellPosition]" is too lax, I think due to type erasure
       case Some(CellPosition(_,_)) => cellMap
-      case _ => Map.empty
+      case _ => globalMap
     }
   }
   def handleCommand(prefix: Char, str: String) = prefix match {
@@ -79,6 +82,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont, 0.125f, 0f))); Success("You put " + str)
     case '_' =>
       putStampAtSelected(Some(new TextRectStamp(str, TextRectStamp.smallFont, 0.125f, 1f))); Success("You put " + str)
+    case '%' =>
+      for (ps <- GridderfaceStringParser.parseColorString(str)) yield {
+        setPaintSet(ps); "Set color to " ++ ps.name
+      }
     case '&' => {
       val tokens = str.split("\\s+")
       tokens.length match {
