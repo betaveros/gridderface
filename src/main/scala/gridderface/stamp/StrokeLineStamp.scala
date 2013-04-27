@@ -15,6 +15,11 @@ object Strokes {
   val normalWidth = 0.125f;
   val normalStroke = new BasicStroke(normalWidth)
   val normalStamp = new StrokeLineStamp(normalStroke)
+
+  // experimentally chosen as Slitherlink-flood-fill edge width
+  val mediumWidth = 0.1875f;
+  val mediumStroke = new BasicStroke(mediumWidth)
+  val mediumStamp = new StrokeLineStamp(mediumStroke)
   
   val thickWidth = 0.25f;
   val thickStroke = new BasicStroke(thickWidth)

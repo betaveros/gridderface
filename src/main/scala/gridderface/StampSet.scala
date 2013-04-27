@@ -13,6 +13,8 @@ object StampSet {
     "Fill", Some(FillRectStamp), Some(Strokes.normalStamp), Some(FixedMark.createFilledSquareStamp(0.125)))
   val thickSet = new StampSet(
     "10/Thick", Some(new TextRectStamp("10")), Some(Strokes.thickStamp), Some(FixedMark.createFilledSquareStamp(0.25)))
+  val mediumSet = new StampSet(
+    "Medium", None, Some(Strokes.mediumStamp), Some(FixedMark.createFilledSquareStamp(0.1875)))
   val shadefillSet = new StampSet(
     "shadeFill", Some(TextureFillRectStamp.diagonalStamp), Some(Strokes.thinStamp), Some(FixedMark.createFilledSquareStamp(0.125)))
   val dashSet = new StampSet(
@@ -45,6 +47,7 @@ object StampSet {
         KeyTypedData('F') -> shadefillSet,
         KeyTypedData('d') -> dashSet,
         KeyTypedData('D') -> dotSet,
+        KeyTypedData('s') -> mediumSet,
         KeyTypedData('.') -> dotSet,
         KeyTypedData(',') -> cornerDotSet,
         KeyTypedData('o') -> circleSet,
@@ -55,7 +58,6 @@ object StampSet {
         KeyTypedData('v') -> checkSet,
         KeyTypedData('<') -> lessSet,
         KeyTypedData('>') -> greaterSet,
-        KeyTypedData('z') -> clearSet,
         KeyTypedData(' ') -> clearSet,
         KeyTypedData('x') -> crossSet)
     val digitMappings = (0 to 9) map (i => KeyTypedData(('0' + i).toChar) ->
