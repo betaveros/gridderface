@@ -13,17 +13,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   val name = "Draw"
   private var paint: Paint = Color.BLACK
   private var paintName: String = "Black"
-  private var backgroundPaint: Option[Paint] = None
-  private var backgroundPaintName: String = "-"
-  private var waitingForBackground = false
   private var _lockedToCells = false
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, paint)
-    backgroundPaint match {
-      case None => putter.putCell(cpos, fgContent)
-      case Some(paint) => putter.putCell(cpos, CombinedRectContent(
-          new RectStampContent(FillRectStamp, paint), fgContent))
-    }
+    putter.putCell(cpos, fgContent)
   }
   def lockedToCells = _lockedToCells
   def lockedToCells_=(b: Boolean) = {
@@ -55,8 +48,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       case ipos: IntersectionPosition => pointStamp foreach (putPointStamp(ipos, _))
     })
   }
-  def status = "%s / %s".format(paintName, 
-      if (waitingForBackground) "?" else backgroundPaintName)
+  def status = paintName
   def putStampSet(s: StampSet) = putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
   def moveSelected(rd: Int, cd: Int) = {
     val mult = if (lockedToCells) 2 else 1
@@ -103,38 +95,9 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     paintName = ps.name
     publish(StatusChanged(this))
   }
-  def setBackgroundPaintSet(ps: PaintSet) {
-    backgroundPaint = Some(ps.paint)
-    backgroundPaintName = ps.name
-    waitingForBackground = false
-    publish(StatusChanged(this))
-  }
-  def clearBackgroundPaintSet() {
-    backgroundPaint = None
-    backgroundPaintName = "-"
-    waitingForBackground = false
-    publish(StatusChanged(this))
-  }
-  val backgroundReactions: PartialFunction[KeyData, Unit] = {
-    case KeyTypedData('`') => waitingForBackground = true; publish(StatusChanged(this))
-  }
-  val backgroundClearReactions: PartialFunction[KeyData, Unit] = {
-    case KeyTypedData(' ') => clearBackgroundPaintSet()
-  }
-  val clearContentReactions: PartialFunction[KeyData, Unit] = {
-    // override background, if any
-    case KeyTypedData(' ') => putClearRectStampAtSelected()
-  }
-  def keyReactions = if (waitingForBackground) {
-    (PaintSet.defaultMap andThen setBackgroundPaintSet) orElse
-    backgroundClearReactions
-  } else {
-    (moveReactions
-    orElse clearContentReactions
+  def keyReactions = (moveReactions
     orElse (StampSet.defaultMap andThen putStampSet)
-    orElse (PaintSet.defaultMap andThen setPaintSet)
-    orElse backgroundReactions)
-  }
+    orElse (PaintSet.defaultMap andThen setPaintSet))
   def selectNear(pt: Point) {
     sel.selected = Some(point2pos(pt))
     ensureLock()
