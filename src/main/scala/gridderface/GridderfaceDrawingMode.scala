@@ -2,12 +2,10 @@ package gridderface
 
 import java.awt.{ Paint, Color }
 import scala.collection.immutable.HashMap
-import gridderface.stamp.{ RectStamp, LineStamp, PointStamp, TextRectStamp, TwoTextRectStamp, ThreeTextRectStamp, FourTextRectStamp }
 import scala.swing.event.{ MouseEvent, MouseClicked }
 import scala.swing.event.MousePressed
-import gridderface.stamp.FillRectStamp
-import gridderface.stamp.ClearStamp
 import java.awt.Point
+import gridderface.stamp._
 
 class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter, point2pos: java.awt.Point => Position) extends GridderfaceMode {
   val name = "Draw"
@@ -39,14 +37,20 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       case ipos: IntersectionPosition => putPointStamp(ipos, ClearStamp)
     })
   }
-  def putStampAtSelected(rectStamp: Option[RectStamp] = None,
+  def putStampAtPosition(pos: Position, rectStamp: Option[RectStamp] = None,
     lineStamp: Option[LineStamp] = None,
     pointStamp: Option[PointStamp] = None) {
-    sel.selected foreach (se => se match {
+    pos match {
       case cpos: CellPosition => rectStamp foreach (putRectStamp(cpos, _))
       case epos: EdgePosition => lineStamp foreach (putLineStamp(epos, _))
       case ipos: IntersectionPosition => pointStamp foreach (putPointStamp(ipos, _))
-    })
+    }
+  }
+  def putStampAtSelected(rectStamp: Option[RectStamp] = None,
+    lineStamp: Option[LineStamp] = None,
+    pointStamp: Option[PointStamp] = None) {
+    sel.selected foreach (pos => putStampAtPosition(pos, rectStamp, lineStamp,
+      pointStamp))
   }
   def status = paintName
   def putStampSet(s: StampSet) = putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
@@ -55,7 +59,30 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
     ensureLock()
   }
+  def moveAndDrawSelected(rd: Int, cd: Int) = {
+    sel.selected foreach (se => {
+      val dpos = se.deltaPosition(rd, cd)
+      se match {
+        case cpos: CellPosition => dpos match {
+          case depos: EdgePosition => putLineStamp(depos, new TransverseLineStamp(Strokes.normalStroke))
+          case _ => throw new AssertionError("moveAndDrawSelected: cell to non-edge")
+        }
+        case ipos: IntersectionPosition => dpos match {
+          case depos: EdgePosition => putLineStamp(depos, Strokes.normalStamp)
+          case _ => throw new AssertionError("moveAndDrawSelected: intersection to non-edge")
+        }
+        case epos: EdgePosition => dpos match {
+          case dcpos: CellPosition => putRectStamp(dcpos, FillRectStamp)
+          case dipos: IntersectionPosition => putPointStamp(dipos, FixedMark.createFilledSquareStamp(0.125))
+          case _ => throw new AssertionError("moveAndDrawSelected: edge to edge")
+        }
+      }
+    })
+    sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
+    ensureLock()
+  }
   val moveReactions = KeyDataCombinations.keyDataRCFunction(moveSelected)
+  val moveAndDrawReactions = KeyDataCombinations.keyDataShiftRCFunction(moveAndDrawSelected)
 
   private val globalMap: Map[KeyData, Char] = HashMap(
     KeyTypedData('%') -> '%')
@@ -103,6 +130,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     publish(StatusChanged(this))
   }
   def keyReactions = (moveReactions
+    orElse moveAndDrawReactions
     orElse (StampSet.defaultMap andThen putStampSet)
     orElse (PaintSet.defaultMap andThen setPaintSet))
   def selectNear(pt: Point) {
