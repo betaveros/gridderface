@@ -6,6 +6,7 @@ import java.awt.Color
 import java.awt.Paint
 import gridderface.stamp._
 import scala.collection.immutable.HashMap
+import scala.collection.mutable.ListBuffer
 import javax.swing.TransferHandler
 import java.awt.Toolkit
 import javax.swing.KeyStroke
@@ -34,28 +35,31 @@ object Gridderface extends SimpleSwingApplication {
     val gridpt = gridPanel.viewToGrid(pt)
     prov.computePosition(gridpt.getX(), gridpt.getY())
   }
-  val globalReactions: PartialFunction[KeyData, Unit] = {
-    case KeyTypedData(':') => commandLine.startCommandMode(':')
-    case KeyPressedData(Key.D, Key.Modifier.Control) => setMode(drawMode)
-    case KeyPressedData(Key.G, Key.Modifier.Control) => setMode(gridMode)
-    case KeyPressedData(Key.P, Key.Modifier.Control) => setMode(viewportMode)
-    case KeyPressedData(Key.Tab, 0) => {
+  private def ctrl(c: Char): Char = (c - 64).toChar
+  val globalKeyListReactions: PartialFunction[List[KeyData], Boolean] = {
+    case List(KeyTypedData(':'         )) => commandLine.startCommandMode(':'); true
+    case List(KeyTypedData('\04' /*^D*/)) => setMode(drawMode); true
+    case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); true
+    case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); true
+    case List(KeyPressedData(Key.Tab, 0)) => {
       gridList.selectNextGrid()
       commandLine showMessage gridList.status
+      true
     }
-    case KeyPressedData(Key.Tab, Key.Modifier.Shift) => {
+    case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
       gridList.selectNextGrid()
       commandLine showMessage gridList.status
+      true
     }
-    // Note: Control-V is mapped in java.swing with InputMaps & co.
-    // since I can't seem to simulate pasting nicely.
+    // Note: Given the list-of-keys-lookup structure I'm trying to set up,
+    // Control-V is now somewhat of a serious outlier.
+    // I can't seem to simulate pasting nicely; as a result I'm mapping it
+    // in java.swing with InputMaps & co., but that creates illogical
+    // behavior mid-key-sequence. Meh. This is something TODO?
   }
   var currentMode: GridderfaceMode = drawMode
   
 
-  private def currentKeyReactions = (currentMode.keyReactions
-    orElse (currentMode.commandPrefixMap andThen commandLine.startCommandMode)
-    orElse globalReactions)
   private def currentMouseReactions = currentMode.mouseReactions
   def setMode(mode: GridderfaceMode) {
     currentMode = mode
@@ -66,6 +70,31 @@ object Gridderface extends SimpleSwingApplication {
 
   private def withOpacity(g: Griddable, alpha: Float, name: String): OpacityBuffer = {
     new OpacityBuffer(g, alpha)
+  }
+
+  private var keyList: ListBuffer[KeyData] = ListBuffer()
+  private def isUsefulKeyData(d: KeyData) = d match {
+    case KeyTypedData('\t') => false // cannot detect modifiers, apparently
+    case KeyTypedData(_) => true
+    case KeyPressedData(Key.Tab, _) => true
+    case _ => false
+  }
+
+  private def processKeyEvent(e: KeyEvent) {
+    val dat = KeyData extract e
+    if (isUsefulKeyData(dat)) {
+      keyList += dat
+      val finished = (currentMode.keyListReactions
+        // orElse (currentMode.commandPrefixMap andThen commandLine.startCommandMode)
+        orElse globalKeyListReactions) lift (keyList.toList)
+      finished match {
+        case Some(true) => keyList.clear()
+        case _ => {
+          commandLine showError "Undefined key sequence " ++ keyList.toString
+          keyList.clear()
+        }
+      }
+    }
   }
 
   val griddableList: List[Tuple3[Griddable, Float, String]] = List(
@@ -91,7 +120,7 @@ object Gridderface extends SimpleSwingApplication {
     reactions += {
       // "lift" turns PartialFunctions into total functions returning Option[B]
       // here we just use it to silence uncaught events
-      case event: KeyEvent => currentKeyReactions lift (KeyData extract event)
+      case event: KeyEvent => processKeyEvent(event)
       case event: MouseEvent => currentMouseReactions lift event
       case event: BufferChanged => repaint()
       case event: GridChanged => repaint()
@@ -257,7 +286,8 @@ object Gridderface extends SimpleSwingApplication {
   })
   val modeLabel = new Label()
   val statusLabel = new Label()
-  val drawMode = new GridderfaceDrawingMode(selectedManager, gridList, pt => computePosition(pt))
+  val drawMode = new GridderfaceDrawingMode(selectedManager, gridList,
+    pt => computePosition(pt), commandLine.startCommandMode(_))
   val gridMode = new GridderfaceGridSettingMode(prov)
   lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
   // gah, the initialization sequence here is tricky

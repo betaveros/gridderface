@@ -7,7 +7,8 @@ import scala.swing.event.MousePressed
 import java.awt.Point
 import gridderface.stamp._
 
-class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter, point2pos: java.awt.Point => Position) extends GridderfaceMode {
+class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter,
+  point2pos: java.awt.Point => Position, commandStarter: Char => Unit) extends GridderfaceMode {
   val name = "Draw"
   private var paint: Paint = Color.BLACK
   private var paintName: String = "Black"
@@ -59,26 +60,36 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
     ensureLock()
   }
+  val cellMoveStamp = new TransverseLineStamp(Strokes.normalStroke)
+  val intersectionMoveStamp = Strokes.normalStamp
   def moveAndDrawSelected(rd: Int, cd: Int) = {
     sel.selected foreach (se => {
       val dpos = se.deltaPosition(rd, cd)
       se match {
-        case cpos: CellPosition => dpos match {
-          case depos: EdgePosition => putLineStamp(depos, new TransverseLineStamp(Strokes.normalStroke))
-          case _ => throw new AssertionError("moveAndDrawSelected: cell to non-edge")
+        case cpos: CellPosition => {
+          dpos match {
+            case depos: EdgePosition => putLineStamp(depos, cellMoveStamp)
+            case _ => throw new AssertionError("moveAndDrawSelected: cell to non-edge")
+          }
+          sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
         }
-        case ipos: IntersectionPosition => dpos match {
-          case depos: EdgePosition => putLineStamp(depos, Strokes.normalStamp)
-          case _ => throw new AssertionError("moveAndDrawSelected: intersection to non-edge")
+        case ipos: IntersectionPosition => {
+          dpos match {
+            case depos: EdgePosition => putLineStamp(depos, intersectionMoveStamp)
+            case _ => throw new AssertionError("moveAndDrawSelected: intersection to non-edge")
+          }
+          sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
         }
-        case epos: EdgePosition => dpos match {
-          case dcpos: CellPosition => putRectStamp(dcpos, FillRectStamp)
-          case dipos: IntersectionPosition => putPointStamp(dipos, FixedMark.createFilledSquareStamp(0.125))
-          case _ => throw new AssertionError("moveAndDrawSelected: edge to edge")
+        case epos: EdgePosition => { 
+          dpos match {
+            case dcpos: CellPosition => putLineStamp(epos, cellMoveStamp)
+            case dipos: IntersectionPosition => putLineStamp(epos, intersectionMoveStamp)
+            case _ => throw new AssertionError("moveAndDrawSelected: edge to edge")
+          }
+          sel.selected = sel.selected map (_.deltaPosition(rd, cd))
         }
       }
     })
-    sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
     ensureLock()
   }
   val moveReactions = KeyDataCombinations.keyDataRCFunction(moveSelected)
@@ -91,15 +102,14 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     KeyTypedData(';') -> ';',
     KeyTypedData('^') -> '^',
     KeyTypedData('_') -> '_',
-    KeyTypedData('&') -> '&',
-    KeyTypedData('%') -> '%')
-  def commandPrefixMap: Map[KeyData, Char] = {
-    sel.selected match {
+    KeyTypedData('&') -> '&')
+  def commandStartReactions: PartialFunction[KeyData, Unit] = (
+    (sel.selected match {
       // bugnote: "case _: Some[CellPosition]" is too lax, I think due to type erasure
-      case Some(CellPosition(_,_)) => cellMap
+      case Some(CellPosition(_,_)) => cellMap orElse globalMap
       case _ => globalMap
-    }
-  }
+    }) andThen commandStarter
+  )
   def handleCommand(prefix: Char, str: String) = prefix match {
     case '=' =>
       putStampAtSelected(Some(new TextRectStamp(str))); Success("You put " + str)
@@ -129,10 +139,11 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     paintName = ps.name
     publish(StatusChanged(this))
   }
-  def keyReactions = (moveReactions
+  def keyListReactions = new SingletonListPartialFunction(moveReactions
     orElse moveAndDrawReactions
+    orElse commandStartReactions
     orElse (StampSet.defaultMap andThen putStampSet)
-    orElse (PaintSet.defaultMap andThen setPaintSet))
+    orElse (PaintSet.defaultMap andThen setPaintSet) andThen {u: Unit => true})
   def selectNear(pt: Point) {
     sel.selected = Some(point2pos(pt))
     ensureLock()

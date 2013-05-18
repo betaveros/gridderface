@@ -33,6 +33,7 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
       if (field.enabled) enabledColor else disabledColor
     field.text = msg
   }
+  def showError(msg: String) = showMessage(msg, true)
   field.listenTo(field.keys)
   field.reactions += {
     case _: FocusLost => stopCommandMode

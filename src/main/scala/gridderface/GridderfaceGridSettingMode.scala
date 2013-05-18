@@ -37,9 +37,9 @@ class GridderfaceGridSettingMode(prov: MutableGridProvider) extends GridderfaceM
   val negateMultiplierReactions: PartialFunction[KeyData, Unit] = {
     case KeyTypedData('`') => negateFlag = true; publish(StatusChanged(this))
   }
-  val keyReactions = (moveGridReactions orElse resizeGridReactions orElse
-      setGridMultiplierReactions orElse negateMultiplierReactions)
-  def commandPrefixMap = Map.empty
+  val keyListReactions = new SingletonListPartialFunction(
+    moveGridReactions orElse resizeGridReactions orElse
+    setGridMultiplierReactions orElse negateMultiplierReactions andThen {u: Unit => true})
   def handleCommand(prefix: Char, str: String) = Success("")
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
 
