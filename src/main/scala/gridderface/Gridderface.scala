@@ -89,6 +89,7 @@ object Gridderface extends SimpleSwingApplication {
         orElse globalKeyListReactions) lift (keyList.toList)
       finished match {
         case Some(true) => keyList.clear()
+        case Some(false) => // nothing?
         case _ => {
           commandLine showError "Undefined key sequence " ++ keyList.toString
           keyList.clear()

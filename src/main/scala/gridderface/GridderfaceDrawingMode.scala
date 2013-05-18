@@ -92,8 +92,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     })
     ensureLock()
   }
-  val moveReactions = KeyDataCombinations.keyDataRCFunction(moveSelected)
-  val moveAndDrawReactions = KeyDataCombinations.keyDataShiftRCFunction(moveAndDrawSelected)
+  private def truePF[B](pf: PartialFunction[KeyData, B]): PartialFunction[List[KeyData], Boolean] =
+    new SingletonListPartialFunction(pf andThen {u: B => true})
+  val moveReactions = truePF(KeyDataCombinations.keyDataRCFunction(moveSelected))
+  val moveAndDrawReactions = truePF(KeyDataCombinations.keyDataShiftRCFunction(moveAndDrawSelected))
 
   private val globalMap: Map[KeyData, Char] = HashMap(
     KeyTypedData('%') -> '%')
@@ -103,13 +105,21 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     KeyTypedData('^') -> '^',
     KeyTypedData('_') -> '_',
     KeyTypedData('&') -> '&')
-  def commandStartReactions: PartialFunction[KeyData, Unit] = (
+  def commandStartReactions = truePF(
     (sel.selected match {
       // bugnote: "case _: Some[CellPosition]" is too lax, I think due to type erasure
       case Some(CellPosition(_,_)) => cellMap orElse globalMap
       case _ => globalMap
     }) andThen commandStarter
   )
+  def paintReactions: PartialFunction[List[KeyData], Boolean] = kd => kd match {
+    case List(KeyTypedData('c')) => false
+    case List(KeyTypedData('c'), d2) => {
+      // TODO: this fails silently
+      (PaintSet.defaultMap andThen setPaintSet) lift d2
+      true
+    }
+  }
   def handleCommand(prefix: Char, str: String) = prefix match {
     case '=' =>
       putStampAtSelected(Some(new TextRectStamp(str))); Success("You put " + str)
@@ -139,11 +149,11 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     paintName = ps.name
     publish(StatusChanged(this))
   }
-  def keyListReactions = new SingletonListPartialFunction(moveReactions
+  def keyListReactions = (moveReactions
     orElse moveAndDrawReactions
     orElse commandStartReactions
-    orElse (StampSet.defaultMap andThen putStampSet)
-    orElse (PaintSet.defaultMap andThen setPaintSet) andThen {u: Unit => true})
+    orElse truePF(StampSet.defaultMap andThen putStampSet)
+    orElse paintReactions)
   def selectNear(pt: Point) {
     sel.selected = Some(point2pos(pt))
     ensureLock()
