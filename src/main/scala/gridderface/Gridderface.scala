@@ -91,7 +91,9 @@ object Gridderface extends SimpleSwingApplication {
         case Some(true) => keyList.clear()
         case Some(false) => // nothing?
         case _ => {
-          commandLine showError "Undefined key sequence " ++ keyList.toString
+          commandLine showError "Undefined key sequence " ++ {
+            (keyList map {_.toKeyString}).mkString
+          }
           keyList.clear()
         }
       }
