@@ -12,6 +12,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   val name = "Draw"
   private var paint: Paint = Color.BLACK
   private var paintName: String = "Black"
+  private var writeSet: WriteSet = WriteSet.writeSet
   private var _lockedToCells = false
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, paint)
@@ -60,30 +61,28 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
     ensureLock()
   }
-  val cellMoveStamp = new TransverseLineStamp(Strokes.normalStroke)
-  val intersectionMoveStamp = Strokes.normalStamp
   def moveAndDrawSelected(rd: Int, cd: Int) = {
     sel.selected foreach (se => {
       val dpos = se.deltaPosition(rd, cd)
       se match {
         case cpos: CellPosition => {
           dpos match {
-            case depos: EdgePosition => putLineStamp(depos, cellMoveStamp)
+            case depos: EdgePosition => writeSet.cellWriteStamp foreach {s => putLineStamp(depos, s)}
             case _ => throw new AssertionError("moveAndDrawSelected: cell to non-edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
         }
         case ipos: IntersectionPosition => {
           dpos match {
-            case depos: EdgePosition => putLineStamp(depos, intersectionMoveStamp)
+            case depos: EdgePosition => writeSet.intersectionWriteStamp foreach {s => putLineStamp(depos, s)}
             case _ => throw new AssertionError("moveAndDrawSelected: intersection to non-edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
         }
-        case epos: EdgePosition => { 
+        case epos: EdgePosition => {
           dpos match {
-            case dcpos: CellPosition => putLineStamp(epos, cellMoveStamp)
-            case dipos: IntersectionPosition => putLineStamp(epos, intersectionMoveStamp)
+            case dcpos: CellPosition => writeSet.cellWriteStamp foreach {s => putLineStamp(epos, s)}
+            case dipos: IntersectionPosition => writeSet.intersectionWriteStamp foreach {s => putLineStamp(epos, s)}
             case _ => throw new AssertionError("moveAndDrawSelected: edge to edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(rd, cd))
@@ -120,6 +119,15 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       true
     }
   }
+  def writeReactions: PartialFunction[List[KeyData], Boolean] = kd => kd match {
+    case List(KeyTypedData('w')) => false
+    case List(KeyTypedData('w'), d2) => {
+      // TODO: this fails silently too!
+      (WriteSet.defaultMap andThen setWriteSet) lift d2
+      true
+    }
+
+  }
   def handleCommand(prefix: Char, str: String) = prefix match {
     case '=' =>
       putStampAtSelected(Some(new TextRectStamp(str))); Success("You put " + str)
@@ -149,11 +157,16 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     paintName = ps.name
     publish(StatusChanged(this))
   }
+  def setWriteSet(ws: WriteSet) {
+    writeSet = ws
+    // publish(StatusChanged(this))
+  }
   def keyListReactions = (moveReactions
     orElse moveAndDrawReactions
     orElse commandStartReactions
     orElse truePF(StampSet.defaultMap andThen putStampSet)
-    orElse paintReactions)
+    orElse paintReactions
+    orElse writeReactions)
   def selectNear(pt: Point) {
     sel.selected = Some(point2pos(pt))
     ensureLock()
