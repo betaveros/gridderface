@@ -10,12 +10,17 @@ import gridderface.stamp._
 class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter,
   point2pos: java.awt.Point => Position, commandStarter: Char => Unit) extends GridderfaceMode {
   val name = "Draw"
-  private var paint: Paint = Color.BLACK
-  private var paintName: String = "Black"
+  private var cellPaint: Paint = Color.BLACK
+  private var cellPaintName: String = "Black"
+  private var edgePaint: Paint = Color.BLACK
+  private var edgePaintName: String = "Black"
+  private var intersectionPaint: Paint = Color.BLACK
+  private var intersectionPaintName: String = "Black"
   private var writeSet: WriteSet = WriteSet.writeSet
+  private var _status: String = "Black"
   private var _lockedToCells = false
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
-    val fgContent = new RectStampContent(st, paint)
+    val fgContent = new RectStampContent(st, cellPaint)
     putter.putCell(cpos, fgContent)
   }
   def lockedToCells = _lockedToCells
@@ -28,13 +33,13 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   }
     
   def putLineStamp(epos: EdgePosition, st: LineStamp) =
-    putter.putEdge(epos, new LineStampContent(st, paint))
+    putter.putEdge(epos, new LineStampContent(st, edgePaint))
   def putPointStamp(ipos: IntersectionPosition, st: PointStamp) =
-    putter.putIntersection(ipos, new PointStampContent(st, paint))
+    putter.putIntersection(ipos, new PointStampContent(st, intersectionPaint))
 
   def putClearRectStampAtSelected() = {
     sel.selected foreach (se => se match {
-      case cpos: CellPosition => putter.putCell(cpos, new RectStampContent(ClearStamp, paint))
+      case cpos: CellPosition => putter.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
       case epos: EdgePosition => putLineStamp(epos, ClearStamp)
       case ipos: IntersectionPosition => putPointStamp(ipos, ClearStamp)
     })
@@ -54,7 +59,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     sel.selected foreach (pos => putStampAtPosition(pos, rectStamp, lineStamp,
       pointStamp))
   }
-  def status = paintName
+  def status = _status
   def putStampSet(s: StampSet) = putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
   def moveSelected(rd: Int, cd: Int) = {
     val mult = if (lockedToCells) 2 else 1
@@ -118,6 +123,25 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       (PaintSet.defaultMap andThen setPaintSet) lift d2
       true
     }
+    case List(KeyTypedData('C')) => false
+    case List(KeyTypedData('C'), KeyTypedData('c')) => false
+    case List(KeyTypedData('C'), KeyTypedData('c'), d2) => {
+      // TODO
+      (PaintSet.defaultMap andThen setCellPaintSet) lift d2
+      true
+    }
+    case List(KeyTypedData('C'), KeyTypedData('e')) => false
+    case List(KeyTypedData('C'), KeyTypedData('e'), d2) => {
+      // TODO
+      (PaintSet.defaultMap andThen setEdgePaintSet) lift d2
+      true
+    }
+    case List(KeyTypedData('C'), KeyTypedData('i')) => false
+    case List(KeyTypedData('C'), KeyTypedData('i'), d2) => {
+      // TODO
+      (PaintSet.defaultMap andThen setIntersectionPaintSet) lift d2
+      true
+    }
   }
   def writeReactions: PartialFunction[List[KeyData], Boolean] = kd => kd match {
     case List(KeyTypedData('w')) => false
@@ -153,8 +177,34 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     case c => Failed("Drawing Mode can't handle this prefix: " + c)
   }
   def setPaintSet(ps: PaintSet) {
-    paint = ps.paint
-    paintName = ps.name
+    cellPaint = ps.paint
+    cellPaintName = ps.name
+    edgePaint = ps.paint
+    edgePaintName = ps.name
+    intersectionPaint = ps.paint
+    intersectionPaintName = ps.name
+    _status = ps.name
+    publish(StatusChanged(this))
+  }
+  def createStatus() {
+    _status = cellPaintName ++ " / " ++ edgePaintName ++ " / " ++ intersectionPaintName
+  }
+  def setCellPaintSet(ps: PaintSet) {
+    cellPaint = ps.paint
+    cellPaintName = ps.name
+    createStatus()
+    publish(StatusChanged(this))
+  }
+  def setEdgePaintSet(ps: PaintSet) {
+    edgePaint = ps.paint
+    edgePaintName = ps.name
+    createStatus()
+    publish(StatusChanged(this))
+  }
+  def setIntersectionPaintSet(ps: PaintSet) {
+    intersectionPaint = ps.paint
+    intersectionPaintName = ps.name
+    createStatus()
     publish(StatusChanged(this))
   }
   def setWriteSet(ws: WriteSet) {
