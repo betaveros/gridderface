@@ -8,6 +8,7 @@ class WriteSet(val name: String,
 
 object WriteSet {
   val writeSet = new WriteSet("Write", Some(new TransverseLineStamp(Strokes.normalStroke)), Some(Strokes.normalStamp))
+  val blockSet = new WriteSet("Block", Some(Strokes.normalStamp), Some(new TransverseLineStamp(Strokes.normalStroke)))
   val eraseSet = new WriteSet("Erase", Some(ClearStamp), Some(ClearStamp))
   val crossMark = FixedMark.createCrossStamp(0.125, Strokes.normalStroke)
   val crossSet = new WriteSet("Cross", Some(crossMark), Some(crossMark))
@@ -18,6 +19,7 @@ object WriteSet {
   val defaultMap: Map[KeyData, WriteSet] = {
     val basicMappings = List(
         KeyTypedData('w') -> writeSet,
+        KeyTypedData('b') -> blockSet,
         KeyTypedData('e') -> eraseSet,
         KeyTypedData('x') -> crossSet,
         KeyTypedData('d') -> dashedSet,
