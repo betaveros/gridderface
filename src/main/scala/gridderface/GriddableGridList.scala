@@ -28,6 +28,9 @@ class GriddableGridList extends Griddable with ContentPutter {
   def clearGrid() = {
     _currentGrid.clear()
   }
+  def clearAll() = {
+    _list foreach {_.clear()}
+  }
   def addGrid() = {
     _currentGrid = new GriddableGrid()
     listenTo(_currentGrid)
@@ -45,6 +48,13 @@ class GriddableGridList extends Griddable with ContentPutter {
       _currentGrid = _list.last
       _currentGridIndex = _list.length - 1
     }
+    publish(GriddableChanged(this))
+  }
+  def removeAll() = {
+    _currentGrid = new GriddableGrid()
+    listenTo(_currentGrid)
+    _list = List(_currentGrid)
+    _currentGridIndex = 0
     publish(GriddableChanged(this))
   }
   def selectPreviousGrid() = {

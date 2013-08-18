@@ -253,8 +253,12 @@ object Gridderface extends SimpleSwingApplication {
           gridList.addGrid(); Success(gridList.status ++ " New grid added")
         case "delgrid" =>
           gridList.removeGrid(); Success(gridList.status ++ " Current grid removed")
+        case "delall" =>
+          gridList.removeAll(); Success(gridList.status ++ " All grids removed")
         case "clear" =>
-          gridList.clearGrid(); Success("Content cleared")
+          gridList.clearGrid(); Success(gridList.status ++ " Content cleared")
+        case "clearall" =>
+          gridList.clearAll(); Success(gridList.status ++ " All content cleared")
         case "clearimage" =>
           bg.image = None; Success("Image cleared")
         case "resetgrid" => {
