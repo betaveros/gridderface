@@ -41,6 +41,7 @@ object Gridderface extends SimpleSwingApplication {
     case List(KeyTypedData('\04' /*^D*/)) => setMode(drawMode); true
     case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); true
     case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); true
+    case List(KeyTypedData('\26' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); true
     case List(KeyPressedData(Key.Tab, 0)) => {
       gridList.selectNextGrid()
       commandLine showMessage gridList.status
@@ -131,9 +132,9 @@ object Gridderface extends SimpleSwingApplication {
     // looks like datatransfer will have to fully fall back to java.swing
     peer.setTransferHandler(new ImageTransferHandler(
       { img => bg.image = Some(img); repaint }))
-    val pasteKey = "paste"
-    peer.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), pasteKey)
-    peer.getActionMap().put(pasteKey, TransferHandler.getPasteAction())
+    //val pasteKey = "paste"
+    //peer.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), pasteKey)
+    //peer.getActionMap().put(pasteKey, TransferHandler.getPasteAction())
     focusable = true
     requestFocus
   }
