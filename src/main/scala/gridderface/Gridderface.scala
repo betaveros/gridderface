@@ -9,6 +9,7 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.ListBuffer
 import javax.swing.TransferHandler
 import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
 import javax.swing.KeyStroke
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
@@ -38,6 +39,7 @@ object Gridderface extends SimpleSwingApplication {
   private def ctrl(c: Char): Char = (c - 64).toChar
   val globalKeyListReactions: PartialFunction[List[KeyData], Boolean] = {
     case List(KeyTypedData(':'         )) => commandLine.startCommandMode(':'); true
+    case List(KeyTypedData('@'         )) => commandLine.startCommandMode('@'); true
     case List(KeyTypedData('\04' /*^D*/)) => setMode(drawMode); true
     case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); true
     case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); true
@@ -241,6 +243,11 @@ object Gridderface extends SimpleSwingApplication {
       case None => Failed("Error: not in generation mode")
     }
   }
+  def copyToClipboard(str: String): Status[String] = {
+    val sel = new StringSelection(str)
+    Toolkit.getDefaultToolkit.getSystemClipboard.setContents(sel, null)
+    Success("Copied " + str.length + " characters to clipboard")
+  }
   def handleColonCommand(str: String): Status[String] = {
     val parts = "\\s+".r.split(str.trim)
     if (parts.length > 0) {
@@ -290,6 +297,7 @@ object Gridderface extends SimpleSwingApplication {
   }
   val commandLine = new CommandLinePanel((char, str) => char match {
     case ':' => handleColonCommand(str)
+    case '@' => copyToClipboard(str)
     case _ => currentMode.handleCommand(char, str)
   })
   val modeLabel = new Label()
