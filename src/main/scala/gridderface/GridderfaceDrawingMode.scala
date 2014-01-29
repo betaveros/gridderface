@@ -18,20 +18,31 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   private var intersectionPaintName: String = "Black"
   private var writeSet: WriteSet = WriteSet.writeSet
   private var _status: String = "Black"
-  private var _lockedToCells = false
+  private var _lockFunction: Position => Position = identity[Position]
+  private var _lockMultiplier = 1
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, cellPaint)
     putter.putCell(cpos, fgContent)
   }
-  def lockedToCells = _lockedToCells
-  def lockedToCells_=(b: Boolean) = {
-    _lockedToCells = b
+  def ensureLock() {
+    sel.selected = sel.selected map _lockFunction
+  }
+  private def setLockFunction(f: Position => Position) = {
+    _lockFunction = f
     ensureLock()
   }
-  def ensureLock() {
-    if (_lockedToCells) sel.selected = sel.selected map (_.roundToCell)
+  def lockToCells() = {
+    setLockFunction(_.roundToCell)
+    _lockMultiplier = 2
   }
-    
+  def lockToIntersections() = {
+    setLockFunction(_.roundToIntersection)
+    _lockMultiplier = 2
+  }
+  def unlock() = {
+    setLockFunction(identity[Position])
+    _lockMultiplier = 1
+  }
   def putLineStamp(epos: EdgePosition, st: LineStamp) =
     putter.putEdge(epos, new LineStampContent(st, edgePaint))
   def putPointStamp(ipos: IntersectionPosition, st: PointStamp) =
@@ -62,7 +73,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   def status = _status
   def putStampSet(s: StampSet) = putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
   def moveSelected(rd: Int, cd: Int) = {
-    val mult = if (lockedToCells) 2 else 1
+    val mult = _lockMultiplier
     sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
     ensureLock()
   }
