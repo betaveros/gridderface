@@ -28,5 +28,7 @@ class MutableGridProvider(private var _rowHeight: Double,
     val row = computeRow(y)
     (y - computeY(row)) <= tol || (computeY(row + 1) - y) <= tol
   }
-  
+  override def immutableCopy() = {
+    new SimpleGridProvider(_rowHeight, _colWidth, _xOffset, _yOffset)
+  }
 }

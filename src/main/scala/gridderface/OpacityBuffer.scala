@@ -6,10 +6,27 @@ import scala.swing.Publisher
 import java.awt.geom.AffineTransform
 
 class OpacityBuffer(val original: Griddable, private var _opacity: Float) extends Publisher {
+  // okay, so one reasonably obvious way to speed up Gridderface is to cache the
+  // stuff that this buffer does. Unfortunately, my crappy and arguably
+  // severely overgeneralized current method of implementation requires that the
+  // buffer know the grid and transform it's dealing with before drawing
+  // anything. The reason is since it wants to create a uniformly translucent
+  // image, it needs to know the dimensions of an image to draw on that will
+  // get shown on the outside.
+
+  // Right now, I'm just caching both the transform and grid to check if my
+  // cached image is valid, since they probably won't change much.
+
+  // TODO: In the future, maybe invert the transform and allocate a buffer image
+  // before it, so we don't have to cache on it too?
+
   
   listenTo(original)
   reactions += {
-    case GriddableChanged(`original`) => publish(BufferChanged(this))
+    case GriddableChanged(`original`) => {
+      cache = None
+      publish(BufferChanged(this))
+    }
   }
   def opacity = _opacity
   def opacity_=(op: Float) = {
@@ -19,21 +36,36 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float) extend
   
   private var curWidth = 0
   private var curHeight = 0
-  
+  private var cache: Option[BufferedImage] = None
+  private var cacheGrid: Option[GridProvider] = None
+  private var cacheTransform: Option[AffineTransform] = None
   
   def ensureDimensions(dim: Dimension) {
     if (dim.width > curWidth) curWidth = 2*curWidth max dim.width
     if (dim.height > curHeight) curHeight = 2*curHeight max dim.height
   }
-  
-  def draw(prov: GridProvider, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
+
+  private def recache(prov: GridProvider, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
     ensureDimensions(dim)
     val buf = new BufferedImage(curWidth, curHeight, BufferedImage.TYPE_INT_ARGB)
-
     val lg = buf.createGraphics()
     lg transform transform
     original.grid(prov, lg)
-    
+
+    cache = Some(buf)
+    cacheGrid = Some(prov.immutableCopy())
+    cacheTransform = Some(transform.clone().asInstanceOf[AffineTransform])
+  }
+  
+  def draw(prov: GridProvider, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
+    if (!(cache.nonEmpty
+        && cacheGrid.exists(_ equals prov.immutableCopy())
+        && cacheTransform.exists(_ equals transform)
+        && dim.height <= curHeight
+        && dim.width <= curWidth)) {
+      recache(prov, g2d, transform, dim)
+    }
+    val buf = cache.get
     val cs = g2d.getComposite
     g2d setComposite AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity)
     g2d.drawImage(buf, 0, 0, buf.getWidth, buf.getHeight, null)

@@ -20,4 +20,5 @@ trait GridProvider extends Publisher {
     // FIXME: tightly coupled.
     Position.getPosition(2*row + rowinc, 2*col + colinc)
   }
+  def immutableCopy(): GridProvider
 }
