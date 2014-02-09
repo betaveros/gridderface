@@ -20,9 +20,9 @@ object Gridderface extends SimpleSwingApplication {
 
   val selectedManager = new SelectedPositionManager(Some(new IntersectionPosition(0, 0)))
   val gridList = new GriddableGridList()
+  // qq, initialization order
+  val gridMode = new GridderfaceGridSettingMode(SimpleGridProvider.defaultGrid)
   val bg = new GriddableImageHolder(None)
-  val prov = new MutableGridProvider(32.0, 32.0, 0.0, 0.0)
-  // the default arguments work, but Eclipse randomly bugs me about it meh
 
   def createEdgeGrid(rs: Int, cs: Int, rc: Int, cc: Int) = new HomogeneousEdgeGrid(
     new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rs, cs, rc, cc)
@@ -34,7 +34,7 @@ object Gridderface extends SimpleSwingApplication {
 
   def computePosition(pt: Point) = {
     val gridpt = gridPanel.viewToGrid(pt)
-    prov.computePosition(gridpt.getX(), gridpt.getY())
+    gridMode.computePosition(gridpt.getX(), gridpt.getY())
   }
   private def ctrl(c: Char): Char = (c - 64).toChar
   val globalKeyListReactions: PartialFunction[List[KeyData], Boolean] = {
@@ -115,14 +115,14 @@ object Gridderface extends SimpleSwingApplication {
   }
   val opacityBufferMap = HashMap(opacityBufferList: _*)
 
-  val gridPanel = new GridPanel(prov) {
+  val gridPanel = new GridPanel(gridMode) {
     peer setFocusTraversalKeysEnabled false // prevent tab key from being consumed
     listenTo(keys)
     listenTo(mouse.clicks)
 
     for ((_, obuf) <- opacityBufferList) { buffers += obuf; listenTo(obuf) }
 
-    listenTo(prov)
+    listenTo(gridMode)
     reactions += {
       // "lift" turns PartialFunctions into total functions returning Option[B]
       // here we just use it to silence uncaught events
@@ -183,10 +183,7 @@ object Gridderface extends SimpleSwingApplication {
       
       decorationGridSeq.griddable = GriddableSeq.empty
 
-      prov.xOffset = 16
-      prov.yOffset = 16
-      prov.rowHeight = 32
-      prov.colWidth = 32
+      gridMode.grid = SimpleGridProvider.generationGrid
       bg.image = Some(CommandUtilities.createFilledImage(
         32 * (1 + cols), 32 * (1 + rows), Color.WHITE))
       edgeGridHolder.griddable = createEdgeGrid(0, 0, rows, cols)
@@ -200,8 +197,8 @@ object Gridderface extends SimpleSwingApplication {
       val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
       val g = img.createGraphics()
       g.drawImage(baseImg, 0, 0, w, h, null)
-      decorationGridSeq.grid(prov, g)
-      gridList.grid(prov, g)
+      decorationGridSeq.grid(gridMode, g)
+      gridList.grid(gridMode, g)
       img
     })
   }
@@ -270,10 +267,7 @@ object Gridderface extends SimpleSwingApplication {
         case "clearimage" =>
           bg.image = None; Success("Image cleared")
         case "resetgrid" => {
-          prov.xOffset = 0
-          prov.yOffset = 0
-          prov.rowHeight = 32
-          prov.colWidth = 32
+          gridMode.grid = SimpleGridProvider.defaultGrid
           Success("Grid reset")
         }
         case "write" => writeGeneratedImage(parts.tail)
@@ -305,7 +299,6 @@ object Gridderface extends SimpleSwingApplication {
   val statusLabel = new Label()
   val drawMode = new GridderfaceDrawingMode(selectedManager, gridList,
     pt => computePosition(pt), commandLine.startCommandMode(_))
-  val gridMode = new GridderfaceGridSettingMode(prov)
   lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
   // gah, the initialization sequence here is tricky
   

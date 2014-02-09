@@ -37,7 +37,7 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float) extend
   private var curWidth = 0
   private var curHeight = 0
   private var cache: Option[BufferedImage] = None
-  private var cacheGrid: Option[GridProvider] = None
+  private var cacheGrid: Option[SimpleGridProvider] = None
   private var cacheTransform: Option[AffineTransform] = None
   
   def ensureDimensions(dim: Dimension) {
@@ -53,13 +53,13 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float) extend
     original.grid(prov, lg)
 
     cache = Some(buf)
-    cacheGrid = Some(prov.immutableCopy())
+    cacheGrid = Some(prov.simpleGrid)
     cacheTransform = Some(transform.clone().asInstanceOf[AffineTransform])
   }
   
   def draw(prov: GridProvider, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
     if (!(cache.nonEmpty
-        && cacheGrid.exists(_ equals prov.immutableCopy())
+        && cacheGrid.exists(_ sameGrid prov)
         && cacheTransform.exists(_ equals transform)
         && dim.height <= curHeight
         && dim.width <= curWidth)) {

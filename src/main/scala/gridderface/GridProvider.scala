@@ -20,5 +20,14 @@ trait GridProvider extends Publisher {
     // FIXME: tightly coupled.
     Position.getPosition(2*row + rowinc, 2*col + colinc)
   }
-  def immutableCopy(): GridProvider
+  def isXCoordinateOnEdge(x: Double, tol: Double = 3.0) = {
+    val col = computeCol(x)
+    (x - computeX(col)) <= tol || (computeX(col + 1) - x) <= tol
+  }
+  def isYCoordinateOnEdge(y: Double, tol: Double = 3.0) = {
+    val row = computeRow(y)
+    (y - computeY(row)) <= tol || (computeY(row + 1) - y) <= tol
+  }
+  def simpleGrid: SimpleGridProvider
+  def sameGrid(other: GridProvider) = simpleGrid equals other.simpleGrid
 }

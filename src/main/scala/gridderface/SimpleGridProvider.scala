@@ -5,8 +5,15 @@ class SimpleGridProvider(val rowHeight: Double, val colWidth: Double, val xOffse
 
   override def computeX(col: Int): Double = xOffset + col * colWidth
   override def computeY(row: Int): Double = yOffset + row * rowHeight
-  override def computeRow(y: Double): Int = ((y - yOffset) / rowHeight).toInt
-  override def computeCol(x: Double): Int = ((x - xOffset) / colWidth).toInt
+  override def computeRow(y: Double): Int = ((y - yOffset) / rowHeight).floor.toInt
+  override def computeCol(x: Double): Int = ((x - xOffset) / colWidth).floor.toInt
+
+  def offsetBy(xd: Double, yd: Double) = {
+    new SimpleGridProvider(rowHeight, colWidth, xOffset + xd, yOffset + yd)
+  }
+  def gridSizeAdjustedBy(rd: Double, cd: Double) = {
+    new SimpleGridProvider((rowHeight + rd) max 0.0, (colWidth + cd) max 0.0, xOffset, yOffset)
+  }
 
   override def equals(other: Any) = {
     other match {
@@ -22,5 +29,10 @@ class SimpleGridProvider(val rowHeight: Double, val colWidth: Double, val xOffse
     rowHeight.##() + 13*colWidth.##() + 37*xOffset.##() + 79*yOffset.##()
   }
   override def hashCode() = _hash
-  override def immutableCopy() = this
+  override def simpleGrid = this
+}
+
+object SimpleGridProvider {
+  val defaultGrid = new SimpleGridProvider(32, 32, 0, 0)
+  val generationGrid = new SimpleGridProvider(32, 32, 16, 16)
 }

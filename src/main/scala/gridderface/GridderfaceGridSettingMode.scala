@@ -2,16 +2,27 @@ package gridderface
 
 import scala.swing.event.MouseEvent
 
-class GridderfaceGridSettingMode(prov: MutableGridProvider) extends GridderfaceMode {
+class GridderfaceGridSettingMode(private var _prov: SimpleGridProvider) extends GridderfaceMode with GridProvider {
 
   val name = "Grid"
+  def computeX(col: Int) = _prov.computeX(col)
+  def computeY(row: Int) = _prov.computeY(row)
+  def computeRow(y: Double) = _prov.computeRow(y)
+  def computeCol(x: Double) = _prov.computeCol(x)
+
   def moveGrid(xd: Int, yd: Int){
-    prov.xOffset += (xd * gridMultiplier)
-    prov.yOffset += (yd * gridMultiplier)
+    _prov = _prov.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
+    publish(GridChanged())
   }
   def adjustGridSize(d: Double) {
-    prov.rowHeight = (prov.rowHeight + d) max 0.0
-    prov.colWidth = (prov.colWidth + d) max 0.0
+    _prov = _prov.gridSizeAdjustedBy(d, d)
+    publish(GridChanged())
+  }
+  def grid: SimpleGridProvider = _prov
+  def grid_=(g: SimpleGridProvider): Unit = {
+    if (_prov equals g) return
+    _prov = g
+    publish(GridChanged())
   }
   var gridExponent = 0
   def gridMultiplier = scala.math.pow(2.0, gridExponent)
@@ -22,12 +33,8 @@ class GridderfaceGridSettingMode(prov: MutableGridProvider) extends GridderfaceM
       case KeyTypedData('-') => adjustGridSize(-gridMultiplier)
   }
   def status = {
-    "%.2fx%.2f (M2^%d%s)".format(prov.colWidth, prov.rowHeight, gridExponent,
+    "%.2fx%.2f (M2^%d%s)".format(_prov.colWidth, _prov.rowHeight, gridExponent,
         if (negateFlag) "`" else "")
-  }
-  listenTo(prov)
-  reactions += {
-    case GridChanged() => publish(StatusChanged(this))
   }
   val setGridMultiplierReactions = KeyDataCombinations.keyDataDigitFunction(dig => {
     gridExponent = if (negateFlag) -dig else dig
@@ -43,4 +50,5 @@ class GridderfaceGridSettingMode(prov: MutableGridProvider) extends GridderfaceM
   def handleCommand(prefix: Char, str: String) = Success("")
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
 
+  override def simpleGrid = _prov
 }
