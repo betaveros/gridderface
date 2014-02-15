@@ -278,22 +278,30 @@ object Gridderface extends SimpleSwingApplication {
         }
         case "write" => writeGeneratedImage(parts.tail)
         case "read" => readImageFrom(parts.tail)
+
         case "pwd" => Success(new File(".").getAbsolutePath)
-        case "init" => initGeneration(parts.tail)
+
+        case "init"    => initGeneration(parts.tail)
         case "initgen" => initGeneration(parts.tail)
+
         case "hide" => fixedOpacityCommand(0f, parts.tail)
         case "show" => fixedOpacityCommand(1f, parts.tail)
+
         case "opacity" => opacityCommand(parts.tail)
-        case "op" => opacityCommand(parts.tail)
+        case "op"      => opacityCommand(parts.tail)
+
         case "multiply" => setMultiplyCommand(true, parts.tail)
-        case "mul" => setMultiplyCommand(true, parts.tail)
+        case "mul"      => setMultiplyCommand(true, parts.tail)
         case "nomultiply" => setMultiplyCommand(false, parts.tail)
-        case "nomul" => setMultiplyCommand(false, parts.tail)
+        case "nomul"      => setMultiplyCommand(false, parts.tail)
+
         case "color" => readColorCommand(parts.tail)
+
         case "decorate" => decorationCommand(parts.tail)
-        case "dec" => decorationCommand(parts.tail)
-        case "lock" => drawMode.lockToCells(); Success("Locked to cells")
-        case "ilock" => drawMode.lockToIntersections(); Success("Locked to intersections")
+        case "dec"      => decorationCommand(parts.tail)
+
+        case "lock"   => drawMode.lockToCells(); Success("Locked to cells")
+        case "ilock"  => drawMode.lockToIntersections(); Success("Locked to intersections")
         case "unlock" => drawMode.unlock(); Success("Unlocked")
         
         case _ => Failed("Unrecognized command")
