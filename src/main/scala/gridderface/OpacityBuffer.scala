@@ -37,7 +37,7 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float) extend
   private var curWidth = 0
   private var curHeight = 0
   private var cache: Option[BufferedImage] = None
-  private var cacheGrid: Option[SimpleGridProvider] = None
+  private var cacheGrid: Option[SimpleGrid] = None
   private var cacheTransform: Option[AffineTransform] = None
   
   def ensureDimensions(dim: Dimension) {
@@ -45,25 +45,25 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float) extend
     if (dim.height > curHeight) curHeight = 2*curHeight max dim.height
   }
 
-  private def recache(prov: GridProvider, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
+  private def recache(grid: SimpleGrid, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
     ensureDimensions(dim)
     val buf = new BufferedImage(curWidth, curHeight, BufferedImage.TYPE_INT_ARGB)
     val lg = buf.createGraphics()
     lg transform transform
-    original.grid(prov, lg)
+    original.drawOnGrid(grid, lg)
 
     cache = Some(buf)
-    cacheGrid = Some(prov.simpleGrid)
+    cacheGrid = Some(grid)
     cacheTransform = Some(transform.clone().asInstanceOf[AffineTransform])
   }
   
-  def draw(prov: GridProvider, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
+  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
     if (!(cache.nonEmpty
-        && cacheGrid.exists(_ sameGrid prov)
+        && cacheGrid.exists(_ equals grid)
         && cacheTransform.exists(_ equals transform)
         && dim.height <= curHeight
         && dim.width <= curWidth)) {
-      recache(prov, g2d, transform, dim)
+      recache(grid, g2d, transform, dim)
     }
     val buf = cache.get
     val cs = g2d.getComposite

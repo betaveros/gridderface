@@ -2,26 +2,21 @@ package gridderface
 
 import scala.swing.event.MouseEvent
 
-class GridderfaceGridSettingMode(private var _prov: SimpleGridProvider) extends GridderfaceMode with GridProvider {
+class GridderfaceGridSettingMode(private var _grid: SimpleGrid) extends GridderfaceMode with GridProvider {
 
   val name = "Grid"
-  def computeX(col: Int) = _prov.computeX(col)
-  def computeY(row: Int) = _prov.computeY(row)
-  def computeRow(y: Double) = _prov.computeRow(y)
-  def computeCol(x: Double) = _prov.computeCol(x)
-
   def moveGrid(xd: Int, yd: Int){
-    _prov = _prov.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
+    _grid = _grid.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
     publish(GridChanged())
   }
   def adjustGridSize(d: Double) {
-    _prov = _prov.gridSizeAdjustedBy(d, d)
+    _grid = _grid.gridSizeAdjustedBy(d, d)
     publish(GridChanged())
   }
-  def grid: SimpleGridProvider = _prov
-  def grid_=(g: SimpleGridProvider): Unit = {
-    if (_prov equals g) return
-    _prov = g
+  def grid: SimpleGrid = _grid
+  def grid_=(g: SimpleGrid): Unit = {
+    if (_grid equals g) return
+    _grid = g
     publish(GridChanged())
   }
   var gridExponent = 0
@@ -33,7 +28,7 @@ class GridderfaceGridSettingMode(private var _prov: SimpleGridProvider) extends 
       case KeyTypedData('-') => adjustGridSize(-gridMultiplier)
   }
   def status = {
-    "%.2fx%.2f (M2^%d%s)".format(_prov.colWidth, _prov.rowHeight, gridExponent,
+    "%.2fx%.2f (M2^%d%s)".format(_grid.colWidth, _grid.rowHeight, gridExponent,
         if (negateFlag) "`" else "")
   }
   val setGridMultiplierReactions = KeyDataCombinations.keyDataDigitFunction(dig => {
@@ -49,6 +44,4 @@ class GridderfaceGridSettingMode(private var _prov: SimpleGridProvider) extends 
     setGridMultiplierReactions orElse negateMultiplierReactions andThen {u: Unit => true})
   def handleCommand(prefix: Char, str: String) = Success("")
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
-
-  override def simpleGrid = _prov
 }

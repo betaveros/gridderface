@@ -28,7 +28,7 @@ class GridPanel(val provider: GridProvider) extends Panel {
 //  )
   override def paintComponent(g: Graphics2D) {
     super.paintComponent(g)
-    buffers.foreach(b => b.draw(provider, g, transform, size))
+    buffers.foreach(b => b.drawOnGrid(provider.grid, g, transform, size))
   }
   def translate(x: Double, y: Double) = {
     transform.translate(x, y)

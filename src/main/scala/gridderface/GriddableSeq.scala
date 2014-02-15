@@ -15,7 +15,7 @@ class GriddableSeq(griddables: scala.collection.immutable.Seq[Griddable])
   reactions += {
     case GriddableChanged(g) if g != this => publish(GriddableChanged(this))
   }
-  def grid(prov: GridProvider, g2d: Graphics2D) = griddables foreach (_.grid(prov, g2d))
+  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D) = griddables foreach (_.drawOnGrid(grid, g2d))
   def apply(idx: Int) = griddables(idx)
   def iterator = griddables.iterator
   def length = griddables.length

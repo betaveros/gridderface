@@ -18,8 +18,8 @@ class GriddableAdaptor[A <: Griddable](private var _griddable: A) extends Gridda
     publish(GriddableChanged(this))
   }
   
-  def grid(prov: GridProvider, g2d: Graphics2D): Unit = {
-    griddable.grid(prov, g2d)
+  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
+    griddable.drawOnGrid(grid, g2d)
   }
 
 }

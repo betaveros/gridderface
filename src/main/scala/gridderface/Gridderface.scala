@@ -19,9 +19,9 @@ import java.io.File
 object Gridderface extends SimpleSwingApplication {
 
   val selectedManager = new SelectedPositionManager(Some(new IntersectionPosition(0, 0)))
-  val gridList = new GriddableGridList()
+  val gridList = new GriddablePositionMapList()
   // qq, initialization order
-  val gridMode = new GridderfaceGridSettingMode(SimpleGridProvider.defaultGrid)
+  val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid)
   val bg = new GriddableImageHolder(None)
 
   def createEdgeGrid(rs: Int, cs: Int, rc: Int, cc: Int) = new HomogeneousEdgeGrid(
@@ -34,7 +34,7 @@ object Gridderface extends SimpleSwingApplication {
 
   def computePosition(pt: Point) = {
     val gridpt = gridPanel.viewToGrid(pt)
-    gridMode.computePosition(gridpt.getX(), gridpt.getY())
+    gridMode.grid.computePosition(gridpt.getX(), gridpt.getY())
   }
   private def ctrl(c: Char): Char = (c - 64).toChar
   val globalKeyListReactions: PartialFunction[List[KeyData], Boolean] = {
@@ -183,7 +183,7 @@ object Gridderface extends SimpleSwingApplication {
       
       decorationGridSeq.griddable = GriddableSeq.empty
 
-      gridMode.grid = SimpleGridProvider.generationGrid
+      gridMode.grid = SimpleGrid.generationGrid
       bg.image = Some(CommandUtilities.createFilledImage(
         32 * (1 + cols), 32 * (1 + rows), Color.WHITE))
       edgeGridHolder.griddable = createEdgeGrid(0, 0, rows, cols)
@@ -197,8 +197,8 @@ object Gridderface extends SimpleSwingApplication {
       val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
       val g = img.createGraphics()
       g.drawImage(baseImg, 0, 0, w, h, null)
-      decorationGridSeq.grid(gridMode, g)
-      gridList.grid(gridMode, g)
+      decorationGridSeq.drawOnGrid(gridMode.grid, g)
+      gridList.drawOnGrid(gridMode.grid, g)
       img
     })
   }
@@ -267,7 +267,7 @@ object Gridderface extends SimpleSwingApplication {
         case "clearimage" =>
           bg.image = None; Success("Image cleared")
         case "resetgrid" => {
-          gridMode.grid = SimpleGridProvider.defaultGrid
+          gridMode.grid = SimpleGrid.defaultGrid
           Success("Grid reset")
         }
         case "write" => writeGeneratedImage(parts.tail)

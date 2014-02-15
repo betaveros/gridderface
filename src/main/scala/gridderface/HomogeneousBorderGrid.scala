@@ -4,9 +4,9 @@ import java.awt.Graphics2D
 
 class HomogeneousBorderGrid(val content: LineContent, val rowStart: Int, val colStart: Int, val rowCount: Int, val colCount: Int) extends Griddable {
   
-  def grid(prov: GridProvider, g2d: Graphics2D): Unit = {
+  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     def gridEdge(r: Int, c: Int, o: EdgeOrientation.Value) = {
-      new EdgeGriddable(content, new EdgePosition(r, c, o)).grid(prov, g2d)
+      new EdgeGriddable(content, new EdgePosition(r, c, o)).drawOnGrid(grid, g2d)
     }
     for (r <- List(rowStart, (rowStart + rowCount))){
       for (c <- colStart until (colStart + colCount)){

@@ -3,10 +3,10 @@ package gridderface
 import java.awt.Graphics2D
 import scala.collection.immutable.TreeMap
 
-class GriddableGrid extends Griddable with ContentPutter {
+class GriddablePositionMap extends Griddable with ContentPutter {
   var map = new TreeMap[Position, Griddable]
-  def grid(prov: GridProvider, g2d: Graphics2D): Unit = {
-    map foreach {_._2.grid(prov, g2d)}
+  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
+    map foreach {_._2.drawOnGrid(grid, g2d)}
   }
   def put(p: Position, g: Griddable) = {
     map += ((p, g))
