@@ -3,21 +3,19 @@ package gridderface
 import scala.swing.event.MouseEvent
 
 class GridderfaceGridSettingMode(private var _grid: SimpleGrid) extends GridderfaceMode with GridProvider {
-
   val name = "Grid"
-  def moveGrid(xd: Int, yd: Int){
-    _grid = _grid.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
-    publish(GridChanged())
-  }
-  def adjustGridSize(d: Double) {
-    _grid = _grid.gridSizeAdjustedBy(d, d)
-    publish(GridChanged())
-  }
   def grid: SimpleGrid = _grid
   def grid_=(g: SimpleGrid): Unit = {
     if (_grid equals g) return
     _grid = g
     publish(GridChanged())
+    publish(StatusChanged(this))
+  }
+  def moveGrid(xd: Int, yd: Int){
+    grid = grid.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
+  }
+  def adjustGridSize(d: Double) {
+    grid = grid.gridSizeAdjustedBy(d, d)
   }
   var gridExponent = 0
   def gridMultiplier = scala.math.pow(2.0, gridExponent)
