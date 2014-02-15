@@ -164,6 +164,12 @@ object Gridderface extends SimpleSwingApplication {
       a2 <- safeAlpha(a)
     ) yield { buf.opacity = a2; "" }
   }
+  def setMultiplyCommand(mul: Boolean, args: Array[String]): Status[String] = {
+    for (
+      arg <- CommandUtilities.getSingleElement(args);
+      buf <- getOpacityBufferAsStatus(arg)
+    ) yield { buf.multiply = mul; "" }
+  }
   def getDimensionPair(args: Array[String], defaultVal: Int): Status[(Int, Int)] = {
     for (ints <- CommandUtilities.countedIntArguments(args, Set(0, 1, 2).contains(_))) yield {
       ints.length match {
@@ -279,6 +285,10 @@ object Gridderface extends SimpleSwingApplication {
         case "show" => fixedOpacityCommand(1f, parts.tail)
         case "opacity" => opacityCommand(parts.tail)
         case "op" => opacityCommand(parts.tail)
+        case "multiply" => setMultiplyCommand(true, parts.tail)
+        case "mul" => setMultiplyCommand(true, parts.tail)
+        case "nomultiply" => setMultiplyCommand(false, parts.tail)
+        case "nomul" => setMultiplyCommand(false, parts.tail)
         case "color" => readColorCommand(parts.tail)
         case "decorate" => decorationCommand(parts.tail)
         case "dec" => decorationCommand(parts.tail)

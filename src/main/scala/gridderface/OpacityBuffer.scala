@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage
 import scala.swing.Publisher
 import java.awt.geom.AffineTransform
 
-class OpacityBuffer(val original: Griddable, private var _opacity: Float) extends Publisher {
+class OpacityBuffer(val original: Griddable, private var _opacity: Float, private var _multiply: Boolean = false) extends Publisher {
   // okay, so one reasonably obvious way to speed up Gridderface is to cache the
   // stuff that this buffer does. Unfortunately, my crappy and arguably
   // severely overgeneralized current method of implementation requires that the
@@ -31,6 +31,11 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float) extend
   def opacity = _opacity
   def opacity_=(op: Float) = {
     _opacity = op
+    publish(BufferChanged(this))
+  }
+  def multiply = _multiply
+  def multiply_=(m: Boolean) = {
+    _multiply = m
     publish(BufferChanged(this))
   }
   
@@ -67,7 +72,7 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float) extend
     }
     val buf = cache.get
     val cs = g2d.getComposite
-    g2d setComposite AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity)
+    g2d setComposite (if (multiply) new MultiplyComposite(opacity) else AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity))
     g2d.drawImage(buf, 0, 0, buf.getWidth, buf.getHeight, null)
     g2d setComposite cs
   }
