@@ -224,6 +224,9 @@ object Gridderface extends SimpleSwingApplication {
       bg.image = result; "OK"
     }
   }
+  def readImageFromScreen() = {
+    bg.image = new java.awt.Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()))
+  }
   def setColor(arg: String) = {
     for (set <- GridderfaceStringParser.parseColorString(arg)) yield {
       drawMode.setPaintSet(set); "Set color to " + arg
@@ -305,6 +308,8 @@ object Gridderface extends SimpleSwingApplication {
         case "lock"   => drawMode.lockToCells(); Success("Locked to cells")
         case "ilock"  => drawMode.lockToIntersections(); Success("Locked to intersections")
         case "unlock" => drawMode.unlock(); Success("Unlocked")
+
+        case "screen" => readImageFromScreen(); Success("Read image from screen")
 
         case _ => Failed("Unrecognized command")
       }
