@@ -33,6 +33,12 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
       if (field.enabled) enabledColor else disabledColor
     field.text = msg
   }
+  def showStatus(stat: Status[String]) {
+    stat match {
+      case Failed(text) => showMessage(text, true)
+      case Success(text) => showMessage(text, false)
+    }
+  }
   def showError(msg: String) = showMessage(msg, true)
   field.listenTo(field.keys)
   field.reactions += {
@@ -43,12 +49,9 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
       if (field.text.length == 0) stopCommandMode
     }
     case KeyPressed(_, Key.Enter, _, _) => {
-      val message = responder(prefix, field.text)
+      val stat = responder(prefix, field.text)
       stopCommandMode
-      message match {
-        case Failed(text) => showMessage(text, true)
-        case Success(text) => showMessage(text, false)
-      }
+      showStatus(stat)
     }
   }
   

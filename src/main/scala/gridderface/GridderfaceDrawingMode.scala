@@ -17,6 +17,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   private var intersectionPaint: Paint = Color.BLACK
   private var intersectionPaintName: String = "Black"
   private var writeSet: WriteSet = WriteSet.writeSet
+  private var lastStampSet: Option[StampSet] = None
   private var _status: String = "Black"
   private var _lockFunction: Position => Position = identity[Position]
   private var _lockMultiplier = 1
@@ -71,7 +72,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
       pointStamp))
   }
   def status = _status
-  def putStampSet(s: StampSet) = putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
+  def putStampSet(s: StampSet): Unit = {
+    lastStampSet = Some(s)
+    putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
+  }
   def moveSelected(rd: Int, cd: Int) = {
     val mult = _lockMultiplier
     sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
@@ -107,10 +111,10 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     })
     ensureLock()
   }
-  private def truePF[B](pf: PartialFunction[KeyData, B]): PartialFunction[List[KeyData], Boolean] =
-    new SingletonListPartialFunction(pf andThen {u: B => true})
-  val moveReactions = truePF(KeyDataCombinations.keyDataRCFunction(moveSelected))
-  val moveAndDrawReactions = truePF(KeyDataCombinations.keyDataShiftRCFunction(moveAndDrawSelected))
+  private def completePF[B](pf: PartialFunction[KeyData, B]): PartialFunction[List[KeyData], KeyResult] =
+    new SingletonListPartialFunction(pf andThen {u: B => KeyComplete})
+  val moveReactions = completePF(KeyDataCombinations.keyDataRCFunction(moveSelected))
+  val moveAndDrawReactions = completePF(KeyDataCombinations.keyDataShiftRCFunction(moveAndDrawSelected))
 
   private val globalMap: Map[KeyData, Char] = HashMap(
     KeyTypedData('%') -> '%')
@@ -120,48 +124,37 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     KeyTypedData('^') -> '^',
     KeyTypedData('_') -> '_',
     KeyTypedData('&') -> '&')
-  def commandStartReactions = truePF(
+  def commandStartReactions = completePF(
     (sel.selected match {
       // bugnote: "case _: Some[CellPosition]" is too lax, I think due to type erasure
       case Some(CellPosition(_,_)) => cellMap orElse globalMap
       case _ => globalMap
     }) andThen commandStarter
   )
-  def paintReactions: PartialFunction[List[KeyData], Boolean] = kd => kd match {
-    case List(KeyTypedData('c')) => false
-    case List(KeyTypedData('c'), d2) => {
-      // TODO: this fails silently
-      (PaintSet.defaultMap andThen setPaintSet) lift d2
-      true
-    }
-    case List(KeyTypedData('C')) => false
-    case List(KeyTypedData('C'), KeyTypedData('c')) => false
-    case List(KeyTypedData('C'), KeyTypedData('c'), d2) => {
-      // TODO
-      (PaintSet.defaultMap andThen setCellPaintSet) lift d2
-      true
-    }
-    case List(KeyTypedData('C'), KeyTypedData('e')) => false
-    case List(KeyTypedData('C'), KeyTypedData('e'), d2) => {
-      // TODO
-      (PaintSet.defaultMap andThen setEdgePaintSet) lift d2
-      true
-    }
-    case List(KeyTypedData('C'), KeyTypedData('i')) => false
-    case List(KeyTypedData('C'), KeyTypedData('i'), d2) => {
-      // TODO
-      (PaintSet.defaultMap andThen setIntersectionPaintSet) lift d2
-      true
-    }
+  private def unitComplete(s: Option[Unit]) = s match {
+    case Some(()) => KeyComplete
+    case None => KeyUndefined
   }
-  def writeReactions: PartialFunction[List[KeyData], Boolean] = kd => kd match {
-    case List(KeyTypedData('w')) => false
-    case List(KeyTypedData('w'), d2) => {
-      // TODO: this fails silently too!
-      (WriteSet.defaultMap andThen setWriteSet) lift d2
-      true
-    }
+  def paintReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
+    case List(KeyTypedData('c')) => KeyIncomplete
+    case List(KeyTypedData('c'), d2) =>
+      unitComplete(PaintSet.defaultMap andThen setPaintSet lift d2)
 
+    case List(KeyTypedData('C')) => KeyIncomplete
+    case List(KeyTypedData('C'), KeyTypedData('c')) => KeyIncomplete
+    case List(KeyTypedData('C'), KeyTypedData('c'), d2) =>
+      unitComplete(PaintSet.defaultMap andThen setCellPaintSet lift d2)
+    case List(KeyTypedData('C'), KeyTypedData('e')) => KeyIncomplete
+    case List(KeyTypedData('C'), KeyTypedData('e'), d2) =>
+      unitComplete(PaintSet.defaultMap andThen setEdgePaintSet lift d2)
+    case List(KeyTypedData('C'), KeyTypedData('i')) => KeyIncomplete
+    case List(KeyTypedData('C'), KeyTypedData('i'), d2) =>
+      unitComplete(PaintSet.defaultMap andThen setIntersectionPaintSet lift d2)
+  }
+  def writeReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
+    case List(KeyTypedData('w')) => KeyIncomplete
+    case List(KeyTypedData('w'), d2) =>
+      unitComplete(WriteSet.defaultMap andThen setWriteSet lift d2)
   }
   def handleCommand(prefix: Char, str: String) = prefix match {
     case '=' =>
@@ -225,7 +218,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   def keyListReactions = (moveReactions
     orElse moveAndDrawReactions
     orElse commandStartReactions
-    orElse truePF(StampSet.defaultMap andThen putStampSet)
+    orElse completePF(StampSet.defaultMap andThen putStampSet)
     orElse paintReactions
     orElse writeReactions)
   def selectNear(pt: Point) {

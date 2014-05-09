@@ -11,7 +11,7 @@ import scala.swing.event.Event
 
 trait GridderfaceMode extends Publisher {
   def name: String
-  def keyListReactions: PartialFunction[List[KeyData], Boolean]
+  def keyListReactions: PartialFunction[List[KeyData], KeyResult]
   def mouseReactions: PartialFunction[MouseEvent, Unit]
   def status: String
   def handleCommand(prefix: Char, str: String): Status[String]

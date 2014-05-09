@@ -24,6 +24,6 @@ class GridderfaceViewportMode(panel: GridPanel) extends GridderfaceMode {
 
   def handleCommand(prefix: Char, str: String) = Success("")
   def keyListReactions = new SingletonListPartialFunction(moveReactions orElse
-    zoomReactions andThen {u: Unit => true})
+    zoomReactions andThen {u: Unit => KeyComplete})
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
 }

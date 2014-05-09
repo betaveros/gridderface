@@ -39,7 +39,7 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid) extends Gridderf
   }
   val keyListReactions = new SingletonListPartialFunction(
     moveGridReactions orElse resizeGridReactions orElse
-    setGridMultiplierReactions orElse negateMultiplierReactions andThen {u: Unit => true})
+    setGridMultiplierReactions orElse negateMultiplierReactions andThen {u: Unit => KeyComplete})
   def handleCommand(prefix: Char, str: String) = Success("")
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
 }

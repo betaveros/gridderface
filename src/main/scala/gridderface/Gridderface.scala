@@ -37,22 +37,20 @@ object Gridderface extends SimpleSwingApplication {
     gridMode.grid.computePosition(gridpt.getX(), gridpt.getY())
   }
   private def ctrl(c: Char): Char = (c - 64).toChar
-  val globalKeyListReactions: PartialFunction[List[KeyData], Boolean] = {
-    case List(KeyTypedData(':'         )) => commandLine.startCommandMode(':'); true
-    case List(KeyTypedData('@'         )) => commandLine.startCommandMode('@'); true
-    case List(KeyTypedData('\04' /*^D*/)) => setMode(drawMode); true
-    case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); true
-    case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); true
-    case List(KeyTypedData('\26' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); true
+  val globalKeyListReactions: PartialFunction[List[KeyData], KeyResult] = {
+    case List(KeyTypedData(':'         )) => commandLine.startCommandMode(':'); KeyComplete
+    case List(KeyTypedData('@'         )) => commandLine.startCommandMode('@'); KeyComplete
+    case List(KeyTypedData('\04' /*^D*/)) => setMode(drawMode); KeyComplete
+    case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); KeyComplete
+    case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); KeyComplete
+    case List(KeyTypedData('\26' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); KeyComplete
     case List(KeyPressedData(Key.Tab, 0)) => {
       gridList.selectNextGrid()
-      commandLine showMessage gridList.status
-      true
+      KeyCompleteWith(Success(gridList.status))
     }
     case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
       gridList.selectNextGrid()
-      commandLine showMessage gridList.status
-      true
+      KeyCompleteWith(Success(gridList.status))
     }
     // Note: Given the list-of-keys-lookup structure I'm trying to set up,
     // Control-V is now somewhat of a serious outlier.
@@ -87,13 +85,17 @@ object Gridderface extends SimpleSwingApplication {
     val dat = KeyData extract e
     if (isUsefulKeyData(dat)) {
       keyList += dat
-      val finished = (currentMode.keyListReactions
+      val res: KeyResult = (currentMode.keyListReactions
         // orElse (currentMode.commandPrefixMap andThen commandLine.startCommandMode)
-        orElse globalKeyListReactions) lift (keyList.toList)
-      finished match {
-        case Some(true) => keyList.clear()
-        case Some(false) => // nothing?
-        case _ => {
+        orElse globalKeyListReactions).applyOrElse(keyList.toList, Function.const(KeyUndefined)_)
+      res match {
+        case KeyComplete => keyList.clear()
+        case KeyCompleteWith(stat) => {
+          keyList.clear()
+          commandLine.showStatus(stat)
+        }
+        case KeyIncomplete => // nothing
+        case KeyUndefined => {
           commandLine showError "Undefined key sequence " ++ {
             (keyList map {_.toKeyString}).mkString
           }
@@ -303,7 +305,7 @@ object Gridderface extends SimpleSwingApplication {
         case "lock"   => drawMode.lockToCells(); Success("Locked to cells")
         case "ilock"  => drawMode.lockToIntersections(); Success("Locked to intersections")
         case "unlock" => drawMode.unlock(); Success("Unlocked")
-        
+
         case _ => Failed("Unrecognized command")
       }
     } else Success("")
