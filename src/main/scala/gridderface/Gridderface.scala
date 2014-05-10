@@ -316,6 +316,12 @@ object Gridderface extends SimpleSwingApplication {
 
         case "screen" => readImageFromScreen(); Success("Read image from screen")
 
+        case "guess" => bg.image match {
+          case Some(img: BufferedImage) => gridMode.grid = GridGuesser guess img; Success("Guess")
+          case Some(_) => Failed("Background image not buffered (!?)")
+          case None => Failed("No background image")
+        }
+
         case _ => Failed("Unrecognized command")
       }
     } else Success("")
