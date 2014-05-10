@@ -10,6 +10,7 @@ import scala.collection.mutable.ListBuffer
 import javax.swing.TransferHandler
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
+import java.awt.geom.AffineTransform
 import javax.swing.KeyStroke
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
@@ -105,24 +106,28 @@ object Gridderface extends SimpleSwingApplication {
     }
   }
 
-  val griddableList: List[Tuple3[Griddable, Float, String]] = List(
-    (bg, 1.0f, "image"),
-    (decorationGridSeq, 1.0f, "decoration"),
-    (gridList, 1.0f, "content"),
-    (edgeGridHolder, 0.5f, "grid"),
-    (selectedManager, 0.75f, "cursor"))
-  val opacityBufferList = for ((g, opacity, name) <- griddableList) yield {
-    val obuf = withOpacity(g, opacity, name)
-    (name, obuf)
-  }
-  val opacityBufferMap = HashMap(opacityBufferList: _*)
+  val griddableList: List[Tuple4[Griddable, Float, String, Boolean]] = List(
+    (bg, 1.0f, "image", true),
+    (decorationGridSeq, 1.0f, "decoration", true),
+    (gridList, 1.0f, "content", true),
+    (edgeGridHolder, 0.5f, "grid", false),
+    (selectedManager, 0.75f, "cursor", false))
+  val opacityBufferList: List[Tuple3[String, OpacityBuffer, Boolean]] =
+    for ((g, opacity, name, generateFlag) <- griddableList) yield {
+      val obuf = withOpacity(g, opacity, name)
+      (name, obuf, generateFlag)
+    }
+  val generatingOpacityBufferList: List[OpacityBuffer] =
+    for ((_, buf, flag) <- opacityBufferList; if flag) yield buf
+  val opacityBufferMap = HashMap(
+    (for ((name, buf, _) <- opacityBufferList) yield (name, buf)): _*)
 
   val gridPanel = new GridPanel(gridMode) {
     peer setFocusTraversalKeysEnabled false // prevent tab key from being consumed
     listenTo(keys)
     listenTo(mouse.clicks)
 
-    for ((_, obuf) <- opacityBufferList) { buffers += obuf; listenTo(obuf) }
+    for ((_, obuf, _) <- opacityBufferList) { buffers += obuf; listenTo(obuf) }
 
     listenTo(gridMode)
     reactions += {
@@ -204,9 +209,9 @@ object Gridderface extends SimpleSwingApplication {
       val h = baseImg.getHeight(null)
       val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
       val g = img.createGraphics()
-      g.drawImage(baseImg, 0, 0, w, h, null)
-      decorationGridSeq.drawOnGrid(gridMode.grid, g)
-      gridList.drawOnGrid(gridMode.grid, g)
+      for (buf <- generatingOpacityBufferList) {
+        buf.drawOnGrid(gridMode.grid, g, new AffineTransform(), new Dimension(w, h))
+      }
       img
     })
   }
