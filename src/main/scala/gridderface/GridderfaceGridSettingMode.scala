@@ -14,17 +14,18 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid) extends Gridderf
   def moveGrid(xd: Int, yd: Int){
     grid = grid.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
   }
-  def adjustGridSize(d: Double) {
-    grid = grid.gridSizeAdjustedBy(d, d)
+  def adjustGridSize(xm: Int, ym: Int) {
+    grid = grid.gridSizeAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
   }
   var gridExponent = 0
   def gridMultiplier = scala.math.pow(2.0, gridExponent)
   var negateFlag = false
   val moveGridReactions = KeyDataCombinations.keyDataXYFunction(moveGrid)
   val resizeGridReactions: PartialFunction[KeyData, Unit] = {
-      case KeyTypedData('+') => adjustGridSize(gridMultiplier)
-      case KeyTypedData('-') => adjustGridSize(-gridMultiplier)
+      case KeyTypedData('+') => adjustGridSize( 1,  1)
+      case KeyTypedData('-') => adjustGridSize(-1, -1)
   }
+  val singlyResizeGridReactions = KeyDataCombinations.keyDataShiftRCFunction(adjustGridSize)
   def status = {
     "%.2fx%.2f (M2^%d%s)".format(_grid.colWidth, _grid.rowHeight, gridExponent,
         if (negateFlag) "`" else "")
@@ -38,8 +39,12 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid) extends Gridderf
     case KeyTypedData('`') => negateFlag = true; publish(StatusChanged(this))
   }
   val keyListReactions = new SingletonListPartialFunction(
-    moveGridReactions orElse resizeGridReactions orElse
-    setGridMultiplierReactions orElse negateMultiplierReactions andThen {u: Unit => KeyComplete})
+    moveGridReactions
+    orElse resizeGridReactions orElse singlyResizeGridReactions
+    orElse setGridMultiplierReactions
+    orElse negateMultiplierReactions
+    andThen {u: Unit => KeyComplete}
+  )
   def handleCommand(prefix: Char, str: String) = Success("")
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
 }
