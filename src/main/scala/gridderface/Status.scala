@@ -1,7 +1,7 @@
 package gridderface
 
 sealed abstract class Status[+A] {
-  def map[Y](f: (A) => Y): Status[Y] 
+  def map[Y](f: (A) => Y): Status[Y]
   def flatMap[Y](f: (A) => Status[Y]): Status[Y]
 }
 case class Failed(message: String) extends Status[Nothing] {

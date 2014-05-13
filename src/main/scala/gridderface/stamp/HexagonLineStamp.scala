@@ -13,11 +13,8 @@ object HexagonLineStamp {
   hexagon.closePath
 }
 class HexagonLineStamp(stroke: Stroke) extends ScalableLineStamp {
-
   def drawUnit(g2d: Graphics2D): Unit = {
     g2d.setStroke(stroke)
     g2d.draw(HexagonLineStamp.hexagon)
   }
-
 }
-

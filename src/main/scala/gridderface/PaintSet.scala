@@ -11,7 +11,7 @@ class PaintSet(val name: String, val paint: Paint) {}
 object PaintSet {
   def createColorSet(color: Color) =
     new PaintSet("#%06X".format(color.getRGB() & 0xffffff), color)
-  
+
   val blackSet =        new PaintSet("Black",        new Color(0,  0,  0  ))
   val redSet =          new PaintSet("Red",          new Color(255,0,  0  ))
   val greenSet =        new PaintSet("Green",        new Color(0,  224,0  ))

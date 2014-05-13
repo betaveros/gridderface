@@ -34,6 +34,4 @@ class ImageTransferHandler(response: Image => Unit) extends TransferHandler {
       true
     }
   }
-    
-  
 }

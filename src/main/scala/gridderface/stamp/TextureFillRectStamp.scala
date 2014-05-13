@@ -19,12 +19,10 @@ class TextureFillRectStamp(val texture: Paint, val textureWidth: Int, val textur
     prepG setPaint texture
     prepG fill prepRect
 
-
     val copy = g2d.create().asInstanceOf[Graphics2D]
     copy.translate(x, y)
     val rect = new Rectangle2D.Double(0, 0, w, h)
-    
-    
+
     copy setPaint (new TexturePaint(prepImg, prepRect))
     copy fill rect
   }

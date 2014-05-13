@@ -7,5 +7,4 @@ class SingletonListPartialFunction[-A,+B](f: PartialFunction[A,B]) extends Abstr
     if (x.length == 1 && f.isDefinedAt(x.head)) f(x.head)
     else default(x)
   }
-
 }

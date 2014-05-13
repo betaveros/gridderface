@@ -29,5 +29,4 @@ class SelectedPositionManager(initselected: Option[Position] = None) extends Gri
     selected = selected map
       {_.deltaPosition(verticalDelta, horizontalDelta)}
   }
-  
 }

@@ -5,7 +5,7 @@ sealed abstract class Position extends Ordered[Position] {
   def verticalPosition: Int
   def deltaPosition(verticalDelta: Int, horizontalDelta: Int) =
     Position.getPosition(verticalPosition + verticalDelta,
-    		horizontalPosition + horizontalDelta)
+        horizontalPosition + horizontalDelta)
   def roundToCell: CellPosition
   def roundToIntersection: IntersectionPosition
 }
@@ -75,9 +75,8 @@ object Position {
       if (vertical % 2 == 0) new IntersectionPosition(row, col)
       else new EdgePosition(row, col, Vertical)
     } else {
-      if (vertical % 2 == 0) new EdgePosition(row, col, Horizontal) 
+      if (vertical % 2 == 0) new EdgePosition(row, col, Horizontal)
       else new CellPosition(row, col)
     }
   }
-  
 }

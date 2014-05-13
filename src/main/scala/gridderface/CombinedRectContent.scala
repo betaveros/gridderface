@@ -5,11 +5,9 @@ import java.awt.Paint
 import gridderface.stamp.FillRectStamp
 
 class CombinedRectContent(val contents: Seq[RectContent]) extends RectContent {
-
   def draw(g2d: Graphics2D, x: Double, y: Double, w: Double, h: Double) {
     contents foreach (_.draw(g2d, x, y, w, h))
   }
-
 }
 
 object CombinedRectContent {

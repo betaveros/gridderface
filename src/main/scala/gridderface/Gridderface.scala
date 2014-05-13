@@ -53,21 +53,14 @@ object Gridderface extends SimpleSwingApplication {
       gridList.selectNextGrid()
       KeyCompleteWith(Success(gridList.status))
     }
-    // Note: Given the list-of-keys-lookup structure I'm trying to set up,
-    // Control-V is now somewhat of a serious outlier.
-    // I can't seem to simulate pasting nicely; as a result I'm mapping it
-    // in java.swing with InputMaps & co., but that creates illogical
-    // behavior mid-key-sequence. Meh. This is something TODO?
   }
   var currentMode: GridderfaceMode = drawMode
-  
 
   private def currentMouseReactions = currentMode.mouseReactions
   def setMode(mode: GridderfaceMode) {
     currentMode = mode
     modeLabel.text = mode.name
     statusLabel.text = mode.status
-
   }
 
   private def withOpacity(g: Griddable, alpha: Float, name: String): OpacityBuffer = {
@@ -138,7 +131,6 @@ object Gridderface extends SimpleSwingApplication {
       case event: BufferChanged => repaint()
       case event: GridChanged => repaint()
     }
-    // looks like datatransfer will have to fully fall back to java.swing
     peer.setTransferHandler(new ImageTransferHandler(
       { img => bg.image = Some(img); repaint }))
     //val pasteKey = "paste"
@@ -193,7 +185,7 @@ object Gridderface extends SimpleSwingApplication {
       val (rows, cols) = rctup
 
       generationDimensions = Some((rows, cols))
-      
+
       decorationGridSeq.griddable = GriddableSeq.empty
 
       gridMode.grid = SimpleGrid.generationGrid
@@ -337,11 +329,10 @@ object Gridderface extends SimpleSwingApplication {
     pt => computePosition(pt), commandLine.startCommandMode(_))
   lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
   // gah, the initialization sequence here is tricky
-  
+
   listenTo(drawMode, gridMode, viewportMode)
   setMode(drawMode)
 
-  
   reactions += {
     case StatusChanged(src: GridderfaceMode) => {
       statusLabel.text = currentMode.status
@@ -362,7 +353,4 @@ object Gridderface extends SimpleSwingApplication {
     }
     size = new java.awt.Dimension(800, 600)
   }
-  
-
 }
-

@@ -17,5 +17,3 @@ trait GridderfaceMode extends Publisher {
   def handleCommand(prefix: Char, str: String): Status[String]
 }
 case class StatusChanged(src: GridderfaceMode) extends Event
-
-

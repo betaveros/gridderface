@@ -15,7 +15,7 @@ class GridderfaceViewportMode(panel: GridPanel) extends GridderfaceMode {
   def translate(x: Int, y: Int) = {
     panel.translate(x.toDouble, y.toDouble)
   }
-  
+
   val zoomReactions: PartialFunction[KeyData, Unit] = k => k match {
     case KeyTypedData('+') => panel.scale(2.0); publish(StatusChanged(this))
     case KeyTypedData('-') => panel.scale(0.5); publish(StatusChanged(this))

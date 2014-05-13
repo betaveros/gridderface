@@ -22,5 +22,4 @@ class GriddablePositionMap extends Griddable with ContentPutter {
     map = new TreeMap[Position, Griddable]
     publish(GriddableChanged(this))
   }
-
 }

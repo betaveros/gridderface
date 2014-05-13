@@ -26,7 +26,6 @@ class TwoTextRectStamp(string1: String, string2: String, font: Font = TwoTextRec
     drawCentered(g2d, 8.0f, 8.0f, string1)
     drawCentered(g2d, 16.0f, 16.0f, string2)
   }
-
 }
 object TwoTextRectStamp {
   val normalFont = new Font("Arial", Font.PLAIN, 16)

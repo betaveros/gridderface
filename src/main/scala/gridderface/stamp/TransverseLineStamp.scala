@@ -10,5 +10,4 @@ class TransverseLineStamp(stroke: Stroke) extends ScalableLineStamp {
     g2d setStroke stroke
     g2d draw edge
   }
-
 }

@@ -1,5 +1,3 @@
-
-
 package gridderface
 
 import java.awt.Graphics2D

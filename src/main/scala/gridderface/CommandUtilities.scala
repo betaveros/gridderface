@@ -41,7 +41,7 @@ object CommandUtilities {
   // it must be implicitly converted to WrappedArray, which is one
   // the <% bound ("can be viewed as") makes the compiler let us take Arrays
   // here, this generality isn't necessary but it's interesting Scala practice
-  def counted[A <% GenSeqLike[Any,Any]](strs: A, countIsAllowed: Int => Boolean, 
+  def counted[A <% GenSeqLike[Any,Any]](strs: A, countIsAllowed: Int => Boolean,
       leftMessage: String = wrongArgumentNumberMessage): Status[A] = {
     if (countIsAllowed(strs.length)) Success(strs) else Failed(leftMessage)
   }
@@ -63,7 +63,7 @@ object CommandUtilities {
         if (file.createNewFile()) {
           ImageIO.write(img, "png", file)
           Success("Created and written image to file " + filename)
-        } else Failed("Error: cannot create file: " + filename) 
+        } else Failed("Error: cannot create file: " + filename)
       } else if (file.canWrite()){
         ImageIO.write(img, "png", file)
         Success("Written image to file " + filename)

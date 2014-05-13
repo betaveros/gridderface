@@ -73,7 +73,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
         new PresetEdges(new LineStampContent(new StrokeLineStamp(0.1875f), new Color(254, 254, 254))),
         new PresetIntersections(new PointStampContent(FixedMark.createDiskStamp(0.125), Color.BLACK))),
     "corral" -> List(
-        new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))), 
+        new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))),
         new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY)),
         new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))),
     "whitedashed" -> List(

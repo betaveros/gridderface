@@ -20,7 +20,6 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float, privat
   // TODO: In the future, maybe invert the transform and allocate a buffer image
   // before it, so we don't have to cache on it too?
 
-  
   listenTo(original)
   reactions += {
     case GriddableChanged(`original`) => {
@@ -38,13 +37,13 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float, privat
     _multiply = m
     publish(BufferChanged(this))
   }
-  
+
   private var curWidth = 0
   private var curHeight = 0
   private var cache: Option[BufferedImage] = None
   private var cacheGrid: Option[SimpleGrid] = None
   private var cacheTransform: Option[AffineTransform] = None
-  
+
   def ensureDimensions(dim: Dimension) {
     if (dim.width > curWidth) curWidth = 2*curWidth max dim.width
     if (dim.height > curHeight) curHeight = 2*curHeight max dim.height
@@ -61,7 +60,7 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float, privat
     cacheGrid = Some(grid)
     cacheTransform = Some(transform.clone().asInstanceOf[AffineTransform])
   }
-  
+
   def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
     if (!(cache.nonEmpty
         && cacheGrid.exists(_ equals grid)

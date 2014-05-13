@@ -5,8 +5,6 @@ import scala.collection.SeqLike
 import scala.collection.GenTraversable
 import scala.collection.generic.CanBuildFrom
 
-
-
 class GriddableSeq(griddables: scala.collection.immutable.Seq[Griddable])
     extends Griddable with scala.collection.immutable.Seq[Griddable] {
   // Sort of implicit mix-in for Griddable Seqs to grid themselves

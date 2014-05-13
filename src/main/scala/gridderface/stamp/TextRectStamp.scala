@@ -13,7 +13,7 @@ class TextRectStamp(string: String, font: Font = TextRectStamp.normalFont,
     g2d.scale(magicScale, magicScale)
     g2d.setFont(font)
     g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, antiAliasRenderingHint)
-    
+
     val fm = g2d.getFontMetrics()
 
     val width = fm.stringWidth(string)

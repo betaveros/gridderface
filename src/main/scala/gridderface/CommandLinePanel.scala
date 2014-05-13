@@ -54,9 +54,8 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
       showStatus(stat)
     }
   }
-  
+
   contents += prefixLabel
   contents += field
   stopCommandMode()
-  
 }

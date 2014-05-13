@@ -22,6 +22,7 @@ class BulbRectStamp(size: Double, xOffset: Double = 0, yOffset: Double = 0) exte
     g2d fill bulb
   }
 }
+
 class CircleRectStamp(size: Double, stroke: Stroke = Strokes.normalStroke) extends ScalableRectStamp {
   val sx = 0.5 - size / 2.0
   val circ = new Ellipse2D.Double(sx, sx, size, size)

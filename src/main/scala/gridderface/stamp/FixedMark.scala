@@ -26,7 +26,6 @@ class FixedMark(filledShapes: Seq[Shape], drawnShapes: Seq[Shape], stroke: Optio
     val yd = y2 - y1
     drawPoint(g2d, paint, (x1 + x2)/2, (y1 + y2)/2, scala.math.sqrt(xd*xd + yd*yd))
   }
-
 }
 
 object FixedMark {
@@ -45,7 +44,6 @@ object FixedMark {
   def createFilledSquareStamp(size: Double) =
     new FixedMark(List(new Rectangle2D.Double(-size, -size, 2*size, 2*size)),
         Nil, None)
-  
 }
 
 

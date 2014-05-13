@@ -27,7 +27,6 @@ class ThreeTextRectStamp(string1: String, string2: String, string3: String, font
     drawCentered(g2d, 18.0f, 6.0f, string2)
     drawCentered(g2d, 12.0f, 18.0f, string3)
   }
-
 }
 object ThreeTextRectStamp {
   val normalFont = new Font("Arial", Font.PLAIN, 14)
