@@ -65,20 +65,27 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
       new HomogeneousIntersectionGrid(cont, rowStart, colStart, rowEnd, colEnd)
     }
   }
+  private val plainPreset = new PresetEdges(new LineStampContent(Strokes.thinStamp, Color.BLACK))
+  private val boldPreset = new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))
+  private val dashedPreset = new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY))
+  private val slitherPresetList = List(
+    new PresetEdges(new LineStampContent(new StrokeLineStamp(0.1875f), new Color(254, 254, 254))),
+    new PresetIntersections(new PointStampContent(FixedMark.createDiskStamp(0.125), Color.BLACK)))
+  private val whitedashedPresetList = List(
+    new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))),
+    dashedPreset)
+
   val presetMap: Map[String, List[PresetGriddable]] = HashMap(
-    "plain" -> List(new PresetEdges(new LineStampContent(Strokes.thinStamp, Color.BLACK))),
-    "dashed" -> List(new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY))),
-    "bold" -> List(new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))),
-    "slither" -> List(
-        new PresetEdges(new LineStampContent(new StrokeLineStamp(0.1875f), new Color(254, 254, 254))),
-        new PresetIntersections(new PointStampContent(FixedMark.createDiskStamp(0.125), Color.BLACK))),
-    "corral" -> List(
-        new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))),
-        new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY)),
-        new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))),
-    "whitedashed" -> List(
-        new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))), 
-        new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY)))
+    "plain" -> List(plainPreset),
+    "dashed" -> List(dashedPreset),
+    "bold" -> List(boldPreset),
+    "slither" -> slitherPresetList,
+    "slitherlink" -> slitherPresetList,
+    "fillomino" -> (whitedashedPresetList
+      :+ new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))),
+    "whitedashed" -> whitedashedPresetList,
+    "corral" -> whitedashedPresetList,
+    "nurikabe" -> List(plainPreset, boldPreset)
   )
   def getPresetAsStatus(presetName: String) = {
     presetMap get presetName match {
