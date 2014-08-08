@@ -39,6 +39,9 @@ object Gridderface extends SimpleSwingApplication {
     gridMode.grid.computePosition(gridpt.getX(), gridpt.getY())
   }
   private def ctrl(c: Char): Char = (c - 64).toChar
+  def setImage(img: Image): Unit = {
+    bg.image = Some(img); gridPanel.repaint()
+  }
   val globalKeyListReactions: PartialFunction[List[KeyData], KeyResult] = {
     case List(KeyTypedData(':'         )) => commandLine.startCommandMode(':'); KeyComplete
     case List(KeyTypedData('@'         )) => commandLine.startCommandMode('@'); KeyComplete
@@ -46,6 +49,12 @@ object Gridderface extends SimpleSwingApplication {
     case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); KeyComplete
     case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); KeyComplete
     case List(KeyTypedData('\26' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); KeyComplete
+    case List(KeyPressedData(Key.V, Key.Modifier.Meta)) => {
+      ImageTransferHack.getImage() match {
+        case Success(img) => setImage(img); KeyComplete
+        case Failed(s) => KeyCompleteWith(Failed(s))
+      }
+    }
     case List(KeyPressedData(Key.Tab, 0)) => {
       gridList.selectNextGrid()
       KeyCompleteWith(Success(gridList.status))
@@ -73,6 +82,7 @@ object Gridderface extends SimpleSwingApplication {
     case KeyTypedData('\t') => false // cannot detect modifiers, apparently
     case KeyTypedData(_) => true
     case KeyPressedData(Key.Tab, _) => true
+    case KeyPressedData(Key.V, Key.Modifier.Meta) => true
     case _ => false
   }
 
@@ -132,8 +142,7 @@ object Gridderface extends SimpleSwingApplication {
       case event: BufferChanged => repaint()
       case event: GridChanged => repaint()
     }
-    peer.setTransferHandler(new ImageTransferHandler(
-      { img => bg.image = Some(img); repaint }))
+    peer.setTransferHandler(new ImageTransferHandler(setImage))
     //val pasteKey = "paste"
     //peer.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), pasteKey)
     //peer.getActionMap().put(pasteKey, TransferHandler.getPasteAction())
