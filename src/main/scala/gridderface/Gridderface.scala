@@ -38,6 +38,9 @@ object Gridderface extends SimpleSwingApplication {
     gridMode.grid.computePosition(gridpt.getX(), gridpt.getY())
   }
   private def ctrl(c: Char): Char = (c - 64).toChar
+  def setImage(img: Image): Unit = {
+    bg.image = Some(img); gridPanel.repaint()
+  }
   val globalKeyListReactions: PartialFunction[List[KeyData], KeyResult] = {
     case List(KeyTypedData(':'            )) => commandLine.startCommandMode(':'); KeyComplete
     case List(KeyTypedData('@'            )) => commandLine.startCommandMode('@'); KeyComplete
@@ -128,8 +131,7 @@ object Gridderface extends SimpleSwingApplication {
       case event: BufferChanged => repaint()
       case event: GridChanged => repaint()
     }
-    peer.setTransferHandler(new ImageTransferHandler(
-      { img => bg.image = Some(img); repaint }))
+    peer.setTransferHandler(new ImageTransferHandler(setImage))
     //val pasteKey = "paste"
     //peer.getInputMap().put(KeyStroke.getKeyStroke("ctrl V"), pasteKey)
     //peer.getActionMap().put(pasteKey, TransferHandler.getPasteAction())
@@ -339,6 +341,12 @@ object Gridderface extends SimpleSwingApplication {
           case Some(img: BufferedImage) => gridMode.grid = GridGuesser guess img; Success("Guess")
           case Some(_) => Failed("Background image not buffered (!?)")
           case None => Failed("No background image")
+        }
+
+        case "pngpaste" => {
+          ImageTransferHack.getImage() map (img => {
+            setImage(img); "Read image from pngpaste -"
+          })
         }
 
         case command => currentMode.handleColonCommand(command, parts.tail)
