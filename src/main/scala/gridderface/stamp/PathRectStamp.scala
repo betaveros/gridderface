@@ -13,19 +13,19 @@ class PathRectStamp(val shapes: Seq[Shape], val sv: StrokeVal = NormalStrokeVal)
 }
 
 object PathRectStamp {
-  val slash1Path = new Path2D.Double
-  slash1Path.moveTo(0.0, 0.0)
-  slash1Path.lineTo(1.0, 1.0)
-  val slash2Path = new Path2D.Double
-  slash2Path.moveTo(0.0, 1.0)
-  slash2Path.lineTo(1.0, 0.0)
+  val majorDiagonal = new Path2D.Double
+  majorDiagonal.moveTo(0.0, 0.0)
+  majorDiagonal.lineTo(1.0, 1.0)
+  val minorDiagonal = new Path2D.Double
+  minorDiagonal.moveTo(0.0, 1.0)
+  minorDiagonal.lineTo(1.0, 0.0)
   val checkPath = new Path2D.Double
   checkPath.moveTo(0.65, 0.75)
   checkPath.lineTo(0.75, 0.9)
   checkPath.lineTo(0.9, 0.6)
-
-  val crossStamp = new PathRectStamp(List(slash1Path, slash2Path))
-  val slash1Stamp = new PathRectStamp(List(slash1Path))
-  val slash2Stamp = new PathRectStamp(List(slash2Path))
-  val checkStamp = new PathRectStamp(List(checkPath))
 }
+
+case object CrossStamp extends PathRectStamp(List(PathRectStamp.majorDiagonal, PathRectStamp.minorDiagonal))
+case object MajorDiagonalStamp extends PathRectStamp(List(PathRectStamp.majorDiagonal))
+case object MinorDiagonalStamp extends PathRectStamp(List(PathRectStamp.minorDiagonal))
+case object CheckStamp extends PathRectStamp(List(PathRectStamp.checkPath))

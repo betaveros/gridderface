@@ -8,7 +8,9 @@ import java.awt.TexturePaint
 import java.awt.image.BufferedImage
 import java.awt.Color
 
-class TextureFillRectStamp(val texture: Paint, val textureWidth: Int, val textureHeight: Int) extends RectStamp {
+class TextureFillRectStamp(val texture: Paint,
+  val textureWidth: Int, val textureHeight: Int) extends RectStamp {
+
   def drawRect(g2d: Graphics2D, paint: Paint, x: Double, y: Double, w: Double, h: Double) {
     val prepImg = new BufferedImage(textureWidth, textureHeight, BufferedImage.TYPE_INT_ARGB)
     val prepRect = new Rectangle2D.Double(0, 0, textureWidth, textureHeight)
@@ -29,14 +31,18 @@ class TextureFillRectStamp(val texture: Paint, val textureWidth: Int, val textur
 }
 
 object TextureFillRectStamp {
-  private def makeSimple3x3Stamp(x1: Int, y1: Int, x2: Int, y2: Int) = {
+  def makeSimple3x3Paint(x1: Int, y1: Int, x2: Int, y2: Int) = {
     val bi = new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB)
     val g2d = bi.createGraphics();
     g2d.setColor(Color.BLACK); // doesn't really matter
     g2d.drawLine(x1, y1, x2, y2);
-    new TextureFillRectStamp(new TexturePaint(bi, new Rectangle2D.Double(0,0,3,3)), 3, 3)
+    new TexturePaint(bi, new Rectangle2D.Double(0,0,3,3))
   }
-  val diagonalStamp = makeSimple3x3Stamp(0, 0, 2, 2)
-  val dashedStamp = makeSimple3x3Stamp(0, 0, 1, 0)
-  val dottedStamp = makeSimple3x3Stamp(0, 0, 0, 0)
 }
+
+case object DiagonalFillRectStamp extends TextureFillRectStamp(
+  TextureFillRectStamp.makeSimple3x3Paint(0, 0, 2, 2), 3, 3)
+case object DashedFillRectStamp extends TextureFillRectStamp(
+  TextureFillRectStamp.makeSimple3x3Paint(0, 0, 1, 0), 3, 3)
+case object DottedFillRectStamp extends TextureFillRectStamp(
+  TextureFillRectStamp.makeSimple3x3Paint(0, 0, 0, 0), 3, 3)

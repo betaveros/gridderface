@@ -16,9 +16,9 @@ object StampSet {
   val mediumSet = new StampSet(
     "Medium", None, Some(StrokeLineStamp(MediumStrokeVal)), Some(FilledSquareFixedMark(0.1875)))
   val shadefillSet = new StampSet(
-    "shadeFill", Some(TextureFillRectStamp.diagonalStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(FilledSquareFixedMark(0.125)))
+    "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(FilledSquareFixedMark(0.125)))
   val dashSet = new StampSet(
-    "Dash", Some(TextureFillRectStamp.dashedStamp), Some(StrokeLineStamp(NormalDashedStrokeVal)), Some(DiskFixedMark(0.125)))
+    "Dash", Some(DashedFillRectStamp), Some(StrokeLineStamp(NormalDashedStrokeVal)), Some(DiskFixedMark(0.125)))
   val dotSet = new StampSet(
     "Dot", Some(BulbRectStamp(0.25)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
   val cornerDotSet = new StampSet(
@@ -31,13 +31,13 @@ object StampSet {
     "Clear", Some(ClearStamp), Some(ClearStamp), Some(ClearStamp))
   val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
   val slash1Set = new StampSet(
-    "\\", Some(PathRectStamp.slash1Stamp), None, None)
+    "\\", Some(MajorDiagonalStamp), None, None)
   val slash2Set = new StampSet(
-    "/", Some(PathRectStamp.slash2Stamp), None, None)
+    "/", Some(MinorDiagonalStamp), None, None)
   val crossSet = new StampSet(
-    "Cross", Some(PathRectStamp.crossStamp), Some(crossMark), Some(crossMark))
+    "Cross", Some(CrossStamp), Some(crossMark), Some(crossMark))
   val checkSet = new StampSet(
-    "Check", Some(PathRectStamp.checkStamp), None, None)
+    "Check", Some(CheckStamp), None, None)
   val lessSet = new StampSet(
     "LessThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Less)), None)
   val greaterSet = new StampSet(

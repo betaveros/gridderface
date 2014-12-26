@@ -20,8 +20,19 @@ object OneTextRectStamp {
     type FontSize = Value
     val Normal, Small = Value
   }
+  val Normal = FontSize.Normal
+  val Small = FontSize.Small
   def fontOf(fs: FontSize.Value) = fs match {
-    case FontSize.Normal => normalFont
-    case FontSize.Small => smallFont
+    case Normal => normalFont
+    case Small => smallFont
+  }
+  def stringify(fs: FontSize.Value) = fs match {
+    case Normal => "n"
+    case Small => "s"
+  }
+  def parse(s: String): Option[FontSize.Value] = s match {
+    case "n" => Some(Normal)
+    case "s" => Some(Small)
+    case _ => None
   }
 }

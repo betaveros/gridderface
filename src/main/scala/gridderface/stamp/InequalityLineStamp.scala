@@ -26,4 +26,14 @@ object InequalityLineStamp {
   }
   val Less = Inequality.Less
   val Greater = Inequality.Greater
+  def getValue(c: Char) = c match {
+    case '<' => Some(Less)
+    case '>' => Some(Greater)
+    case _ => None
+  }
+  def stringify(v: Inequality.Value) = v match {
+    case Less => "<"
+    case Greater => ">"
+  }
+
 }
