@@ -12,7 +12,7 @@ object StampSet {
   val fillSet = new StampSet(
     "Fill", Some(FillRectStamp), Some(Strokes.normalStamp), Some(FixedMark.createFilledSquareStamp(0.125)))
   val thickSet = new StampSet(
-    "10/Thick", Some(new TextRectStamp("10")), Some(Strokes.thickStamp), Some(FixedMark.createFilledSquareStamp(0.25)))
+    "10/Thick", Some(new OneTextRectStamp("10")), Some(Strokes.thickStamp), Some(FixedMark.createFilledSquareStamp(0.25)))
   val mediumSet = new StampSet(
     "Medium", None, Some(Strokes.mediumStamp), Some(FixedMark.createFilledSquareStamp(0.1875)))
   val shadefillSet = new StampSet(
@@ -26,7 +26,7 @@ object StampSet {
   val circleSet = new StampSet(
     "Circle", Some(new CircleRectStamp(0.75)), Some(FixedMark.createCircleStamp(0.125)), Some(FixedMark.createCircleStamp(0.125)))
   val eSet = new StampSet(
-    "11/Trans", Some(new TextRectStamp("11")), Some(new TransverseLineStamp(Strokes.normalStroke)), None)
+    "11/Trans", Some(new OneTextRectStamp("11")), Some(new TransverseLineStamp(Strokes.normalStroke)), None)
   val clearSet = new StampSet(
     "Clear", Some(ClearStamp), Some(ClearStamp), Some(ClearStamp))
   val crossMark = FixedMark.createCrossStamp(0.125, Strokes.normalStroke)
@@ -61,7 +61,7 @@ object StampSet {
         KeyTypedData(' ') -> clearSet,
         KeyTypedData('x') -> crossSet)
     val digitMappings = (0 to 9) map (i => KeyTypedData(('0' + i).toChar) ->
-      new StampSet("'" + i + "'", Some(new TextRectStamp("" + i)), None, None))
+      new StampSet("'" + i + "'", Some(new OneTextRectStamp("" + i)), None, None))
     HashMap((basicMappings ++ digitMappings): _*)
   }
 

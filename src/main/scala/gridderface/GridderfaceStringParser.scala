@@ -5,7 +5,7 @@ import java.awt.Color
 import gridderface.stamp.LineStamp
 import gridderface.stamp.RectStamp
 import gridderface.stamp.Strokes
-import gridderface.stamp.TextRectStamp
+import gridderface.stamp.OneTextRectStamp
 import java.awt.Paint
 
 object GridderfaceStringParser {
@@ -22,8 +22,8 @@ object GridderfaceStringParser {
     } else None
   }
   def parseRectStampString(str: String): Status[RectStamp] = {
-    ((optionToInt(str) map (int => new TextRectStamp(int.toString))) orElse
-      (stripOptionToInt("o", str) map (int => new TextRectStamp(int.toString))) orElse None) match {
+    ((optionToInt(str) map (int => new OneTextRectStamp(int.toString))) orElse
+      (stripOptionToInt("o", str) map (int => new OneTextRectStamp(int.toString))) orElse None) match {
       case Some(s) => Success(s)
       case None => Failed("Error: could not parse RectStamp " + str)
     }
