@@ -2,9 +2,7 @@ package gridderface
 
 import scala.collection.immutable.HashMap
 import java.awt.Color
-import gridderface.stamp.Strokes
-import gridderface.stamp.StrokeLineStamp
-import gridderface.stamp.FixedMark
+import gridderface.stamp._
 
 class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   def decorationClearCommand(restArgs: Array[String]): Status[String] = {
@@ -65,14 +63,14 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
       new HomogeneousIntersectionGrid(cont, rowStart, colStart, rowEnd, colEnd)
     }
   }
-  private val plainPreset = new PresetEdges(new LineStampContent(Strokes.thinStamp, Color.BLACK))
-  private val boldPreset = new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))
-  private val dashedPreset = new PresetEdges(new LineStampContent(Strokes.thinDashedStamp, Color.GRAY))
+  private val plainPreset = new PresetEdges(new LineStampContent(StrokeLineStamp(ThinStrokeVal), Color.BLACK))
+  private val boldPreset = new PresetBorder(new LineStampContent(StrokeLineStamp(NormalStrokeVal), Color.BLACK))
+  private val dashedPreset = new PresetEdges(new LineStampContent(StrokeLineStamp(ThinDashedStrokeVal), Color.GRAY))
   private val slitherPresetList = List(
-    new PresetEdges(new LineStampContent(new StrokeLineStamp(0.1875f), new Color(254, 254, 254))),
-    new PresetIntersections(new PointStampContent(FixedMark.createDiskStamp(0.125), Color.BLACK)))
+    new PresetEdges(new LineStampContent(StrokeLineStamp(MediumStrokeVal), new Color(254, 254, 254))),
+    new PresetIntersections(new PointStampContent(DiskFixedMark(0.125), Color.BLACK)))
   private val whitedashedPresetList = List(
-    new PresetEdges(new LineStampContent(Strokes.thinStamp, new Color(254, 254, 254))),
+    new PresetEdges(new LineStampContent(StrokeLineStamp(ThinStrokeVal), new Color(254, 254, 254))),
     dashedPreset)
 
   val presetMap: Map[String, List[PresetGriddable]] = HashMap(
@@ -82,7 +80,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
     "slither" -> slitherPresetList,
     "slitherlink" -> slitherPresetList,
     "fillomino" -> (whitedashedPresetList
-      :+ new PresetBorder(new LineStampContent(Strokes.normalStamp, Color.BLACK))),
+      :+ new PresetBorder(new LineStampContent(StrokeLineStamp(NormalStrokeVal), Color.BLACK))),
     "whitedashed" -> whitedashedPresetList,
     "corral" -> whitedashedPresetList,
     "nurikabe" -> List(plainPreset, boldPreset)

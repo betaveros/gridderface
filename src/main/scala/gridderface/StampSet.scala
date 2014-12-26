@@ -10,26 +10,26 @@ class StampSet(val name: String,
 
 object StampSet {
   val fillSet = new StampSet(
-    "Fill", Some(FillRectStamp), Some(Strokes.normalStamp), Some(FixedMark.createFilledSquareStamp(0.125)))
+    "Fill", Some(FillRectStamp), Some(StrokeLineStamp(NormalStrokeVal)), Some(FilledSquareFixedMark(0.125)))
   val thickSet = new StampSet(
-    "10/Thick", Some(new OneTextRectStamp("10")), Some(Strokes.thickStamp), Some(FixedMark.createFilledSquareStamp(0.25)))
+    "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(FilledSquareFixedMark(0.25)))
   val mediumSet = new StampSet(
-    "Medium", None, Some(Strokes.mediumStamp), Some(FixedMark.createFilledSquareStamp(0.1875)))
+    "Medium", None, Some(StrokeLineStamp(MediumStrokeVal)), Some(FilledSquareFixedMark(0.1875)))
   val shadefillSet = new StampSet(
-    "shadeFill", Some(TextureFillRectStamp.diagonalStamp), Some(Strokes.thinStamp), Some(FixedMark.createFilledSquareStamp(0.125)))
+    "shadeFill", Some(TextureFillRectStamp.diagonalStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(FilledSquareFixedMark(0.125)))
   val dashSet = new StampSet(
-    "Dash", Some(TextureFillRectStamp.dashedStamp), Some(Strokes.normalDashedStamp), Some(FixedMark.createDiskStamp(0.125)))
+    "Dash", Some(TextureFillRectStamp.dashedStamp), Some(StrokeLineStamp(NormalDashedStrokeVal)), Some(DiskFixedMark(0.125)))
   val dotSet = new StampSet(
-    "Dot", Some(new BulbRectStamp(0.25)), Some(FixedMark.createDiskStamp(0.125)), Some(FixedMark.createDiskStamp(0.125)))
+    "Dot", Some(BulbRectStamp(0.25)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
   val cornerDotSet = new StampSet(
-    "CornerDot", Some(new BulbRectStamp(0.25, 0.25, 0.25)), Some(FixedMark.createDiskStamp(0.125)), Some(FixedMark.createDiskStamp(0.125)))
+    "CornerDot", Some(BulbRectStamp(0.25, 0.25, 0.25)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
   val circleSet = new StampSet(
-    "Circle", Some(new CircleRectStamp(0.75)), Some(FixedMark.createCircleStamp(0.125)), Some(FixedMark.createCircleStamp(0.125)))
+    "Circle", Some(CircleRectStamp(0.75)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.125)))
   val eSet = new StampSet(
-    "11/Trans", Some(new OneTextRectStamp("11")), Some(new TransverseLineStamp(Strokes.normalStroke)), None)
+    "11/Trans", Some(OneTextRectStamp("11")), Some(TransverseLineStamp(NormalStrokeVal)), None)
   val clearSet = new StampSet(
     "Clear", Some(ClearStamp), Some(ClearStamp), Some(ClearStamp))
-  val crossMark = FixedMark.createCrossStamp(0.125, Strokes.normalStroke)
+  val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
   val slash1Set = new StampSet(
     "\\", Some(PathRectStamp.slash1Stamp), None, None)
   val slash2Set = new StampSet(
@@ -39,9 +39,9 @@ object StampSet {
   val checkSet = new StampSet(
     "Check", Some(PathRectStamp.checkStamp), None, None)
   val lessSet = new StampSet(
-    "LessThan", None, Some(new InequalityLineStamp(Strokes.normalStroke, true)), None)
+    "LessThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Less)), None)
   val greaterSet = new StampSet(
-    "GreaterThan", None, Some(new InequalityLineStamp(Strokes.normalStroke, false)), None)
+    "GreaterThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Greater)), None)
   val defaultMap: Map[KeyData, StampSet] = {
     val basicMappings = List(KeyTypedData('f') -> fillSet,
         KeyTypedData('F') -> shadefillSet,

@@ -7,13 +7,13 @@ class WriteSet(val name: String,
   val cellWriteStamp: Option[LineStamp], val intersectionWriteStamp: Option[LineStamp])
 
 object WriteSet {
-  val writeSet = new WriteSet("Write", Some(new TransverseLineStamp(Strokes.normalStroke)), Some(Strokes.normalStamp))
-  val blockSet = new WriteSet("Block", Some(Strokes.normalStamp), Some(new TransverseLineStamp(Strokes.normalStroke)))
+  val writeSet = new WriteSet("Write", Some(TransverseLineStamp(NormalStrokeVal)), Some(StrokeLineStamp(NormalStrokeVal)))
+  val blockSet = new WriteSet("Block", Some(StrokeLineStamp(NormalStrokeVal)), Some(TransverseLineStamp(NormalStrokeVal)))
   val eraseSet = new WriteSet("Erase", Some(ClearStamp), Some(ClearStamp))
-  val crossMark = FixedMark.createCrossStamp(0.125, Strokes.normalStroke)
+  val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
   val crossSet = new WriteSet("Cross", Some(crossMark), Some(crossMark))
-  val dashedSet = new WriteSet("Dashed", Some(new TransverseLineStamp(Strokes.normalDashedStroke)), Some(Strokes.normalDashedStamp))
-  val dotMark = FixedMark.createDiskStamp(0.125)
+  val dashedSet = new WriteSet("Dashed", Some(TransverseLineStamp(NormalDashedStrokeVal)), Some(StrokeLineStamp(NormalDashedStrokeVal)))
+  val dotMark = CrossFixedMark(0.125)
   val dotSet = new WriteSet("Dot", Some(dotMark), Some(dotMark))
   val noneSet = new WriteSet("None", None, None)
   val defaultMap: Map[KeyData, WriteSet] = {

@@ -5,10 +5,9 @@ import java.awt.Stroke
 import java.awt.Shape
 import java.awt.geom.Path2D
 
-
-class PathRectStamp(val shapes: Seq[Shape], val stroke: Stroke) extends ScalableRectStamp {
+class PathRectStamp(val shapes: Seq[Shape], val sv: StrokeVal = NormalStrokeVal) extends ScalableRectStamp {
   def drawUnit(g2d: Graphics2D): Unit = {
-    g2d setStroke stroke
+    g2d setStroke sv.stroke
     shapes foreach (g2d draw _)
   }
 }
@@ -25,8 +24,8 @@ object PathRectStamp {
   checkPath.lineTo(0.75, 0.9)
   checkPath.lineTo(0.9, 0.6)
 
-  val crossStamp = new PathRectStamp(List(slash1Path, slash2Path), Strokes.normalStroke)
-  val slash1Stamp = new PathRectStamp(List(slash1Path), Strokes.normalStroke)
-  val slash2Stamp = new PathRectStamp(List(slash2Path), Strokes.normalStroke)
-  val checkStamp = new PathRectStamp(List(checkPath), Strokes.normalStroke)
+  val crossStamp = new PathRectStamp(List(slash1Path, slash2Path))
+  val slash1Stamp = new PathRectStamp(List(slash1Path))
+  val slash2Stamp = new PathRectStamp(List(slash2Path))
+  val checkStamp = new PathRectStamp(List(checkPath))
 }

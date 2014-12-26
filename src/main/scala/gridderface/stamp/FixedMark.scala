@@ -6,7 +6,7 @@ import java.awt.geom._
 import java.awt.Paint
 import java.awt.Stroke
 
-class FixedMark(filledShapes: Seq[Shape], drawnShapes: Seq[Shape], stroke: Option[Stroke]) extends LineStamp with PointStamp {
+abstract class FixedMark(filledShapes: Seq[Shape], drawnShapes: Seq[Shape], stroke: Option[Stroke]) extends LineStamp with PointStamp {
 
   def preparedCopy(g2d: Graphics2D, paint: Paint, x: Double, y: Double, r: Double): Graphics2D = {
     val copy = g2d.create().asInstanceOf[Graphics2D]
@@ -18,7 +18,7 @@ class FixedMark(filledShapes: Seq[Shape], drawnShapes: Seq[Shape], stroke: Optio
   def drawPoint(g2d: Graphics2D, paint: Paint, x: Double, y: Double, r: Double): Unit = {
     val ng = preparedCopy(g2d, paint, x, y, r)
     for (s <- filledShapes) ng.fill(s)
-    stroke foreach (st => { ng.setStroke(st); for (s <- drawnShapes) ng.draw(s) })
+      stroke foreach (st => { ng.setStroke(st); for (s <- drawnShapes) ng.draw(s) })
   }
 
   def drawLine(g2d: Graphics2D, paint: Paint, x1: Double, y1: Double, x2: Double, y2: Double): Unit = {
@@ -28,26 +28,21 @@ class FixedMark(filledShapes: Seq[Shape], drawnShapes: Seq[Shape], stroke: Optio
   }
 }
 
-object FixedMark {
-  def createCrossStamp(size: Double, stroke: Stroke = Strokes.normalStroke) =
-    new FixedMark(Nil,
-        List(new Line2D.Double(-size, -size, size, size),
-            new Line2D.Double(-size, size, size, -size)),
-        Some(stroke))
-  def createCircleStamp(size: Double, stroke: Stroke = Strokes.normalStroke) =
-    new FixedMark(Nil,
-        List(new Ellipse2D.Double(-size, -size, 2*size, 2*size)),
-        Some(stroke))
-  def createDiskStamp(size: Double) =
-    new FixedMark(List(new Ellipse2D.Double(-size, -size, 2*size, 2*size)),
-        Nil, None)
-  def createFilledSquareStamp(size: Double) =
-    new FixedMark(List(new Rectangle2D.Double(-size, -size, 2*size, 2*size)),
-        Nil, None)
-}
+case class CrossFixedMark(size: Double, sv: StrokeVal = NormalStrokeVal)
+extends FixedMark(Nil,
+  List(new Line2D.Double(-size, -size, size, size),
+    new Line2D.Double(-size, size, size, -size)),
+  Some(sv.stroke))
 
+case class CircleFixedMark(size: Double, sv: StrokeVal = NormalStrokeVal)
+extends FixedMark(Nil,
+  List(new Ellipse2D.Double(-size, -size, 2*size, 2*size)),
+  Some(sv.stroke))
 
+case class DiskFixedMark(size: Double)
+extends FixedMark(List(new Ellipse2D.Double(-size, -size, 2*size, 2*size)),
+  Nil, None)
 
-
-
-
+case class FilledSquareFixedMark(size: Double)
+extends FixedMark(List(new Rectangle2D.Double(-size, -size, 2*size, 2*size)),
+  Nil, None)

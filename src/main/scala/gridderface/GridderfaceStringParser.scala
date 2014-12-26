@@ -2,10 +2,7 @@ package gridderface
 
 import scala.collection.immutable.HashMap
 import java.awt.Color
-import gridderface.stamp.LineStamp
-import gridderface.stamp.RectStamp
-import gridderface.stamp.Strokes
-import gridderface.stamp.OneTextRectStamp
+import gridderface.stamp._
 import java.awt.Paint
 
 object GridderfaceStringParser {
@@ -28,14 +25,8 @@ object GridderfaceStringParser {
       case None => Failed("Error: could not parse RectStamp " + str)
     }
   }
-  val lineStampMap = HashMap(
-    "n" -> Strokes.normalStamp,
-    "t" -> Strokes.thickStamp,
-    "s" -> Strokes.thinStamp,
-    "d" -> Strokes.thinDashedStamp,
-    "nd" -> Strokes.normalDashedStamp)
-  def parseLineStampString(str: String): Status[LineStamp] = lineStampMap get str match {
-    case Some(s) => Success(s)
+  def parseLineStampString(str: String): Status[LineStamp] = StrokeVal parse str match {
+    case Some(s) => Success(StrokeLineStamp(s))
     case None => Failed("Error: could not parse LineStamp " + str)
   }
 

@@ -8,9 +8,9 @@ import java.awt.GradientPaint
 class SelectedPositionManager(initselected: Option[Position] = None) extends Griddable {
   private var _selected: Option[Position] = initselected
   val paint = new GradientPaint(0f, 0f, Color.GREEN, 0.5f, 0.5f, new Color(0, 192, 0), true)
-  val cellContent = new RectStampContent(new OutlineRectStamp(Strokes.thickStroke), paint)
-  val edgeContent = new LineStampContent(new HexagonLineStamp(Strokes.thickStroke), paint)
-  val intersectionContent = new PointStampContent(FixedMark.createCircleStamp(0.25, Strokes.thickStroke), paint)
+  val cellContent = new RectStampContent(OutlineRectStamp(ThickStrokeVal), paint)
+  val edgeContent = new LineStampContent(HexagonLineStamp(ThickStrokeVal), paint)
+  val intersectionContent = new PointStampContent(CircleFixedMark(0.25, ThickStrokeVal), paint)
 
   def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     selected match {

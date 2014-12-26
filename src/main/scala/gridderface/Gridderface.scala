@@ -26,7 +26,7 @@ object Gridderface extends SimpleSwingApplication {
   val bg = new GriddableImageHolder(None)
 
   def createEdgeGrid(rs: Int, cs: Int, rc: Int, cc: Int) = new HomogeneousEdgeGrid(
-    new LineStampContent(Strokes.normalDashedStamp, Color.BLACK), rs, cs, rc, cc)
+    new LineStampContent(StrokeLineStamp(NormalDashedStrokeVal), Color.BLACK), rs, cs, rc, cc)
   val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(0, 0, 10, 10))
 
   val decorationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))

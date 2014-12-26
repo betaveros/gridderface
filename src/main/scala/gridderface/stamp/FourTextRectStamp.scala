@@ -3,7 +3,7 @@ package gridderface.stamp
 import java.awt._
 import java.awt.geom._
 
-class FourTextRectStamp(string1: String, string2: String, string3: String, string4: String) extends TextRectStamp {
+case class FourTextRectStamp(string1: String, string2: String, string3: String, string4: String) extends TextRectStamp {
   def drawUnit(g2d: Graphics2D): Unit = {
     prepare(g2d)
     g2d.setFont(FourTextRectStamp.normalFont)

@@ -3,7 +3,7 @@ package gridderface.stamp
 import java.awt._
 import java.awt.geom._
 
-class OneTextRectStamp(string: String,
+case class OneTextRectStamp(string: String,
   fontSize: OneTextRectStamp.FontSize.Value = OneTextRectStamp.FontSize.Normal,
   horizontalAlignment: Float = 0.5f,
   verticalAlignment: Float = 0.5f) extends TextRectStamp {
