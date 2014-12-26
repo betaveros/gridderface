@@ -308,6 +308,8 @@ object Gridderface extends SimpleSwingApplication {
 
         case "screen" => readImageFromScreen(); Success("Read image from screen")
 
+        case "dump" => gridList foreach (GridderfaceStringifier dumpGriddablePositionMap _); Success("Dumped to stdout")
+
         case "guess" => bg.image match {
           case Some(img: BufferedImage) => gridMode.grid = GridGuesser guess img; Success("Guess")
           case Some(_) => Failed("Background image not buffered (!?)")

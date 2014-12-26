@@ -2,7 +2,7 @@ package gridderface
 
 import java.awt.Graphics2D
 
-class CellGriddable(content: RectContent, position: CellPosition) extends Griddable {
+case class CellGriddable(content: RectContent, position: CellPosition) extends Griddable {
   override def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     CellGriddable.drawOnGrid(content, position, grid, g2d)
   }

@@ -3,7 +3,7 @@ package gridderface
 import java.awt.Graphics2D
 import gridderface.EdgeOrientation._
 
-class EdgeGriddable(content: LineContent, position: EdgePosition) extends Griddable {
+case class EdgeGriddable(content: LineContent, position: EdgePosition) extends Griddable {
   override def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     EdgeGriddable.drawOnGrid(content, position, grid, g2d)
   }

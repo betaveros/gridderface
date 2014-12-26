@@ -2,7 +2,7 @@ package gridderface
 
 import java.awt.Graphics2D
 
-class IntersectionGriddable(content: PointContent, position: IntersectionPosition) extends Griddable {
+case class IntersectionGriddable(content: PointContent, position: IntersectionPosition) extends Griddable {
   override def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     IntersectionGriddable.drawOnGrid(content, position, grid, g2d)
   }

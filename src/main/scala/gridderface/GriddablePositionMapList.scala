@@ -13,9 +13,9 @@ class GriddablePositionMapList extends Griddable with ContentPutter {
   reactions += {
     case GriddableChanged(g) if g != this => publish(GriddableChanged(this))
   }
-  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
-    _list foreach {_.drawOnGrid(grid, g2d)}
-  }
+  def foreach(f: GriddablePositionMap => Unit): Unit = _list foreach f
+  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit =
+    foreach(_.drawOnGrid(grid, g2d))
   def put(p: Position, g: Griddable) = {
     _currentMap.put(p, g)
   }
