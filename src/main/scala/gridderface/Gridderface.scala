@@ -152,26 +152,26 @@ object Gridderface extends SimpleSwingApplication {
   }
   def fixedOpacityCommand(op: Float, args: Array[String]): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(args);
+      arg <- StatusUtilities.getSingleElement(args);
       buf <- getOpacityBufferAsStatus(arg)
     ) yield { buf.opacity = op; "" }
   }
   def opacityCommand(args: Array[String]): Status[String] = {
     for (
-      _ <- CommandUtilities.counted(args, (2 == _));
+      _ <- StatusUtilities.counted(args, (2 == _));
       buf <- getOpacityBufferAsStatus(args(0));
-      a <- CommandUtilities.tryToFloat(args(1));
+      a <- StatusUtilities.tryToFloat(args(1));
       a2 <- safeAlpha(a)
     ) yield { buf.opacity = a2; "" }
   }
   def setMultiplyCommand(mul: Boolean, args: Array[String]): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(args);
+      arg <- StatusUtilities.getSingleElement(args);
       buf <- getOpacityBufferAsStatus(arg)
     ) yield { buf.multiply = mul; "" }
   }
   def getDimensionPair(args: Array[String], defaultVal: Int): Status[(Int, Int)] = {
-    for (ints <- CommandUtilities.countedIntArguments(args, Set(0, 1, 2).contains(_))) yield {
+    for (ints <- StatusUtilities.countedIntArguments(args, Set(0, 1, 2).contains(_))) yield {
       ints.length match {
         case 0 => (defaultVal, defaultVal)
         case 1 =>
@@ -190,7 +190,7 @@ object Gridderface extends SimpleSwingApplication {
       decorationGridSeq.griddable = GriddableSeq.empty
 
       gridMode.grid = SimpleGrid.generationGrid
-      bg.image = Some(CommandUtilities.createFilledImage(
+      bg.image = Some(StatusUtilities.createFilledImage(
         32 * (1 + cols), 32 * (1 + rows), Color.WHITE))
       edgeGridHolder.griddable = createEdgeGrid(0, 0, rows, cols)
       "Ready for generation"
@@ -212,13 +212,13 @@ object Gridderface extends SimpleSwingApplication {
     if (args.length != 1) Failed("Error: wrong number of arguments")
     else generateImage() match {
       case None => Failed("Error: no background")
-      case Some(img) => CommandUtilities.writeImage(img, args(0))
+      case Some(img) => StatusUtilities.writeImage(img, args(0))
 
     }
   }
   def readImageFrom(args: Array[String]): Status[String] = {
-    for (arg <- CommandUtilities.getSingleElement(args);
-         result <- CommandUtilities.readImage(arg)) yield {
+    for (arg <- StatusUtilities.getSingleElement(args);
+         result <- StatusUtilities.readImage(arg)) yield {
       bg.image = result; "OK"
     }
   }
@@ -231,7 +231,7 @@ object Gridderface extends SimpleSwingApplication {
     }
   }
   def readColorCommand(args: Array[String]) = {
-    CommandUtilities.getSingleElement(args) flatMap setColor
+    StatusUtilities.getSingleElement(args) flatMap setColor
   }
   /*
   def parseHomogeneousGrid(pair: (String, String), rows: Int, cols: Int) = {
@@ -255,7 +255,7 @@ object Gridderface extends SimpleSwingApplication {
     Success("Copied " + str.length + " characters to clipboard")
   }
   def dumpGriddables(args: Array[String]): Status[String] = {
-    for (arg <- CommandUtilities.getOptionalElement(args)) yield arg match {
+    for (arg <- StatusUtilities.getOptionalElement(args)) yield arg match {
       case None => gridList flatMap (GridderfaceStringifier stringifyGriddablePositionMap _) foreach (println _)
       case Some(f) => {
         val p = new java.io.PrintWriter(new java.io.File(f))
@@ -270,7 +270,7 @@ object Gridderface extends SimpleSwingApplication {
   }
   def parseGriddablesFrom(args: Array[String]): Status[String] = {
     for (
-      arg <- CommandUtilities.getSingleElement(args);
+      arg <- StatusUtilities.getSingleElement(args);
       _ <- GridderfaceStringifier.readGriddablePositionsFromInto(
         Source.fromFile(arg), gridList)
     ) yield "OK"

@@ -9,7 +9,7 @@ import java.awt.Paint
 import java.awt.Graphics2D
 import scala.collection.GenSeqLike
 
-object CommandUtilities {
+object StatusUtilities {
   def tryToFloat(str: String): Status[Float] = {
     try {
       Success(str.toFloat)

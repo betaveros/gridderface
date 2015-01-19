@@ -8,9 +8,9 @@ object GridderfaceStringifier {
   def stringifyColor(c: Color): String = Seq(c.getRed(), c.getGreen(), c.getBlue()).mkString(",")
   def parseColor(s: String): Status[Color] = s.split(",") match {
     case Array(rs, gs, bs) => for (
-      r <- CommandUtilities tryToInt rs;
-      g <- CommandUtilities tryToInt gs;
-      b <- CommandUtilities tryToInt bs
+      r <- StatusUtilities tryToInt rs;
+      g <- StatusUtilities tryToInt gs;
+      b <- StatusUtilities tryToInt bs
     ) yield new Color(r, g, b)
     case _ => Failed("Color does not have 3 components")
   }
@@ -40,12 +40,12 @@ object GridderfaceStringifier {
       for (line <- s.getLines()) {
         val tokens = line split "\\s+"
         val res = for (
-          t0 <- CommandUtilities.getElementByIndex(tokens, 0);
-          t1 <- CommandUtilities.getElementByIndex(tokens, 1);
-          t2 <- CommandUtilities.getElementByIndex(tokens, 2);
-          t3 <- CommandUtilities.getElementByIndex(tokens, 3);
-          r <- CommandUtilities tryToInt t1;
-          c <- CommandUtilities tryToInt t2;
+          t0 <- StatusUtilities.getElementByIndex(tokens, 0);
+          t1 <- StatusUtilities.getElementByIndex(tokens, 1);
+          t2 <- StatusUtilities.getElementByIndex(tokens, 2);
+          t3 <- StatusUtilities.getElementByIndex(tokens, 3);
+          r <- StatusUtilities tryToInt t1;
+          c <- StatusUtilities tryToInt t2;
           color <- parseColor(t3);
           ret <- tokens(0) match {
             case "c" => p.putCell(CellPosition(r, c),

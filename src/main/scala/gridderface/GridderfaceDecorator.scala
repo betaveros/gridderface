@@ -7,7 +7,7 @@ import gridderface.stamp._
 class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   def decorationClearCommand(restArgs: Array[String]): Status[String] = {
     for (
-      _ <- CommandUtilities.counted(
+      _ <- StatusUtilities.counted(
         restArgs, (0 == _), "Error: decorate clear takes no extra arguments")
     ) yield {
       seq.griddable = GriddableSeq.empty
@@ -15,7 +15,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
     }
   }
   def getBoundTuple(args: Array[String], defRows: Int, defCols: Int): Status[(Int, Int, Int, Int)] = {
-    for (ints <- CommandUtilities.countedIntArguments(args, Set(0, 2, 4).contains(_))) yield {
+    for (ints <- StatusUtilities.countedIntArguments(args, Set(0, 2, 4).contains(_))) yield {
       ints.length match {
         case 0 => (0, 0, defRows, defCols)
         case 2 => (0, 0, ints(0), ints(1))
@@ -25,7 +25,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   }
   def decorationEdgeCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
     for (
-      ecs <- CommandUtilities.getElementByIndex(restArgs, 0);
+      ecs <- StatusUtilities.getElementByIndex(restArgs, 0);
       bt <- getBoundTuple(restArgs.tail, rows, cols);
       econt <- GridderfaceStringParser.parseLineContentString(ecs)
     ) yield {
@@ -36,7 +36,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   }
   def decorationBorderCommand(restArgs: Array[String], rows: Int, cols: Int): Status[String] = {
     for (
-      ecs <- CommandUtilities.getElementByIndex(restArgs, 0);
+      ecs <- StatusUtilities.getElementByIndex(restArgs, 0);
       bt <- getBoundTuple(restArgs.tail, rows, cols);
       econt <- GridderfaceStringParser.parseLineContentString(ecs)
     ) yield {
@@ -92,7 +92,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
     }
   }
   def decorationPresetCommand(restArgs: Array[String], rows: Int, cols: Int, append: Boolean): Status[String] = {
-    val presetTokens = (for (s <- CommandUtilities.getElementByIndex(restArgs, 0)) yield s split ',')
+    val presetTokens = (for (s <- StatusUtilities.getElementByIndex(restArgs, 0)) yield s split ',')
 
     val presetStatList = presetTokens map (_ map getPresetAsStatus)
     val presetListStat = for (psl <- presetStatList; res <- psl.foldLeft(
@@ -112,7 +112,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   def decorationCommand(args: Array[String], dim: (Int, Int)): Status[String] = {
     val (rows, cols) = dim
     for (
-      _ <- CommandUtilities.counted(args, (0 < _), "Error: decorate requires arguments");
+      _ <- StatusUtilities.counted(args, (0 < _), "Error: decorate requires arguments");
       result <- (args(0) match {
         case "clear" => decorationClearCommand(args.tail)
         case "edge" => decorationEdgeCommand(args.tail, rows, cols)
