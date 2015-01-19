@@ -2,6 +2,8 @@ package gridderface
 
 import java.awt.Graphics2D
 import scala.collection.immutable.TreeMap
+import scala.collection.GenTraversableOnce
+import scala.collection.generic.CanBuildFrom
 
 // a list of GriddablePositionMaps which keeps track of its own order
 // as well as one active map in the list for modification.
@@ -14,6 +16,8 @@ class GriddablePositionMapList extends Griddable with ContentPutter {
     case GriddableChanged(g) if g != this => publish(GriddableChanged(this))
   }
   def foreach(f: GriddablePositionMap => Unit): Unit = _list foreach f
+  // vvv I just copied this from the List documentation vvv
+  def flatMap[B, That](f: (GriddablePositionMap) => GenTraversableOnce[B])(implicit bf: CanBuildFrom[List[GriddablePositionMap], B, That]): That = _list.flatMap(f)(bf)
   def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit =
     foreach(_.drawOnGrid(grid, g2d))
   def put(p: Position, g: Griddable) = {

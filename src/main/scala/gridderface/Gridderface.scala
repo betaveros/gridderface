@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import java.io.IOException
 import java.io.File
+import scala.io.Source
 
 object Gridderface extends SimpleSwingApplication {
 
@@ -253,6 +254,28 @@ object Gridderface extends SimpleSwingApplication {
     Toolkit.getDefaultToolkit.getSystemClipboard.setContents(sel, null)
     Success("Copied " + str.length + " characters to clipboard")
   }
+  def dumpGriddables(args: Array[String]): Status[String] = {
+    for (arg <- CommandUtilities.getOptionalElement(args)) yield arg match {
+      case None => gridList flatMap (GridderfaceStringifier stringifyGriddablePositionMap _) foreach (println _)
+      case Some(f) => {
+        val p = new java.io.PrintWriter(new java.io.File(f))
+        try {
+          gridList flatMap (GridderfaceStringifier stringifyGriddablePositionMap _) foreach (p println _)
+        } finally {
+          p.close()
+        }
+      }
+    }
+    Success("Dumped")
+  }
+  def parseGriddablesFrom(args: Array[String]): Status[String] = {
+    for (
+      arg <- CommandUtilities.getSingleElement(args);
+      _ <- GridderfaceStringifier.readGriddablePositionsFromInto(
+        Source.fromFile(arg), gridList)
+    ) yield "OK"
+  }
+
   def handleColonCommand(str: String): Status[String] = {
     val parts = "\\s+".r.split(str.trim)
     if (parts.length > 0) {
@@ -308,8 +331,8 @@ object Gridderface extends SimpleSwingApplication {
 
         case "screen" => readImageFromScreen(); Success("Read image from screen")
 
-        case "dump" => gridList foreach (GridderfaceStringifier dumpGriddablePositionMap _); Success("Dumped to stdout")
-
+        case "dump" => dumpGriddables(parts.tail)
+        case "parse" => parseGriddablesFrom(parts.tail)
         case "guess" => bg.image match {
           case Some(img: BufferedImage) => gridMode.grid = GridGuesser guess img; Success("Guess")
           case Some(_) => Failed("Background image not buffered (!?)")

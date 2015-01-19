@@ -48,6 +48,13 @@ object CommandUtilities {
   def getSingleElement[Elt,A <% GenSeqLike[Elt,Any]](args: A): Status[Elt] = {
     for (_ <- counted(args, (1 == _))) yield args(0)
   }
+  def getOptionalElement[Elt,A <% GenSeqLike[Elt,Any]](args: A): Status[Option[Elt]] = {
+    args.length match {
+      case 0 => Success(None)
+      case 1 => Success(Some(args(0)))
+      case _ => Failed(wrongArgumentNumberMessage)
+    }
+  }
   def getTwoElements[Elt,A <% GenSeqLike[Elt,Any]](args: A): Status[(Elt, Elt)] = {
     for (_ <- counted(args, (2 == _))) yield (args(0), args(1))
   }
