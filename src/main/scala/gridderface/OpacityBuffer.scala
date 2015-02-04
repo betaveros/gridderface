@@ -1,11 +1,15 @@
 package gridderface
 
-import java.awt.{Graphics2D, Dimension, AlphaComposite}
+import java.awt._
 import java.awt.image.BufferedImage
 import scala.swing.Publisher
 import java.awt.geom.AffineTransform
 
-class OpacityBuffer(val original: Griddable, private var _opacity: Float, private var _multiply: Boolean = false) extends Publisher {
+class OpacityBuffer(val original: Griddable,
+  private var _opacity: Float,
+  private var _antiAlias: Boolean = false,
+  private var _textAntiAlias: Boolean = false,
+  private var _multiply: Boolean = false) extends Publisher {
   // okay, so one reasonably obvious way to speed up Gridderface is to cache the
   // stuff that this buffer does. Unfortunately, my crappy and arguably
   // severely overgeneralized current method of implementation requires that the
@@ -32,6 +36,16 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float, privat
     _opacity = op
     publish(BufferChanged(this))
   }
+  def antiAlias = _antiAlias
+  def antiAlias_=(aa: Boolean) = {
+    _antiAlias = aa
+    publish(BufferChanged(this))
+  }
+  def textAntiAlias = _textAntiAlias
+  def textAntiAlias_=(aa: Boolean) = {
+    _textAntiAlias = aa
+    publish(BufferChanged(this))
+  }
   def multiply = _multiply
   def multiply_=(m: Boolean) = {
     _multiply = m
@@ -43,6 +57,8 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float, privat
   private var cache: Option[BufferedImage] = None
   private var cacheGrid: Option[SimpleGrid] = None
   private var cacheTransform: Option[AffineTransform] = None
+  private var cacheAntiAlias: Option[Boolean] = None
+  private var cacheTextAntiAlias: Option[Boolean] = None
 
   def ensureDimensions(dim: Dimension) {
     if (dim.width > curWidth) curWidth = 2*curWidth max dim.width
@@ -53,6 +69,8 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float, privat
     ensureDimensions(dim)
     val buf = new BufferedImage(curWidth, curHeight, BufferedImage.TYPE_INT_ARGB)
     val lg = buf.createGraphics()
+    lg.setRenderingHint(RenderingHints.KEY_ANTIALIASING, if (antiAlias) RenderingHints.VALUE_ANTIALIAS_ON else RenderingHints.VALUE_ANTIALIAS_OFF)
+    lg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, if (textAntiAlias) RenderingHints.VALUE_TEXT_ANTIALIAS_ON else RenderingHints.VALUE_TEXT_ANTIALIAS_OFF)
     lg transform transform
     original.drawOnGrid(grid, lg)
 
@@ -65,6 +83,8 @@ class OpacityBuffer(val original: Griddable, private var _opacity: Float, privat
     if (!(cache.nonEmpty
         && cacheGrid.exists(_ equals grid)
         && cacheTransform.exists(_ equals transform)
+        && cacheAntiAlias.exists(_ equals antiAlias)
+        && cacheTextAntiAlias.exists(_ equals textAntiAlias)
         && dim.height <= curHeight
         && dim.width <= curWidth)) {
       recache(grid, g2d, transform, dim)

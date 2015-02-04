@@ -7,7 +7,6 @@ abstract class TextRectStamp extends ScalableRectStamp {
   val magicScale = 1.0 / 24.0
   def prepare(g2d: Graphics2D): Unit = {
     g2d.scale(magicScale, magicScale)
-    g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_OFF)
   }
   def drawAligned(g2d: Graphics2D, lowX: Float, lowY: Float, highX: Float, highY: Float, horizontalAlignment: Float, verticalAlignment: Float, string: String): Unit = {
     val fm = g2d.getFontMetrics()

@@ -1,8 +1,7 @@
 package gridderface
 
 import scala.swing.Panel
-import java.awt.Color
-import java.awt.Graphics2D
+import java.awt._
 import scala.collection.immutable._
 import gridderface.stamp._
 import scala.collection.mutable.ListBuffer

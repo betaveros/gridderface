@@ -170,6 +170,18 @@ object Gridderface extends SimpleSwingApplication {
       buf <- getOpacityBufferAsStatus(arg)
     ) yield { buf.multiply = mul; "" }
   }
+  def setAntiAliasCommand(aa: Boolean, args: Array[String]): Status[String] = {
+    for (
+      arg <- StatusUtilities.getSingleElement(args);
+      buf <- getOpacityBufferAsStatus(arg)
+    ) yield { buf.antiAlias = aa; "" }
+  }
+  def setTextAntiAliasCommand(aa: Boolean, args: Array[String]): Status[String] = {
+    for (
+      arg <- StatusUtilities.getSingleElement(args);
+      buf <- getOpacityBufferAsStatus(arg)
+    ) yield { buf.textAntiAlias = aa; "" }
+  }
   def getDimensionPair(args: Array[String], defaultVal: Int): Status[(Int, Int)] = {
     for (ints <- StatusUtilities.countedIntArguments(args, Set(0, 1, 2).contains(_))) yield {
       ints.length match {
@@ -319,6 +331,14 @@ object Gridderface extends SimpleSwingApplication {
         case "mul"      => setMultiplyCommand(true, parts.tail)
         case "nomultiply" => setMultiplyCommand(false, parts.tail)
         case "nomul"      => setMultiplyCommand(false, parts.tail)
+        case "antialias" => setAntiAliasCommand(true, parts.tail)
+        case "aa"        => setAntiAliasCommand(true, parts.tail)
+        case "noantialias" => setAntiAliasCommand(false, parts.tail)
+        case "noaa"        => setAntiAliasCommand(false, parts.tail)
+        case "textantialias" => setTextAntiAliasCommand(true, parts.tail)
+        case "taa"           => setTextAntiAliasCommand(true, parts.tail)
+        case "notextantialias" => setTextAntiAliasCommand(false, parts.tail)
+        case "notaa"           => setTextAntiAliasCommand(false, parts.tail)
 
         case "color" => readColorCommand(parts.tail)
 
