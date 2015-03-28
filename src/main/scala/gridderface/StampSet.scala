@@ -19,6 +19,8 @@ object StampSet {
     "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(FilledSquareFixedMark(0.125)))
   val dashSet = new StampSet(
     "Dash", Some(DashedFillRectStamp), Some(StrokeLineStamp(NormalDashedStrokeVal)), Some(DiskFixedMark(0.125)))
+  val thinDashSet = new StampSet(
+    "thinDash", Some(DashedFillRectStamp), Some(StrokeLineStamp(ThinDashedStrokeVal)), Some(DiskFixedMark(0.125)))
   val dotSet = new StampSet(
     "Dot", Some(BulbRectStamp(0.25)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
   val cornerDotSet = new StampSet(
@@ -48,7 +50,7 @@ object StampSet {
     val basicMappings = List(KeyTypedData('f') -> fillSet,
         KeyTypedData('F') -> shadefillSet,
         KeyTypedData('d') -> dashSet,
-        KeyTypedData('D') -> dotSet,
+        KeyTypedData('D') -> thinDashSet,
         KeyTypedData('s') -> mediumSet,
         KeyTypedData('.') -> dotSet,
         KeyTypedData(',') -> cornerDotSet,
