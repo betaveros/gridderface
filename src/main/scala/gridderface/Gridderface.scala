@@ -23,12 +23,10 @@ object Gridderface extends SimpleSwingApplication {
   val selectedManager = new SelectedPositionManager(Some(new IntersectionPosition(0, 0)))
   val gridList = new GriddablePositionMapList()
   // qq, initialization order
-  val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid)
+  val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid, 10, 10)
   val bg = new GriddableImageHolder(None)
 
-  def createEdgeGrid(rs: Int, cs: Int, rc: Int, cc: Int) = new HomogeneousEdgeGrid(
-    new LineStampContent(StrokeLineStamp(NormalDashedStrokeVal), Color.BLACK), rs, cs, rc, cc)
-  val edgeGridHolder = new GriddableAdaptor(createEdgeGrid(0, 0, 10, 10))
+  val edgeGridHolder = new GriddableAdaptor(HomogeneousEdgeGrid.defaultEdgeGrid(10, 10))
 
   val decorationGridSeq = new GriddableAdaptor[GriddableSeq](new GriddableSeq(List.empty))
   val decorator = new GridderfaceDecorator(decorationGridSeq)
@@ -104,7 +102,7 @@ object Gridderface extends SimpleSwingApplication {
     (bg, 1.0f, "image", true),
     (decorationGridSeq, 1.0f, "decoration", true),
     (gridList, 1.0f, "content", true),
-    (edgeGridHolder, 0.5f, "grid", false),
+    (gridMode, 0.5f, "grid", false),
     (selectedManager, 0.75f, "cursor", false))
   val opacityBufferList: List[Tuple3[String, OpacityBuffer, Boolean]] =
     for ((g, opacity, name, generateFlag) <- griddableList) yield {
@@ -204,7 +202,7 @@ object Gridderface extends SimpleSwingApplication {
       gridMode.grid = SimpleGrid.generationGrid
       bg.image = Some(StatusUtilities.createFilledImage(
         32 * (1 + cols), 32 * (1 + rows), Color.WHITE))
-      edgeGridHolder.griddable = createEdgeGrid(0, 0, rows, cols)
+      gridMode.setRowColCount(rows, cols)
       "Ready for generation"
     }
   }

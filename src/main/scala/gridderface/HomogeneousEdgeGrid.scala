@@ -1,6 +1,7 @@
 package gridderface
 
-import java.awt.Graphics2D
+import java.awt.{ Graphics2D, Color }
+import gridderface.stamp._
 
 class HomogeneousEdgeGrid(val content: LineContent, val rowStart: Int, val colStart: Int, val rowCount: Int, val colCount: Int) extends Griddable {
 
@@ -15,4 +16,10 @@ class HomogeneousEdgeGrid(val content: LineContent, val rowStart: Int, val colSt
       }
     }
   }
+}
+object HomogeneousEdgeGrid {
+  def defaultEdgeGrid(rc: Int, cc: Int): HomogeneousEdgeGrid =
+    new HomogeneousEdgeGrid(
+      new LineStampContent(StrokeLineStamp(NormalDashedStrokeVal), Color.BLACK),
+      0, 0, rc, cc)
 }
