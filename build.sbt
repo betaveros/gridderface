@@ -1,7 +1,11 @@
+import com.github.retronym.SbtOneJar._
+
 name := "gridderface"
 
 version := "0.1"
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.11.5"
 
-libraryDependencies += "org.scala-lang" % "scala-swing" % "2.10.0"
+libraryDependencies += "org.scala-lang.modules" % "scala-swing_2.11" % "2.0.0-M2"
+
+oneJarSettings

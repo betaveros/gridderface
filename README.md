@@ -21,8 +21,6 @@ then this is the program for you!
 4. `sbt run`.
 5. Cross your fingers.
 
-(Aside: I just fiddled with Scala versions and bumping the version to 2.11 gives me weird errors, possibly related to the unfortunate fact that scala.swing doesn't have a maintainer for 2.11 but also possibly because I suck at configuration. So I'm keeping it at 2.10 for now.)
-
 ## General Usage
 
 The general way keys and commands work should be familiar to any Vim user, except that Gridderface doesn't yet support arbitrarily abbreviating commands.
