@@ -71,6 +71,10 @@ object Gridderface extends SimpleSwingApplication {
     case KeyTypedData('\t') => false // cannot detect modifiers, apparently
     case KeyTypedData(_) => true
     case KeyPressedData(Key.Tab, _) => true
+    case KeyPressedData(Key.Left, _) => true
+    case KeyPressedData(Key.Down, _) => true
+    case KeyPressedData(Key.Up, _) => true
+    case KeyPressedData(Key.Right, _) => true
     case _ => false
   }
 
