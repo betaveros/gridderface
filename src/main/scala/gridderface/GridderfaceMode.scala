@@ -15,5 +15,7 @@ trait GridderfaceMode extends Publisher {
   def mouseReactions: PartialFunction[MouseEvent, Unit]
   def status: String
   def handleCommand(prefix: Char, str: String): Status[String]
+  def handleColonCommand(command: String, args: Array[String]): Status[String] =
+    Failed("Unrecognized command: " + command)
 }
 case class StatusChanged(src: GridderfaceMode) extends Event

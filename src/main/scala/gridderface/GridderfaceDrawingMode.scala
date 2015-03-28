@@ -1,15 +1,12 @@
 package gridderface
 
-import java.awt.{ Paint, Color }
+import java.awt.{ Paint, Color, Point } // must avoid java.awt.List
 import scala.collection.immutable.HashMap
-import scala.swing.event.{ MouseEvent, MouseClicked }
-import scala.swing.event.MousePressed
-import java.awt.Point
+import scala.swing.event._
 import gridderface.stamp._
 
-class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter,
+class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gridList: GriddablePositionMapList,
   point2pos: java.awt.Point => Position, commandStarter: Char => Unit) extends GridderfaceMode {
-  val name = "Draw"
   private var cellPaint: Paint = Color.BLACK
   private var cellPaintName: String = "Black"
   private var edgePaint: Paint = Color.BLACK
@@ -23,7 +20,7 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
   private var _lockMultiplier = 1
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, cellPaint)
-    putter.putCell(cpos, fgContent)
+    gridList.putCell(cpos, fgContent)
   }
   def ensureLock() {
     sel.selected = sel.selected map _lockFunction
@@ -45,13 +42,13 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     _lockMultiplier = 1
   }
   def putLineStamp(epos: EdgePosition, st: LineStamp) =
-    putter.putEdge(epos, new LineStampContent(st, edgePaint))
+    gridList.putEdge(epos, new LineStampContent(st, edgePaint))
   def putPointStamp(ipos: IntersectionPosition, st: PointStamp) =
-    putter.putIntersection(ipos, new PointStampContent(st, intersectionPaint))
+    gridList.putIntersection(ipos, new PointStampContent(st, intersectionPaint))
 
   def putClearRectStampAtSelected() = {
     sel.selected foreach (se => se match {
-      case cpos: CellPosition => putter.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
+      case cpos: CellPosition => gridList.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
       case epos: EdgePosition => putLineStamp(epos, ClearStamp)
       case ipos: IntersectionPosition => putPointStamp(ipos, ClearStamp)
     })
@@ -156,6 +153,16 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     case List(KeyTypedData('w'), d2) =>
       unitComplete(WriteSet.defaultMap andThen setWriteSet lift d2)
   }
+  def gridListReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
+    case List(KeyPressedData(Key.Tab, 0)) => {
+      gridList.selectNextGrid()
+      KeyCompleteWith(Success(gridList.status))
+    }
+    case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
+      gridList.selectNextGrid()
+      KeyCompleteWith(Success(gridList.status))
+    }
+  }
   def handleCommand(prefix: Char, str: String) = prefix match {
     case '=' =>
       putStampAtSelected(Some(new OneTextRectStamp(str))); Success("You put " + str)
@@ -178,7 +185,23 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
         case _ => Failed("Wrong number of tokens for &")
       }
     }
-    case c => Failed("Drawing Mode can't handle this prefix: " + c)
+  }
+  override def handleColonCommand(command: String, args: Array[String]) = command match {
+    case "lock"   => lockToCells(); Success("Locked to cells")
+    case "ilock"  => lockToIntersections(); Success("Locked to intersections")
+    case "unlock" => unlock(); Success("Unlocked")
+
+    case "newgrid" =>
+      gridList.addGrid(); Success(gridList.status ++ " New grid added")
+    case "delgrid" =>
+      gridList.removeGrid(); Success(gridList.status ++ " Current grid removed")
+    case "delall" =>
+      gridList.removeAll(); Success(gridList.status ++ " All grids removed")
+    case "clear" =>
+      gridList.clearGrid(); Success(gridList.status ++ " Content cleared")
+    case "clearall" =>
+      gridList.clearAll(); Success(gridList.status ++ " All content cleared")
+    case c => Failed("Unrecognized command: " + c)
   }
   def setPaintSet(ps: PaintSet) {
     cellPaint = ps.paint
@@ -220,7 +243,8 @@ class GridderfaceDrawingMode(sel: SelectedPositionManager, putter: ContentPutter
     orElse commandStartReactions
     orElse completePF(StampSet.defaultMap andThen putStampSet)
     orElse paintReactions
-    orElse writeReactions)
+    orElse writeReactions
+    orElse gridListReactions)
   def selectNear(pt: Point) {
     sel.selected = Some(point2pos(pt))
     ensureLock()

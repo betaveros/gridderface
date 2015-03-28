@@ -21,6 +21,7 @@ import scala.io.Source
 object Gridderface extends SimpleSwingApplication {
 
   val selectedManager = new SelectedPositionManager(Some(new IntersectionPosition(0, 0)))
+  val underGridList = new GriddablePositionMapList()
   val gridList = new GriddablePositionMapList()
   // qq, initialization order
   val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid, 10, 10)
@@ -43,15 +44,8 @@ object Gridderface extends SimpleSwingApplication {
     case List(KeyTypedData('\04' /*^D*/)) => setMode(drawMode); KeyComplete
     case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); KeyComplete
     case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); KeyComplete
+    case List(KeyTypedData('\25' /*^U*/)) => setMode(underDrawMode); KeyComplete
     case List(KeyTypedData('\26' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); KeyComplete
-    case List(KeyPressedData(Key.Tab, 0)) => {
-      gridList.selectNextGrid()
-      KeyCompleteWith(Success(gridList.status))
-    }
-    case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
-      gridList.selectNextGrid()
-      KeyCompleteWith(Success(gridList.status))
-    }
   }
   var currentMode: GridderfaceMode = drawMode
 
@@ -104,6 +98,7 @@ object Gridderface extends SimpleSwingApplication {
 
   val griddableList: List[Tuple4[Griddable, Float, String, Boolean]] = List(
     (bg, 1.0f, "image", true),
+    (underGridList, 1.0f, "undercontent", true),
     (decorationGridSeq, 1.0f, "decoration", true),
     (gridList, 1.0f, "content", true),
     (gridMode, 0.5f, "grid", false),
@@ -299,16 +294,6 @@ object Gridderface extends SimpleSwingApplication {
         // just pretend this is for testing if errors work
         case "Ni!" => Failed("Do you demand a shrubbery?")
         case "quit" => sys.exit()
-        case "newgrid" =>
-          gridList.addGrid(); Success(gridList.status ++ " New grid added")
-        case "delgrid" =>
-          gridList.removeGrid(); Success(gridList.status ++ " Current grid removed")
-        case "delall" =>
-          gridList.removeAll(); Success(gridList.status ++ " All grids removed")
-        case "clear" =>
-          gridList.clearGrid(); Success(gridList.status ++ " Content cleared")
-        case "clearall" =>
-          gridList.clearAll(); Success(gridList.status ++ " All content cleared")
         case "clearimage" =>
           bg.image = None; Success("Image cleared")
         case "resetgrid" => {
@@ -347,10 +332,6 @@ object Gridderface extends SimpleSwingApplication {
         case "decorate" => decorationCommand(parts.tail)
         case "dec"      => decorationCommand(parts.tail)
 
-        case "lock"   => drawMode.lockToCells(); Success("Locked to cells")
-        case "ilock"  => drawMode.lockToIntersections(); Success("Locked to intersections")
-        case "unlock" => drawMode.unlock(); Success("Unlocked")
-
         case "screen" => readImageFromScreen(); Success("Read image from screen")
 
         case "dump" => dumpGriddables(parts.tail)
@@ -361,7 +342,7 @@ object Gridderface extends SimpleSwingApplication {
           case None => Failed("No background image")
         }
 
-        case _ => Failed("Unrecognized command")
+        case command => currentMode.handleColonCommand(command, parts.tail)
       }
     } else Success("")
   }
@@ -372,12 +353,16 @@ object Gridderface extends SimpleSwingApplication {
   })
   val modeLabel = new Label()
   val statusLabel = new Label()
-  val drawMode = new GridderfaceDrawingMode(selectedManager, gridList,
+  val underDrawMode = new GridderfaceDrawingMode("underDraw",
+    selectedManager, underGridList,
+    pt => computePosition(pt), commandLine.startCommandMode(_))
+  val drawMode = new GridderfaceDrawingMode("Draw",
+    selectedManager, gridList,
     pt => computePosition(pt), commandLine.startCommandMode(_))
   lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
   // gah, the initialization sequence here is tricky
 
-  listenTo(drawMode, gridMode, viewportMode)
+  listenTo(underDrawMode, drawMode, gridMode, viewportMode)
   setMode(drawMode)
 
   reactions += {
