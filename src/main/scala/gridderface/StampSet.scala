@@ -22,11 +22,11 @@ object StampSet {
   val dotSet = new StampSet(
     "Dot", Some(BulbRectStamp(0.25)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
   val cornerDotSet = new StampSet(
-    "CornerDot", Some(BulbRectStamp(0.25, 0.25, 0.25)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
+    "CornerDot", Some(BulbRectStamp(0.25, 0.25, 0.25)), Some(DiskFixedMark(0.125)), Some(CircleFixedMark(0.125, ThinStrokeVal)))
   val circleSet = new StampSet(
-    "Circle", Some(CircleRectStamp(0.6875)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.125)))
+    "Circle", Some(CircleRectStamp(0.6875)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.25, ThinStrokeVal)))
   val bulbSet = new StampSet(
-    "Bulb", Some(BulbRectStamp(0.75)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
+    "Bulb", Some(BulbRectStamp(0.75)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.28125)))
   val eSet = new StampSet(
     "11/Trans", Some(OneTextRectStamp("11")), Some(TransverseLineStamp(NormalStrokeVal)), None)
   val clearSet = new StampSet(
