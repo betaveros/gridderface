@@ -283,4 +283,5 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case MousePressed(_, pt, _, _, _) => selectNear(pt)
     case MouseClicked(_, pt, _, _, _) => selectNear(pt)
   }
+  def cursorPaint = SelectedPositionManager.greenPaint
 }

@@ -26,4 +26,5 @@ class GridderfaceViewportMode(panel: GridPanel) extends GridderfaceMode {
   def keyListReactions = new SingletonListPartialFunction(moveReactions orElse
     zoomReactions andThen {u: Unit => KeyComplete})
   val mouseReactions: PartialFunction[MouseEvent, Unit] = Map.empty
+  def cursorPaint = SelectedPositionManager.redGrayPaint
 }

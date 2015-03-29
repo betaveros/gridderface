@@ -131,4 +131,5 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
     }
     case _ => ()
   }
+  def cursorPaint = SelectedPositionManager.blueGrayPaint
 }

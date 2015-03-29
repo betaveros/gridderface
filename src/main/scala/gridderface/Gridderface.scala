@@ -54,6 +54,7 @@ object Gridderface extends SimpleSwingApplication {
   private def currentMouseReactions = currentMode.mouseReactions
   def setMode(mode: GridderfaceMode) {
     currentMode = mode
+    selectedManager.paint = mode.cursorPaint
     modeLabel.text = mode.name
     statusLabel.text = mode.status
   }
