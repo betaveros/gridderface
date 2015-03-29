@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 import javax.swing.TransferHandler
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-import java.awt.geom.AffineTransform
+import java.awt.geom._
 import javax.swing.KeyStroke
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
@@ -24,7 +24,8 @@ object Gridderface extends SimpleSwingApplication {
   val underGridList = new GriddablePositionMapList()
   val gridList = new GriddablePositionMapList()
   // qq, initialization order
-  val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid, 10, 10)
+  val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid, 10, 10,
+    (pt: Point2D) => gridPanel.viewToGrid(pt))
   val bg = new GriddableImageHolder(None)
 
   val edgeGridHolder = new GriddableAdaptor(HomogeneousEdgeGrid.defaultEdgeGrid(10, 10))
@@ -114,10 +115,11 @@ object Gridderface extends SimpleSwingApplication {
   val opacityBufferMap = HashMap(
     (for ((name, buf, _) <- opacityBufferList) yield (name, buf)): _*)
 
-  val gridPanel = new GridPanel(gridMode) {
+  val gridPanel: GridPanel = new GridPanel(gridMode) {
     peer setFocusTraversalKeysEnabled false // prevent tab key from being consumed
     listenTo(keys)
     listenTo(mouse.clicks)
+    listenTo(mouse.moves)
 
     for ((_, obuf, _) <- opacityBufferList) { buffers += obuf; listenTo(obuf) }
 

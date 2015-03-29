@@ -33,7 +33,7 @@ class GridPanel(val provider: GridProvider) extends Panel {
     transform.translate(x, y)
     repaint()
   }
-  def viewToGrid(pt: Point2D) = transform.inverseTransform(pt, null)
+  def viewToGrid(pt: Point2D): Point2D = transform.inverseTransform(pt, null)
   def getScale() = transform.getScaleX()
   def scale(s: Double) = {transform.scale(s, s); repaint()}
 
