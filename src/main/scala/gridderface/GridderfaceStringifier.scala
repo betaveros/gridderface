@@ -33,6 +33,7 @@ object GridderfaceStringifier {
         if (s == ClearStamp) None else
           Some("i %d %d %s %s".format(r, c, stringifyColor(color), StampStringifier.stringifyPointStamp(s)))
       }
+      case c => throw new IllegalArgumentException("Cannot stringify position/griddable: " + c.toString)
     })
   }
   def readGriddablePositionsFromInto(s: Source, p: ContentPutter): Status[Unit] = {

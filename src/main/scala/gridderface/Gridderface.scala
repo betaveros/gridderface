@@ -39,15 +39,14 @@ object Gridderface extends SimpleSwingApplication {
   }
   private def ctrl(c: Char): Char = (c - 64).toChar
   val globalKeyListReactions: PartialFunction[List[KeyData], KeyResult] = {
-    case List(KeyTypedData(':'         )) => commandLine.startCommandMode(':'); KeyComplete
-    case List(KeyTypedData('@'         )) => commandLine.startCommandMode('@'); KeyComplete
-    case List(KeyTypedData('\04' /*^D*/)) => setMode(drawMode); KeyComplete
-    case List(KeyTypedData('\07' /*^G*/)) => setMode(gridMode); KeyComplete
-    case List(KeyTypedData('\20' /*^P*/)) => setMode(viewportMode); KeyComplete
-    case List(KeyTypedData('\25' /*^U*/)) => setMode(underDrawMode); KeyComplete
-    case List(KeyTypedData('\26' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); KeyComplete
+    case List(KeyTypedData(':'            )) => commandLine.startCommandMode(':'); KeyComplete
+    case List(KeyTypedData('@'            )) => commandLine.startCommandMode('@'); KeyComplete
+    case List(KeyTypedData('\u0004' /*^D*/)) => setMode(drawMode); KeyComplete
+    case List(KeyTypedData('\u0007' /*^G*/)) => setMode(gridMode); KeyComplete
+    case List(KeyTypedData('\u0010' /*^P*/)) => setMode(viewportMode); KeyComplete
+    case List(KeyTypedData('\u0015' /*^U*/)) => setMode(underDrawMode); KeyComplete
+    case List(KeyTypedData('\u0016' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); KeyComplete
   }
-  var currentMode: GridderfaceMode = drawMode
 
   private def currentMouseReactions = currentMode.mouseReactions
   def setMode(mode: GridderfaceMode) {
@@ -64,10 +63,10 @@ object Gridderface extends SimpleSwingApplication {
   private def isUsefulKeyData(d: KeyData) = d match {
     case KeyTypedData('\t') => false // cannot detect modifiers, apparently
     case KeyTypedData(_) => true
-    case KeyPressedData(Key.Tab, _) => true
-    case KeyPressedData(Key.Left, _) => true
-    case KeyPressedData(Key.Down, _) => true
-    case KeyPressedData(Key.Up, _) => true
+    case KeyPressedData(Key.Tab,   _) => true
+    case KeyPressedData(Key.Left,  _) => true
+    case KeyPressedData(Key.Down,  _) => true
+    case KeyPressedData(Key.Up,    _) => true
     case KeyPressedData(Key.Right, _) => true
     case _ => false
   }
@@ -360,6 +359,7 @@ object Gridderface extends SimpleSwingApplication {
     selectedManager, gridList,
     pt => computePosition(pt), commandLine.startCommandMode(_))
   lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
+  var currentMode: GridderfaceMode = drawMode
   // gah, the initialization sequence here is tricky
 
   listenTo(underDrawMode, drawMode, gridMode, viewportMode)
