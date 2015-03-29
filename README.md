@@ -76,15 +76,21 @@ There are lots of keys for entering particular figures on cells, edges, and inte
 
 You can also enter arbitrary text into cells with one of several keys: `=`, `;`, `^`, or `_`. All four keys will enter the command line, where you can type some text and hit Enter. `=` enters big text. `;`, `^`, and `_` enter small text aligned in different places.
 
+Also, `&` lets you enter Tapa-style clues, e.g. `&1 1 3` will put 1, 1, and 3 in the current cell.
+
+There is also a `@` feature where after you type text and hit enter, it gets copied to the clipboard. This is useful for composing your answer key in a competition.
+
 If you're solving a puzzle where you spend most or all of your time marking only cells (e.g. Sudoku, Nurikabe, crosswords), you can lock the cursor to only ever select cells with `:lock`. For intersections, it's `:ilock`. To unlock, `:unlock`.
 
 To make drawing continuous lines easier, you can use `HJKL`. They can also be set to erase or draw other things, by typing `w` followed by another character (see [WriteSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/WriteSet.scala)).
 
 To change the color of your marks, type `c` followed by a letter (see [PaintSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/PaintSet.scala)) or `%` followed by either a color name or a hex color in `#abcdef` format (with the hash!)
 
+For example, `cr` makes your color red, and `ck` makes it black.
+
 ## Create a Puzzle
 
-You can initialize a blank image with standard dimensions (10x10), standard grid dimensions, and standard position with `:initgen`. The command can be followed by one or two numbers to specify the dimensions.
+You can initialize a blank image with standard dimensions (10x10), standard grid dimensions, and standard position with `:initgen`. The command can be followed by one or two numbers to specify the dimensions, e.g. `:initgen 13 37`.
 
 For most puzzles, you now want to draw a grid into which the clues will do. These commands will create some of the presets:
 
@@ -97,22 +103,35 @@ You can choose exactly what grids you want and where you want them, which you ma
 
 After you're done, `:write filename.png` will output a file.
 
-## Layer Visuals Manipulation
+## Layers Manipulation
 
-"Layers"
+Sometimes, two dimensions aren't enough. For example, sometimes you want to draw a filled block and then write text on top of it. If you try doing this directly you'll find putting the text in a cell overwrites the block.
 
-There are a couple commands for changing how "layers" are displayed.
+To let you do this, Gridderface has layers. In Draw mode, the `1/1` in the status indicates the current layer, where you're drawing, and how many layers there are total.
 
-Layers are:
+- `:newlayer` adds a new layer.
+- `TAB` switches between different layers.
+- `:rmlayer` removes the current layer.
+- `:clear` clears the current layer of all marks.
+
+This is useful in solving puzzles too: if you want to bifurcate in solving, you can create a new layer and draw on it; if it doesn't work out, it's easy to clear or delete just your marks on that layer.
+
+By the way, `CTRL+Tab` lets you draw on the `undercontent`, which is its own group of layers that is underneath the decoration grid. This is useful if you want to shade certain cells of the grid without covering the grid lines.
+
+## Buffers
+
+You can change things about how they are drawn. In order from top to bottom, buffers are:
 
 - `image`
 - `undercontent`
 - `decoration`
-- `content`
+- `content` (stuff you've drawn)
 - `grid`
 - `cursor`
 
+Here are commands.
+
 - `:opacity` (or `:op`), as mentioned above, changes the opacity of layers
 `:hide` and `:show` are short for calling `:opacity` with `0` or `1`.
-- `:multiply` (or `:mul`) makes the layer drawn by multiplying each pixel value with the one below. Black multiplied by any color is black, but white multiplied by any color is that color. `:nomultiply` (or `:nomul`) undoes this.
+- `:multiply` (or `:mul`) makes the layer drawn by multiplying each pixel value with the one below. Black multiplied by any color is black, but white multiplied by any color is that color. `:nomultiply` (or `:nomul`) undoes this. This often makes filling cells look nicer: for example, if the puzzle image is a black grid and you fill a cell with red, normally the red will block part of the black grid. It's even worse if the black cell had black text in it you still want to see. If you `:multiply content`, then the black will show neatly through the red.
 - `:antialias` (`:aa`; `:noantialias`, `:noaa`) changes the general antialias settings for the layer. `:textantialias` (`:taa`; `:notextantialias`, `:notaa`) does the same only for text.
