@@ -15,7 +15,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
   private var intersectionPaintName: String = "Black"
   private var writeSet: WriteSet = WriteSet.writeSet
   private var lastStampSet: Option[StampSet] = None
-  private var _status: String = "Black"
+  private var _paintStatus: String = "Black"
   private var _lockFunction: Position => Position = identity[Position]
   private var _lockMultiplier = 1
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
@@ -68,7 +68,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
     sel.selected foreach (pos => putStampAtPosition(pos, rectStamp, lineStamp,
       pointStamp))
   }
-  def status = _status
+  def status = _paintStatus + " | " + gridList.status
   def putStampSet(s: StampSet): Unit = {
     lastStampSet = Some(s)
     putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
@@ -156,11 +156,13 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
   def gridListReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
     case List(KeyPressedData(Key.Tab, 0)) => {
       gridList.selectNextGrid()
-      KeyCompleteWith(Success(gridList.status))
+      publish(StatusChanged(this))
+      KeyCompleteWith(Success("Selected layer " ++ gridList.status))
     }
     case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
       gridList.selectNextGrid()
-      KeyCompleteWith(Success(gridList.status))
+      publish(StatusChanged(this))
+      KeyCompleteWith(Success("Selected layer " ++ gridList.status))
     }
   }
   def handleCommand(prefix: Char, str: String) = prefix match {
@@ -192,15 +194,20 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
     case "unlock" => unlock(); Success("Unlocked")
 
     case "newgrid" =>
-      gridList.addGrid(); Success(gridList.status ++ " New grid added")
+      gridList.addGrid(); publish(StatusChanged(this))
+      Success("New grid added")
     case "delgrid" =>
-      gridList.removeGrid(); Success(gridList.status ++ " Current grid removed")
+      gridList.removeGrid(); publish(StatusChanged(this))
+      Success("Current grid removed")
     case "delall" =>
-      gridList.removeAll(); Success(gridList.status ++ " All grids removed")
+      gridList.removeAll(); publish(StatusChanged(this))
+      Success("All grids removed")
     case "clear" =>
-      gridList.clearGrid(); Success(gridList.status ++ " Content cleared")
+      gridList.clearGrid(); publish(StatusChanged(this))
+      Success("Content cleared")
     case "clearall" =>
-      gridList.clearAll(); Success(gridList.status ++ " All content cleared")
+      gridList.clearAll(); publish(StatusChanged(this))
+      Success("All content cleared")
     case c => Failed("Unrecognized command: " + c)
   }
   def setPaintSet(ps: PaintSet) {
@@ -210,28 +217,28 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
     edgePaintName = ps.name
     intersectionPaint = ps.paint
     intersectionPaintName = ps.name
-    _status = ps.name
+    _paintStatus = ps.name
     publish(StatusChanged(this))
   }
-  def createStatus() {
-    _status = cellPaintName ++ " / " ++ edgePaintName ++ " / " ++ intersectionPaintName
+  def createPaintStatus() {
+    _paintStatus = cellPaintName ++ " / " ++ edgePaintName ++ " / " ++ intersectionPaintName
   }
   def setCellPaintSet(ps: PaintSet) {
     cellPaint = ps.paint
     cellPaintName = ps.name
-    createStatus()
+    createPaintStatus()
     publish(StatusChanged(this))
   }
   def setEdgePaintSet(ps: PaintSet) {
     edgePaint = ps.paint
     edgePaintName = ps.name
-    createStatus()
+    createPaintStatus()
     publish(StatusChanged(this))
   }
   def setIntersectionPaintSet(ps: PaintSet) {
     intersectionPaint = ps.paint
     intersectionPaintName = ps.name
-    createStatus()
+    createPaintStatus()
     publish(StatusChanged(this))
   }
   def setWriteSet(ws: WriteSet) {
