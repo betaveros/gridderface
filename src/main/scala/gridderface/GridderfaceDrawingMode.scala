@@ -5,8 +5,12 @@ import scala.collection.immutable.HashMap
 import scala.swing.event._
 import gridderface.stamp._
 
-class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gridList: GriddablePositionMapList,
+class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
+  gridLists: List[GriddablePositionMapList],
+  gridListNames: List[Option[String]],
+  private var _currentListIndex: Int,
   point2pos: java.awt.Point => Position, commandStarter: Char => Unit) extends GridderfaceMode {
+
   private var cellPaint: Paint = Color.BLACK
   private var cellPaintName: String = "Black"
   private var edgePaint: Paint = Color.BLACK
@@ -18,9 +22,10 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
   private var _paintStatus: String = "Black"
   private var _lockFunction: Position => Position = identity[Position]
   private var _lockMultiplier = 1
+  private var _gridList = gridLists(_currentListIndex)
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, cellPaint)
-    gridList.putCell(cpos, fgContent)
+    _gridList.putCell(cpos, fgContent)
   }
   def ensureLock() {
     sel.selected = sel.selected map _lockFunction
@@ -42,13 +47,13 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
     _lockMultiplier = 1
   }
   def putLineStamp(epos: EdgePosition, st: LineStamp) =
-    gridList.putEdge(epos, new LineStampContent(st, edgePaint))
+    _gridList.putEdge(epos, new LineStampContent(st, edgePaint))
   def putPointStamp(ipos: IntersectionPosition, st: PointStamp) =
-    gridList.putIntersection(ipos, new PointStampContent(st, intersectionPaint))
+    _gridList.putIntersection(ipos, new PointStampContent(st, intersectionPaint))
 
   def putClearRectStampAtSelected() = {
     sel.selected foreach (se => se match {
-      case cpos: CellPosition => gridList.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
+      case cpos: CellPosition => _gridList.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
       case epos: EdgePosition => putLineStamp(epos, ClearStamp)
       case ipos: IntersectionPosition => putPointStamp(ipos, ClearStamp)
     })
@@ -68,7 +73,10 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
     sel.selected foreach (pos => putStampAtPosition(pos, rectStamp, lineStamp,
       pointStamp))
   }
-  def status = _paintStatus + " | " + gridList.status
+  def status = _paintStatus ++ " | " ++ (gridListNames(_currentListIndex) match {
+      case None => ""
+      case Some(s) => "(" ++ s ++ ")"
+    }) ++ _gridList.status
   def putStampSet(s: StampSet): Unit = {
     lastStampSet = Some(s)
     putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
@@ -155,14 +163,20 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
   }
   def gridListReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
     case List(KeyPressedData(Key.Tab, 0)) => {
-      gridList.selectNextGrid()
+      _gridList.selectNextGrid()
       publish(StatusChanged(this))
-      KeyCompleteWith(Success("Selected layer " ++ gridList.status))
+      KeyCompleteWith(Success("Selected layer " ++ _gridList.status))
     }
     case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
-      gridList.selectNextGrid()
+      _gridList.selectNextGrid()
       publish(StatusChanged(this))
-      KeyCompleteWith(Success("Selected layer " ++ gridList.status))
+      KeyCompleteWith(Success("Selected layer " ++ _gridList.status))
+    }
+    case List(KeyPressedData(Key.Tab, Key.Modifier.Control)) => {
+      _currentListIndex = (_currentListIndex + 1) % gridLists.length
+      _gridList = gridLists(_currentListIndex)
+      publish(StatusChanged(this))
+      KeyCompleteWith(Success("Selected layer list"))
     }
   }
   def handleCommand(prefix: Char, str: String) = prefix match {
@@ -188,25 +202,34 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager, gri
       }
     }
   }
+  def addLayer(): Status[String] = {
+    _gridList.addGrid(); publish(StatusChanged(this))
+    Success("New layer added")
+  }
+  def removeLayer(): Status[String] = {
+    _gridList.removeGrid(); publish(StatusChanged(this))
+    Success("Current layer removed")
+  }
+  def removeAll(): Status[String] = {
+    _gridList.removeAll(); publish(StatusChanged(this))
+    Success("All layers removed")
+  }
   override def handleColonCommand(command: String, args: Array[String]) = command match {
     case "lock"   => lockToCells(); Success("Locked to cells")
     case "ilock"  => lockToIntersections(); Success("Locked to intersections")
     case "unlock" => unlock(); Success("Unlocked")
 
-    case "newgrid" =>
-      gridList.addGrid(); publish(StatusChanged(this))
-      Success("New grid added")
-    case "delgrid" =>
-      gridList.removeGrid(); publish(StatusChanged(this))
-      Success("Current grid removed")
-    case "delall" =>
-      gridList.removeAll(); publish(StatusChanged(this))
-      Success("All grids removed")
+    case "newlayer" => addLayer()
+    case "addlayer" => addLayer()
+    case "rmlayer"  => removeLayer()
+    case "dellayer" => removeLayer()
+    case "rmall"    => removeAll()
+    case "delall"   => removeAll()
     case "clear" =>
-      gridList.clearGrid(); publish(StatusChanged(this))
+      _gridList.clearGrid(); publish(StatusChanged(this))
       Success("Content cleared")
     case "clearall" =>
-      gridList.clearAll(); publish(StatusChanged(this))
+      _gridList.clearAll(); publish(StatusChanged(this))
       Success("All content cleared")
     case c => Failed("Unrecognized command: " + c)
   }

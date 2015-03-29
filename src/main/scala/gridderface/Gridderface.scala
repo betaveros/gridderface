@@ -47,7 +47,6 @@ object Gridderface extends SimpleSwingApplication {
     case List(KeyTypedData('\u0004' /*^D*/)) => setMode(drawMode); KeyComplete
     case List(KeyTypedData('\u0007' /*^G*/)) => setMode(gridMode); KeyComplete
     case List(KeyTypedData('\u0010' /*^P*/)) => setMode(viewportMode); KeyComplete
-    case List(KeyTypedData('\u0015' /*^U*/)) => setMode(underDrawMode); KeyComplete
     case List(KeyTypedData('\u0016' /*^V*/)) => TransferHandler.getPasteAction().actionPerformed(new java.awt.event.ActionEvent(gridPanel.peer, java.awt.event.ActionEvent.ACTION_PERFORMED, "paste")); KeyComplete
   }
 
@@ -360,17 +359,17 @@ object Gridderface extends SimpleSwingApplication {
   })
   val modeLabel = new Label()
   val statusLabel = new Label()
-  val underDrawMode = new GridderfaceDrawingMode("underDraw",
-    selectedManager, underGridList,
-    pt => computePosition(pt), commandLine.startCommandMode(_))
   val drawMode = new GridderfaceDrawingMode("Draw",
-    selectedManager, gridList,
+    selectedManager,
+    List(gridList, underGridList),
+    List(None, Some("under")),
+    0,
     pt => computePosition(pt), commandLine.startCommandMode(_))
   lazy val viewportMode = new GridderfaceViewportMode(gridPanel)
   var currentMode: GridderfaceMode = drawMode
   // gah, the initialization sequence here is tricky
 
-  listenTo(underDrawMode, drawMode, gridMode, viewportMode)
+  listenTo(drawMode, gridMode, viewportMode)
   setMode(drawMode)
 
   reactions += {
