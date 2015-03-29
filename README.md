@@ -55,14 +55,16 @@ Issue the command `:read <filename>` to read an image from somewhere. Or drag an
 
 The command `:guess` will attempt to guess the location and size of the grid in the image. It is very naive as of the time of writing.
 
-Manually adjusting the grid can be done in **grid-setting mode**, entered with the key `CTRL-G`. Then you can use these keys:
+Manually adjusting the grid can be done in **grid-setting mode**, entered with the key <kbd>CTRL-G</kbd>. Then you can use these keys:
 
-- `hjkl` or arrow keys will change the grid position.
-- `HJKL` or shift--arrow keys will change one of the grid dimensions.
-- `+-` will change both grid dimensions together.
-- `[]{}` will change the number of rows or columns in the displayed grid.
+- <kbd>hjkl</kbd> or arrow keys will change the grid position.
+- <kbd>HJKL</kbd> or shift--arrow keys will change one of the grid dimensions.
+- <kbd>+-</kbd> will change both grid dimensions together.
+- <kbd>[]{}</kbd> will change the number of rows or columns in the displayed grid.
 
-Typing a number will make all of these keys adjust the grid by (exponentially) larger increments; typing `` ` `` (backquote) followed by a number will make the adjustments change by (exponentially) smaller increments. The exponential increment is displayed in the status bar as `(M2^<number>)`.
+Typing a number will make all of these keys adjust the grid by (exponentially) larger increments; typing <kbd>\`</kbd> (backquote) followed by a number will make the adjustments change by (exponentially) smaller increments. The exponential increment is displayed in the status bar as `(M2^<number>)`.
+
+To use the mouse, type `r` (for _resize_) and drag out the boundary of the grid you want. You'll have to first make the number of rows or columns correct. Alternatively, since the grid extends infinitely in all directions, you can skip that step and just drag out a rectangle the same size as a 10x10 square of puzzle cells, whether the puzzle's actual dimensions are bigger or smaller than 10x10.
 
 Once you've set up the grid, it's often very distracting from the image and your own marks. You can hide it with `:hide grid`, or, to make it transparent, something like `:op grid 0.1` (`:op` is short for `:opacity`, which works too; `0.1` should be a number between 0 and 1.)
 
@@ -70,9 +72,9 @@ To get it back, you can `:op grid 0.5`. Or for full opacity `:show grid` works t
 
 ### Solve
 
-You can start solving now! Enter `CTRL-D` to enter **drawing mode** (this is the default mode). Move the cursor around with the obvious `hjkl` or arrow keys.
+You can start solving now! Enter <kbd>CTRL-D</kbd> to enter **drawing mode** (this is the default mode). Move the cursor around with the obvious <kbd>hjkl</kbd> or arrow keys.
 
-There are lots of keys for entering particular figures on cells, edges, and intersections, including `f`, `.`, space, and all ten digits; see [StampSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/StampSet.scala) to see the list.
+There are lots of keys for entering particular figures on cells, edges, and intersections, including <kbd>f</kbd>, <kbd>.</kbd>, <kbd>Space</kbd>, and all ten digits; see below [StampSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/StampSet.scala) to see the list.
 
 You can also enter arbitrary text into cells with one of several keys: `=`, `;`, `^`, or `_`. All four keys will enter the command line, where you can type some text and hit Enter. `=` enters big text. `;`, `^`, and `_` enter small text aligned in different places.
 
@@ -82,11 +84,9 @@ There is also a `@` feature where after you type text and hit enter, it gets cop
 
 If you're solving a puzzle where you spend most or all of your time marking only cells (e.g. Sudoku, Nurikabe, crosswords), you can lock the cursor to only ever select cells with `:lock`. For intersections, it's `:ilock`. To unlock, `:unlock`.
 
-To make drawing continuous lines easier, you can use `HJKL`. They can also be set to erase or draw other things, by typing `w` followed by another character (see [WriteSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/WriteSet.scala)).
+To make drawing continuous lines easier, you can use `HJKL`. They can also be set to erase or draw other things, by typing `w` followed by another character (see below or [WriteSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/WriteSet.scala)).
 
-To change the color of your marks, type `c` followed by a letter (see [PaintSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/PaintSet.scala)) or `%` followed by either a color name or a hex color in `#abcdef` format (with the hash!)
-
-For example, `cr` makes your color red, and `ck` makes it black.
+To change the color of your marks, type `c` followed by a letter (see [PaintSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/PaintSet.scala)) or `%` followed by either a color name or a hex color in `#abcdef` format (with the hash!) For example, `cr` makes your color red, and `ck` makes it black.
 
 ## Create a Puzzle
 
@@ -99,9 +99,93 @@ For most puzzles, you now want to draw a grid into which the clues will do. Thes
 - `:dec pre nurikabe`
 - `:dec pre slitherlink`
 
+(`dec` is short for `decorate`; `pre` is short for `preset`.)
+
 You can choose exactly what grids you want and where you want them, which you may be able to figure out by looking at [GridderfaceDecorator.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/GridderfaceDecorator.scala), but these presets should be enough for 99% of uses.
 
-After you're done, `:write filename.png` will output a file.
+After you're done, `:write filename.png` will output an image file.
+
+## Detailed Drawing Mode
+
+**Drawing mode** is entered by typing <kbd>CTRL-D</kbd>. It is indicated by the text "Draw" in the lower-left corner and a green cursor.
+
+### Move the cursor
+
+Should be intuitive: <kbd>hjkl</kbd> or arrow keys.
+
+### Draw things
+
+A lot of keys draw things on the grid. Here are some examples.
+
+- <kbd>f</kbd> Fill, draw line
+- <kbd>F</kbd> Slashed/shaded fill
+- <kbd>0123456789</kbd> Number
+- <kbd>t</kbd> 10 or thick line
+- <kbd>e</kbd> 11 or "transverse line" (for larger numbers, enter them with <kbd>=</kbd>)
+- <kbd>o</kbd> Circle
+- <kbd>O</kbd> Filled circle / bulb
+- <kbd>x</kbd> Cross
+- <kbd>.</kbd> Dot
+- <kbd>,</kbd> Corner dot
+- <kbd>v</kbd> Check
+- <kbd>Space</kbd> Clear
+
+The full list is in [StampSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/StampSet.scala), although the above keys are less likely to change.
+
+### Write text
+
+These keys change focus to the command line. The text will be drawn after you type it into the command line and press Enter.
+
+- <kbd>=</kbd> default big text
+- <kbd>;</kbd> small centered text
+- <kbd>^</kbd> top-left text
+- <kbd>_</kbd> bottom-left text
+- <kbd>&</kbd> Tapa clues: arranges its space-separated arguments into the cell in a way depending on the number of arguments. Supports 1 to 4 arguments.
+- <kbd>@</kbd> Answer key helper: This does _not_ draw the text on the grid after you press Enter, but rather copies it to the clipboard. This is intended to give you a place to fill out the extracted answer key for a competition puzzle.
+
+## Draw continuous paths
+
+When you want to draw a continuous border, it's exhausting to type something like <kbd>f</kbd><kbd>Left</kbd><kbd>Left</kbd><kbd>f</kbd><kbd>Left</kbd><kbd>Left</kbd><kbd>f</kbd><kbd>Left</kbd><kbd>Left</kbd>...
+
+So instead you can use <kbd>HJKL</kbd> or shifted arrow keys to do the same thing.
+
+You can change the functionality of `HJKL` by typing `w` followed by a character (mnemonic: `w` is for _write_). Valid keys include:
+
+- `ww`: drawing solid lines (default)
+- `wd`: dashed lines
+- `we`: erase
+- `wx`: crosses
+- `w.`: dots
+
+The complete list of all keystrokes is in [WriteSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/WriteSet.scala), although the ones listed above are less likely to change than the ones only listed in the code.
+
+### Lock the cursor
+These commands change which positions the cursor is allowed to be in. They are useful if you only intend on drawing on cells or on intersections with rare or homogeneous paths on the edges, especially in combination with the above keys for drawing continuous paths.
+
+- `:unlock`: no restriction (default)
+- `:lock`: cursor only selects cells; `hjkl` jumps to the next cell
+- `:ilock`: cursor only selects intersections; `hjkl` jumps to the next intersection
+
+### Change the color
+
+- <kbd>k</kbd> = black
+- <kbd>r</kbd> = red
+- <kbd>g</kbd> = green
+- <kbd>b</kbd> = blue
+- <kbd>c</kbd> = cyan
+- <kbd>m</kbd> = magenta
+- <kbd>y</kbd> = yellow
+- <kbd>o</kbd> = orange
+- <kbd>i</kbd> = indigo
+- <kbd>l</kbd> = lemon
+- <kbd>K</kbd> = light gray
+- <kbd>R</kbd> = light red
+- <kbd>G</kbd> = light green
+- <kbd>B</kbd> = light blue
+- <kbd>C</kbd> = light cyan
+- <kbd>M</kbd> = light magenta
+- <kbd>Y</kbd> = light yellow
+- <kbd>w</kbd> = white
 
 ## Layers Manipulation
 
