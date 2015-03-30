@@ -20,6 +20,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   private var writeSet: WriteSet = WriteSet.writeSet
   private var lastStampSet: Option[StampSet] = None
   private var _paintStatus: String = "Black"
+  private var _drawStatus: String = ""
   private var _lockFunction: Position => Position = identity[Position]
   private var _lockMultiplier = 1
   private var _gridList = gridLists(_currentListIndex)
@@ -73,13 +74,25 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     sel.selected foreach (pos => putStampAtPosition(pos, rectStamp, lineStamp,
       pointStamp))
   }
-  def status = _paintStatus ++ " | " ++ (gridListNames(_currentListIndex) match {
+  def putContentAtSelected(rectContent: Option[RectContent] = None,
+    lineContent: Option[LineContent] = None,
+    pointContent: Option[PointContent] = None) {
+    sel.selected foreach (_ match {
+      case cpos: CellPosition => rectContent foreach (_gridList.putCell(cpos, _))
+      case epos: EdgePosition => lineContent foreach (_gridList.putEdge(epos, _))
+      case ipos: IntersectionPosition => pointContent foreach (_gridList.putIntersection(ipos, _))
+    })
+  }
+  def status = _drawStatus ++ _paintStatus ++ " | " ++ (gridListNames(_currentListIndex) match {
       case None => ""
       case Some(s) => "(" ++ s ++ ")"
     }) ++ _gridList.status
   def putStampSet(s: StampSet): Unit = {
     lastStampSet = Some(s)
     putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
+  }
+  def putContentSet(s: ContentSet): Unit = {
+    putContentAtSelected(s.rectContent, s.lineContent, s.pointContent)
   }
   def moveSelected(rd: Int, cd: Int) = {
     val mult = _lockMultiplier
@@ -219,6 +232,10 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "ilock"  => lockToIntersections(); Success("Locked to intersections")
     case "unlock" => unlock(); Success("Unlocked")
 
+    case "default" => _drawStatus = ""; _drawReactions = defaultDrawReactions; publish(StatusChanged(this)); Success("Default")
+    case "alpha"   => _drawStatus = "[alpha]"; _drawReactions = alphaDrawReactions; publish(StatusChanged(this)); Success("Alpha")
+    case "fill"    => _drawStatus = "[fill]"; _drawReactions = fillDrawReactions; publish(StatusChanged(this)); Success("Fill")
+
     case "newlayer" => addLayer()
     case "addlayer" => addLayer()
     case "rmlayer"  => removeLayer()
@@ -268,10 +285,15 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     writeSet = ws
     // publish(StatusChanged(this))
   }
+  val defaultDrawReactions = completePF(StampSet.defaultMap andThen putStampSet)
+  val alphaDrawReactions = completePF(StampSet.alphaMap andThen putStampSet)
+  val fillDrawReactions = completePF(ContentSet.fillMap andThen putContentSet)
+  private var _drawReactions = defaultDrawReactions
+
   def keyListReactions = (moveReactions
     orElse moveAndDrawReactions
     orElse commandStartReactions
-    orElse completePF(StampSet.defaultMap andThen putStampSet)
+    orElse _drawReactions
     orElse paintReactions
     orElse writeReactions
     orElse gridListReactions)

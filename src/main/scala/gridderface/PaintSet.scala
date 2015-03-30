@@ -33,14 +33,16 @@ object PaintSet {
   val lightMagentaSet = new PaintSet("LightMagenta", new Color(255,128,255))
   val lightYellowSet =  new PaintSet("LightYellow",  new Color(255,255,128))
   val whiteSet =        new PaintSet("White",        new Color(255,255,255))
-  val defaultMap: HashMap[KeyData, PaintSet] = HashMap(
-    KeyTypedData('k') -> blackSet,
+  val basicMap: HashMap[KeyData, PaintSet] = HashMap(
     KeyTypedData('r') -> redSet,
     KeyTypedData('g') -> greenSet,
     KeyTypedData('b') -> blueSet,
     KeyTypedData('c') -> cyanSet,
     KeyTypedData('m') -> magentaSet,
-    KeyTypedData('y') -> yellowSet,
+    KeyTypedData('y') -> yellowSet
+  )
+  val defaultMap: HashMap[KeyData, PaintSet] = basicMap ++ HashMap(
+    KeyTypedData('k') -> blackSet,
     KeyTypedData('o') -> orangeSet,
     KeyTypedData('i') -> indigoSet,
     KeyTypedData('l') -> lemonSet,
