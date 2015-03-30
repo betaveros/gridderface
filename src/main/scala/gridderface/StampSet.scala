@@ -5,47 +5,54 @@ import scala.swing.event.KeyEvent
 import scala.swing.event.KeyTyped
 import scala.collection.immutable.HashMap
 
-class StampSet(val name: String,
+case class StampSet(val name: String,
   val rectStamp: Option[RectStamp], val lineStamp: Option[LineStamp], val pointStamp: Option[PointStamp])
 
 object StampSet {
-  val fillSet = new StampSet(
+  val fillSet = StampSet(
     "Fill", Some(FillRectStamp), Some(StrokeLineStamp(NormalStrokeVal)), Some(FilledSquareFixedMark(0.125)))
-  val thickSet = new StampSet(
+  val thickSet = StampSet(
     "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(FilledSquareFixedMark(0.25)))
-  val mediumSet = new StampSet(
+  val mediumSet = StampSet(
     "Medium", None, Some(StrokeLineStamp(MediumStrokeVal)), Some(FilledSquareFixedMark(0.1875)))
-  val shadefillSet = new StampSet(
+  val shadefillSet = StampSet(
     "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(FilledSquareFixedMark(0.125)))
-  val dashSet = new StampSet(
+  val dashSet = StampSet(
     "Dash", Some(DashedFillRectStamp), Some(StrokeLineStamp(NormalDashedStrokeVal)), Some(DiskFixedMark(0.125)))
-  val thinDashSet = new StampSet(
+  val thinDashSet = StampSet(
     "thinDash", Some(DashedFillRectStamp), Some(StrokeLineStamp(ThinDashedStrokeVal)), Some(DiskFixedMark(0.125)))
-  val dotSet = new StampSet(
+  val dotSet = StampSet(
     "Dot", Some(BulbRectStamp(0.25)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
-  val cornerDotSet = new StampSet(
+  val cornerDotSet = StampSet(
     "CornerDot", Some(BulbRectStamp(0.25, 0.25, 0.25)), Some(DiskFixedMark(0.125)), Some(CircleFixedMark(0.125, ThinStrokeVal)))
-  val circleSet = new StampSet(
+  val circleSet = StampSet(
     "Circle", Some(CircleRectStamp(0.6875)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.25, ThinStrokeVal)))
-  val bulbSet = new StampSet(
+  val bulbSet = StampSet(
     "Bulb", Some(BulbRectStamp(0.75)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.28125)))
-  val eSet = new StampSet(
+  val eSet = StampSet(
     "11/Trans", Some(OneTextRectStamp("11")), Some(TransverseLineStamp(NormalStrokeVal)), None)
-  val clearSet = new StampSet(
+  val clearSet = StampSet(
     "Clear", Some(ClearStamp), Some(ClearStamp), Some(ClearStamp))
   val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
-  val slash1Set = new StampSet(
+  val slash1Set = StampSet(
     "\\", Some(MajorDiagonalStamp), None, None)
-  val slash2Set = new StampSet(
+  val slash2Set = StampSet(
     "/", Some(MinorDiagonalStamp), None, None)
-  val crossSet = new StampSet(
+  val crossSet = StampSet(
     "Cross", Some(CrossStamp), Some(crossMark), Some(crossMark))
-  val checkSet = new StampSet(
+  val checkSet = StampSet(
     "Check", Some(CheckStamp), None, None)
-  val lessSet = new StampSet(
+  val lessSet = StampSet(
     "LessThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Less)), None)
-  val greaterSet = new StampSet(
+  val greaterSet = StampSet(
     "GreaterThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Greater)), None)
+
+  def charMappings(cs: Seq[Char]): Seq[(KeyData, StampSet)] = cs map (c => KeyTypedData(c) ->
+    new StampSet("'" + c + "'", Some(new OneTextRectStamp(c.toString)), None, None))
+
+  val digitMappings = charMappings('0' to '9')
+  val letterMappings = charMappings('A' to 'Z')
+
   val defaultMap: Map[KeyData, StampSet] = {
     val basicMappings = List(KeyTypedData('f') -> fillSet,
         KeyTypedData('F') -> shadefillSet,
@@ -54,8 +61,8 @@ object StampSet {
         KeyTypedData('s') -> mediumSet,
         KeyTypedData('.') -> dotSet,
         KeyTypedData(',') -> cornerDotSet,
-        KeyTypedData('o') -> circleSet,
-        KeyTypedData('O') -> bulbSet,
+        KeyTypedData('o') -> bulbSet,
+        KeyTypedData('O') -> circleSet,
         KeyTypedData('b') -> bulbSet,
         KeyTypedData('e') -> eSet,
         KeyTypedData('t') -> thickSet,
@@ -66,10 +73,9 @@ object StampSet {
         KeyTypedData('>') -> greaterSet,
         KeyTypedData(' ') -> clearSet,
         KeyTypedData('x') -> crossSet)
-    val digitMappings = (0 to 9) map (i => KeyTypedData(('0' + i).toChar) ->
-      new StampSet("'" + i + "'", Some(new OneTextRectStamp("" + i)), None, None))
     HashMap((basicMappings ++ digitMappings): _*)
   }
+  val alphaMap: Map[KeyData, StampSet] = defaultMap ++ letterMappings
 
   //    case KeyTyped(_, 'f', _, _) => fillSet
   //    case KeyTyped(_, 't', _, _) => thickSet
