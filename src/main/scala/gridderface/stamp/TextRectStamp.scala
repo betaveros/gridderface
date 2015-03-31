@@ -4,9 +4,8 @@ import java.awt._
 import java.awt.geom._
 
 abstract class TextRectStamp extends ScalableRectStamp {
-  val magicScale = 1.0 / 24.0
   def prepare(g2d: Graphics2D): Unit = {
-    g2d.scale(magicScale, magicScale)
+    g2d.scale(TextRectStamp.magicScale, TextRectStamp.magicScale)
   }
   def drawAligned(g2d: Graphics2D, lowX: Float, lowY: Float, highX: Float, highY: Float, horizontalAlignment: Float, verticalAlignment: Float, string: String): Unit = {
     val fm = g2d.getFontMetrics()
@@ -62,5 +61,7 @@ object TextRectStamp {
   val font16 = new Font("Arial", Font.PLAIN, 16)
   val font14 = new Font("Arial", Font.PLAIN, 14)
   val font12 = new Font("Arial", Font.PLAIN, 12)
-  val magicScale = 1.0 / 24.0
+  val font10  = new Font("Arial", Font.PLAIN, 10)
+  val magicSize = 24.0f
+  val magicScale = 1.0f / magicSize
 }

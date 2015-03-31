@@ -141,7 +141,8 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     KeyTypedData(';') -> ';',
     KeyTypedData('^') -> '^',
     KeyTypedData('_') -> '_',
-    KeyTypedData('&') -> '&')
+    KeyTypedData('&') -> '&',
+    KeyTypedData('#') -> '#')
   def commandStartReactions = completePF(
     (sel.selected match {
       // bugnote: "case _: Some[CellPosition]" is too lax, I think due to type erasure
@@ -214,6 +215,8 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
         case _ => Failed("Wrong number of tokens for &")
       }
     }
+    case '#' =>
+      putStampAtSelected(Some(SudokuPencilRectStamp.createSudokuPencilRectStampFromString(str))); Success("")
   }
   def addLayer(): Status[String] = {
     _gridList.addGrid(); publish(StatusChanged(this))
