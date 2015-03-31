@@ -291,9 +291,9 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   private var _drawReactions = defaultDrawReactions
 
   def keyListReactions = (moveReactions
-    orElse moveAndDrawReactions
     orElse commandStartReactions
     orElse _drawReactions
+    orElse moveAndDrawReactions
     orElse paintReactions
     orElse writeReactions
     orElse gridListReactions)
