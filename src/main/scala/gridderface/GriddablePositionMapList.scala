@@ -32,6 +32,9 @@ class GriddablePositionMapList extends Griddable with ContentPutter {
   def clearGrid() = {
     _currentMap.clear()
   }
+  def mapUpdateCurrent(f: Griddable => Griddable) {
+    _currentMap mapUpdate f
+  }
   def clearAll() = {
     _list foreach {_.clear()}
   }

@@ -1,10 +1,10 @@
 package gridderface
 
 import java.awt.Graphics2D
-import scala.collection.immutable.TreeMap
+import scala.collection.immutable._
 
 class GriddablePositionMap extends Griddable with ContentPutter {
-  var map = new TreeMap[Position, Griddable]
+  var map: SortedMap[Position, Griddable] = new TreeMap[Position, Griddable]
   def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     map foreach {_._2.drawOnGrid(grid, g2d)}
   }
@@ -20,6 +20,10 @@ class GriddablePositionMap extends Griddable with ContentPutter {
     put(p, new IntersectionGriddable(c, p))
   def clear() {
     map = new TreeMap[Position, Griddable]
+    publish(GriddableChanged(this))
+  }
+  def mapUpdate(f: Griddable => Griddable) {
+    map = map mapValues f
     publish(GriddableChanged(this))
   }
 }

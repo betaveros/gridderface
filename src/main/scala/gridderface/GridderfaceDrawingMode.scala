@@ -272,6 +272,24 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "alpha"   => _drawStatus = "[alpha]"; _drawReactions = alphaDrawReactions; publish(StatusChanged(this)); Success("Alpha")
     case "fill"    => _drawStatus = "[fill]"; _drawReactions = fillDrawReactions; publish(StatusChanged(this)); Success("Fill")
 
+    case "recolor" => for (
+      arg <- StatusUtilities.getSingleElement(args);
+      set <- GridderfaceStringParser.parseColorString(arg)) yield {
+      _gridList mapUpdateCurrent (_ match {
+          case CellGriddable(RectStampContent(stamp, _), pos) => (
+            CellGriddable(RectStampContent(stamp, set.paint), pos)
+          )
+          case EdgeGriddable(LineStampContent(stamp, _), pos) => (
+            EdgeGriddable(LineStampContent(stamp, set.paint), pos)
+          )
+          case IntersectionGriddable(PointStampContent(stamp, _), pos) => (
+            IntersectionGriddable(PointStampContent(stamp, set.paint), pos)
+          )
+          case x => x
+        })
+      "Recolored current layer with " + arg
+    }
+
     case "newlayer" => addLayer()
     case "addlayer" => addLayer()
     case "rmlayer"  => removeLayer()
