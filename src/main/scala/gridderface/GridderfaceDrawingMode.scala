@@ -193,9 +193,42 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       KeyCompleteWith(Success("Selected layer list"))
     }
   }
-  def handleCommand(prefix: Char, str: String) = prefix match {
-    case '=' =>
-      putStampAtSelected(Some(new OneTextRectStamp(str))); Success("You put " + str)
+  def handleCommand(prefix: Char, str: String): Status[String] = prefix match {
+    case '=' => {
+      if (str.length == 0) return Success("Canceled")
+      val start = if (str.length >= 2) str.substring(0, 2) else str.substring(0, 1)
+      start match {
+        case "-^" => {
+          if (str.length == 2) {
+            putStampAtSelected(Some(ArrowStamp( 0, -1))); Success("You put an upward arrow")
+          } else {
+            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), UpArrow))); Success("You put an upward arrow with text")
+          }
+        }
+        case "-v" => {
+          if (str.length == 2) {
+            putStampAtSelected(Some(ArrowStamp( 0,  1))); Success("You put a downward arrow")
+          } else {
+            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), DownArrow))); Success("You put a downward arrow with text")
+          }
+        }
+        case "<-" => {
+          if (str.length == 2) {
+            putStampAtSelected(Some(ArrowStamp(-1,  0))); Success("You put a leftward arrow")
+          } else {
+            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), LeftArrow))); Success("You put a leftward arrow with text")
+          }
+        }
+        case "->" => {
+          if (str.length == 2) {
+            putStampAtSelected(Some(ArrowStamp( 1,  0))); Success("You put a rightward arrow")
+          } else {
+            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), RightArrow))); Success("You put a rightward arrow with text")
+          }
+        }
+        case _ => putStampAtSelected(Some(new OneTextRectStamp(str))); Success("You put " + str)
+      }
+    }
     case ';' =>
       putStampAtSelected(Some(new OneTextRectStamp(str, OneTextRectStamp.FontSize.Small))); Success("You put " + str)
     case '^' =>
