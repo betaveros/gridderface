@@ -61,8 +61,10 @@ class OpacityBuffer(val original: Griddable,
   private var cacheTextAntiAlias: Option[Boolean] = None
 
   def ensureDimensions(dim: Dimension) {
-    if (dim.width > curWidth) curWidth = 2*curWidth max dim.width
-    if (dim.height > curHeight) curHeight = 2*curHeight max dim.height
+    if (dim.width > curWidth) curWidth = (curWidth * 4 / 3) max dim.width
+    else if (dim.width * 2 < curWidth) curWidth = dim.width * 4 / 3
+    if (dim.height > curHeight) curHeight = (curHeight * 4 / 3) max dim.height
+    else if (dim.height * 2 < curHeight) curHeight = dim.height * 4 / 3
   }
 
   private def recache(grid: SimpleGrid, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
@@ -79,14 +81,16 @@ class OpacityBuffer(val original: Griddable,
     cacheTransform = Some(transform.clone().asInstanceOf[AffineTransform])
   }
 
+  def fit(dd: Int, cd: Int) = dd <= cd && dd * 2 >= cd
+
   def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
     if (!(cache.nonEmpty
         && cacheGrid.exists(_ equals grid)
         && cacheTransform.exists(_ equals transform)
         && cacheAntiAlias.exists(_ equals antiAlias)
         && cacheTextAntiAlias.exists(_ equals textAntiAlias)
-        && dim.height <= curHeight
-        && dim.width <= curWidth)) {
+        && fit(dim.height, curHeight)
+        && fit(dim.width, curWidth))) {
       recache(grid, g2d, transform, dim)
     }
     val buf = cache.get
