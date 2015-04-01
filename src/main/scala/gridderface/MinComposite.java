@@ -7,21 +7,22 @@ package gridderface;
 import java.awt.*;
 import java.awt.image.*;
 
-public class MultiplyComposite implements Composite {
+public class MinComposite implements Composite {
 	private float alpha;
-	public MultiplyComposite(float alpha) {
+	public MinComposite(float alpha) {
 		this.alpha = alpha;
 	}
 	public CompositeContext createContext(
 			ColorModel srcColorModel,
 			ColorModel dstColorModel,
 			RenderingHints hints) {
-		return new MultiplyContext(alpha);
+		return new MinContext(alpha);
 	}
-	private static class MultiplyContext extends ComponentContext {
-		private MultiplyContext(float alpha) { super(alpha); }
+	private static class MinContext extends ComponentContext {
+		private MinContext(float alpha) { super(alpha); }
 		public int combine(int s, int d, float srcAlpha) {
-			return d + (int) (((s*d / 255) - d) * alpha * srcAlpha);
+			if (d <= s) return d;
+			return d + (int) ((s - d) * alpha * srcAlpha);
 		}
 	}
 }

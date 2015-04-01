@@ -164,11 +164,11 @@ object Gridderface extends SimpleSwingApplication {
       a2 <- safeAlpha(a)
     ) yield { buf.opacity = a2; "" }
   }
-  def setMultiplyCommand(mul: Boolean, args: Array[String]): Status[String] = {
+  def setBlendModeCommand(mode: OpacityBuffer.BlendMode.Value, args: Array[String]): Status[String] = {
     for (
       arg <- StatusUtilities.getSingleElement(args);
       buf <- getOpacityBufferAsStatus(arg)
-    ) yield { buf.multiply = mul; "" }
+    ) yield { buf.blendMode = mode; "" }
   }
   def setAntiAliasCommand(aa: Boolean, args: Array[String]): Status[String] = {
     for (
@@ -317,10 +317,10 @@ object Gridderface extends SimpleSwingApplication {
         case "opacity" => opacityCommand(parts.tail)
         case "op"      => opacityCommand(parts.tail)
 
-        case "multiply" => setMultiplyCommand(true, parts.tail)
-        case "mul"      => setMultiplyCommand(true, parts.tail)
-        case "nomultiply" => setMultiplyCommand(false, parts.tail)
-        case "nomul"      => setMultiplyCommand(false, parts.tail)
+        case "multiply" => setBlendModeCommand(OpacityBuffer.Multiply, parts.tail)
+        case "mul"      => setBlendModeCommand(OpacityBuffer.Multiply, parts.tail)
+        case "min"      => setBlendModeCommand(OpacityBuffer.Min, parts.tail)
+        case "normal"   => setBlendModeCommand(OpacityBuffer.Normal, parts.tail)
         case "antialias" => setAntiAliasCommand(true, parts.tail)
         case "aa"        => setAntiAliasCommand(true, parts.tail)
         case "noantialias" => setAntiAliasCommand(false, parts.tail)

@@ -9,7 +9,7 @@ class OpacityBuffer(val original: Griddable,
   private var _opacity: Float,
   private var _antiAlias: Boolean = false,
   private var _textAntiAlias: Boolean = false,
-  private var _multiply: Boolean = false) extends Publisher {
+  private var _blendMode: OpacityBuffer.BlendMode.Value = OpacityBuffer.Normal) extends Publisher {
   // okay, so one reasonably obvious way to speed up Gridderface is to cache the
   // stuff that this buffer does. Unfortunately, my crappy and arguably
   // severely overgeneralized current method of implementation requires that the
@@ -46,9 +46,9 @@ class OpacityBuffer(val original: Griddable,
     _textAntiAlias = aa
     publish(BufferChanged(this))
   }
-  def multiply = _multiply
-  def multiply_=(m: Boolean) = {
-    _multiply = m
+  def blendMode = _blendMode
+  def blendMode_=(m: OpacityBuffer.BlendMode.Value) = {
+    _blendMode = m
     publish(BufferChanged(this))
   }
 
@@ -91,9 +91,22 @@ class OpacityBuffer(val original: Griddable,
     }
     val buf = cache.get
     val cs = g2d.getComposite
-    g2d setComposite (if (multiply) new MultiplyComposite(opacity) else AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity))
+    g2d setComposite OpacityBuffer.getComposite(blendMode, opacity)
     g2d.drawImage(buf, 0, 0, buf.getWidth, buf.getHeight, null)
     g2d setComposite cs
   }
 
+}
+object OpacityBuffer {
+  object BlendMode extends Enumeration {
+    val Normal, Multiply, Min = Value
+  }
+  val Normal   = BlendMode.Normal
+  val Multiply = BlendMode.Multiply
+  val Min      = BlendMode.Min
+  def getComposite(m: BlendMode.Value, opacity: Float) = m match {
+    case Normal   => AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity)
+    case Multiply => new MultiplyComposite(opacity)
+    case Min      => new MinComposite(opacity)
+  }
 }
