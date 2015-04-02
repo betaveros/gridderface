@@ -5,7 +5,7 @@ import java.awt.Paint
 import gridderface.stamp.LineStamp
 
 case class LineStampContent(stamp: LineStamp, paint: Paint) extends LineContent {
-  def draw(g2d: Graphics2D, x1: Double, y1: Double, x2: Double, y2: Double): Unit = {
-    stamp.drawLine(g2d, paint, x1, y1, x2, y2)
+  def draw(g2d: Graphics2D, x1: Double, y1: Double, x2: Double, y2: Double, tDim: Double): Unit = {
+    stamp.drawLine(g2d, paint, x1, y1, x2, y2, tDim)
   }
 }

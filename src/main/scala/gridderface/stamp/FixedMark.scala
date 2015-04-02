@@ -21,7 +21,7 @@ abstract class FixedMark(filledShapes: Seq[Shape], drawnShapes: Seq[Shape], stro
       stroke foreach (st => { ng.setStroke(st); for (s <- drawnShapes) ng.draw(s) })
   }
 
-  def drawLine(g2d: Graphics2D, paint: Paint, x1: Double, y1: Double, x2: Double, y2: Double): Unit = {
+  def drawLine(g2d: Graphics2D, paint: Paint, x1: Double, y1: Double, x2: Double, y2: Double, _tDim: Double): Unit = {
     val xd = x2 - x1
     val yd = y2 - y1
     drawPoint(g2d, paint, (x1 + x2)/2, (y1 + y2)/2, scala.math.sqrt(xd*xd + yd*yd))
