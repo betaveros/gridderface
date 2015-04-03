@@ -193,39 +193,22 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       KeyCompleteWith(Success("Selected layer list"))
     }
   }
+  def putArrow(str: String, rd: Int, cd: Int, arr: ArrowTextArrow, phrase: String): Status[String] = {
+    if (str.length == 0) {
+      putStampAtSelected(Some(ArrowStamp(rd, cd))); Success("You put " ++ phrase ++ " arrow")
+    } else {
+      putStampAtSelected(Some(ArrowTextRectStamp(str, arr))); Success("You put " ++ phrase ++ " arrow with text " ++ str)
+    }
+  }
   def handleCommand(prefix: Char, str: String): Status[String] = prefix match {
     case '=' => {
       if (str.length == 0) return Success("Canceled")
       val start = if (str.length >= 2) str.substring(0, 2) else str.substring(0, 1)
       start match {
-        case "-^" => {
-          if (str.length == 2) {
-            putStampAtSelected(Some(ArrowStamp( 0, -1))); Success("You put an upward arrow")
-          } else {
-            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), UpArrow))); Success("You put an upward arrow with text")
-          }
-        }
-        case "-v" => {
-          if (str.length == 2) {
-            putStampAtSelected(Some(ArrowStamp( 0,  1))); Success("You put a downward arrow")
-          } else {
-            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), DownArrow))); Success("You put a downward arrow with text")
-          }
-        }
-        case "<-" => {
-          if (str.length == 2) {
-            putStampAtSelected(Some(ArrowStamp(-1,  0))); Success("You put a leftward arrow")
-          } else {
-            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), LeftArrow))); Success("You put a leftward arrow with text")
-          }
-        }
-        case "->" => {
-          if (str.length == 2) {
-            putStampAtSelected(Some(ArrowStamp( 1,  0))); Success("You put a rightward arrow")
-          } else {
-            putStampAtSelected(Some(ArrowTextRectStamp(str.substring(2), RightArrow))); Success("You put a rightward arrow with text")
-          }
-        }
+        case "-^" => putArrow(str.substring(2),  0, -1,    UpArrow,   "an upward")
+        case "-v" => putArrow(str.substring(2),  0,  1,  DownArrow,  "a downward")
+        case "<-" => putArrow(str.substring(2), -1,  0,  LeftArrow,  "a leftward")
+        case "->" => putArrow(str.substring(2),  1,  0, RightArrow, "a rightward")
         case _ => putStampAtSelected(Some(new OneTextRectStamp(str))); Success("You put " + str)
       }
     }
