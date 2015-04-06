@@ -14,7 +14,7 @@ object StampSet {
   val thickSet = StampSet(
     "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(FilledSquareFixedMark(0.25)))
   val mediumSet = StampSet(
-    "Medium", None, Some(StrokeLineStamp(MediumStrokeVal)), Some(FilledSquareFixedMark(0.1875)))
+    "Medium", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, false, false, false)), Some(StrokeLineStamp(MediumStrokeVal)), Some(FilledSquareFixedMark(0.1875)))
   val shadefillSet = StampSet(
     "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(FilledSquareFixedMark(0.125)))
   val dashSet = StampSet(
@@ -46,6 +46,14 @@ object StampSet {
     "LessThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Less)), None)
   val greaterSet = StampSet(
     "GreaterThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Greater)), None)
+  val leftShipSet = StampSet(
+    "LeftShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, false, true, true)), None, None)
+  val rightShipSet = StampSet(
+    "RightShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, true, true, false, false)), None, None)
+  val upShipSet = StampSet(
+    "UpShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, true, false, false, true)), None, None)
+  val downShipSet = StampSet(
+    "DownShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, true, true, false)), None, None)
 
   def charMappings(cs: Seq[Char]): Seq[(KeyData, StampSet)] = cs map (c => KeyTypedData(c) ->
     new StampSet("'" + c + "'", Some(new OneTextRectStamp(c.toString)), None, None))
@@ -71,6 +79,10 @@ object StampSet {
         KeyTypedData('v') -> checkSet,
         KeyTypedData('<') -> lessSet,
         KeyTypedData('>') -> greaterSet,
+        KeyTypedData('(') -> leftShipSet,
+        KeyTypedData(')') -> rightShipSet,
+        KeyTypedData('n') -> upShipSet,
+        KeyTypedData('u') -> downShipSet,
         KeyTypedData(' ') -> clearSet,
         KeyTypedData('x') -> crossSet)
     HashMap((basicMappings ++ digitMappings): _*)
