@@ -27,7 +27,7 @@ Gridderface is not a general image manipulation program. For example, you can't 
 
 On the other hand, if you see any modular things that fit neatly in cells, (e.g. the crosses mathgrant uses in cells for [Shakashaka / "Proof of Quilt"](http://mathgrant.blogspot.tw/2010/12/rules-proof-of-quilt.html) puzzles), it's conceivable that they might be added someday.
 
-Gridderface does not provide answer verification of any sort. This can and has been automated for many, many logic puzzle types (e.g. janko.at Puzzle Applets or PUZ-PRE v3), but Gridderface doesn't know how to read the clues or tell what type the puzzle is, and in any case there are countless puzzle types or variations and more are being invented all the time. You don't usually have automatic verification for a puzzle you solved on paper, either.
+Gridderface does not provide answer verification of any sort. This can and has been automated for many, many logic puzzle types (e.g. janko.at Puzzle Applets or PUZ-PRE v3), but Gridderface doesn't know how to read the clues or tell what type the puzzle is, and in any case there are countless puzzle types or variations and more are being invented all the time. (The author is particularly guilty of contributing to this.) You don't usually have automatic verification for a puzzle you solved on paper, either.
 
 Gridderface cannot deal with puzzles in nonrectangular grids. Or anything else in nonrectangular grids, for that matter. (Is it possible that hexagonal grids might be added at some very distant point in the future? Maaaaybe?)
 
@@ -57,8 +57,8 @@ The command `:guess` will attempt to guess the location and size of the grid in 
 
 Manually adjusting the grid can be done in **grid-setting mode**, entered with the key <kbd>CTRL-G</kbd>. Then you can use these keys:
 
-- <kbd>hjkl</kbd> or arrow keys will change the grid position.
-- <kbd>HJKL</kbd> or shift--arrow keys will change one of the grid dimensions.
+- <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> or arrow keys will change the grid position.
+- <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> or shift-arrow keys will change one of the grid dimensions.
 - <kbd>+-</kbd> will change both grid dimensions together.
 - <kbd>[]{}</kbd> will change the number of rows or columns in the displayed grid.
 
@@ -72,9 +72,9 @@ To get it back, you can `:op grid 0.5`. Or for full opacity `:show grid` works t
 
 ### Solve
 
-You can start solving now! Enter <kbd>CTRL-D</kbd> to enter **drawing mode** (this is the default mode). Move the cursor around with the obvious <kbd>hjkl</kbd> or arrow keys.
+You can start solving now! Enter <kbd>CTRL-D</kbd> to enter **drawing mode** (this is the default mode). Move the cursor around with the obvious <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> or arrow keys.
 
-There are lots of keys for entering particular figures on cells, edges, and intersections, including <kbd>f</kbd>, <kbd>.</kbd>, <kbd>Space</kbd>, and all ten digits; see below [StampSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/StampSet.scala) to see the list.
+There are lots of keys for entering particular figures on cells, edges, and intersections, including <kbd>f</kbd>, <kbd>.</kbd>, <kbd>Space</kbd>, and all ten digits; see below or the source code [StampSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/StampSet.scala) to see the list.
 
 You can also enter arbitrary text into cells with one of several keys: `=`, `;`, `^`, or `_`. All four keys will enter the command line, where you can type some text and hit Enter. `=` enters big text. `;`, `^`, and `_` enter small text aligned in different places.
 
@@ -84,7 +84,7 @@ There is also a `@` feature where after you type text and hit enter, it gets cop
 
 If you're solving a puzzle where you spend most or all of your time marking only cells (e.g. Sudoku, Nurikabe, crosswords), you can lock the cursor to only ever select cells with `:lock`. For intersections, it's `:ilock`. To unlock, `:unlock`.
 
-To make drawing continuous lines easier, you can use `HJKL`. They can also be set to erase or draw other things, by typing `w` followed by another character (see below or [WriteSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/WriteSet.scala)).
+To make drawing continuous lines easier, you can use uppercase <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> or shifted arrow keys. They can also be set to erase or draw other things, by typing `w` followed by another character (see below or [WriteSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/WriteSet.scala)).
 
 To change the color of your marks, type `c` followed by a letter (see [PaintSet.scala](https://github.com/betaveros/gridderface/blob/master/src/main/scala/gridderface/PaintSet.scala)) or `%` followed by either a color name or a hex color in `#abcdef` format (with the hash!) For example, `cr` makes your color red, and `ck` makes it black.
 
@@ -111,7 +111,7 @@ After you're done, `:write filename.png` will output an image file.
 
 ### Move the cursor
 
-Should be intuitive: <kbd>hjkl</kbd> or arrow keys.
+Should be intuitive: also <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> or arrow keys.
 
 ### Draw things
 
@@ -119,7 +119,7 @@ A lot of keys draw things on the grid. Here are some examples.
 
 - <kbd>f</kbd> Fill, draw line
 - <kbd>F</kbd> Slashed/shaded fill
-- <kbd>0123456789</kbd> Number
+- <kbd>0</kbd><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd><kbd>6</kbd><kbd>7</kbd><kbd>8</kbd><kbd>9</kbd> Number
 - <kbd>t</kbd> 10 or thick line
 - <kbd>e</kbd> 11 or "transverse line" (for larger numbers, enter them with <kbd>=</kbd>)
 - <kbd>o</kbd> Circle
@@ -147,9 +147,9 @@ These keys change focus to the command line. The text will be drawn after you ty
 
 When you want to draw a continuous border, it's exhausting to type something like <kbd>f</kbd><kbd>Left</kbd><kbd>Left</kbd><kbd>f</kbd><kbd>Left</kbd><kbd>Left</kbd><kbd>f</kbd><kbd>Left</kbd><kbd>Left</kbd>...
 
-So instead you can use <kbd>HJKL</kbd> or shifted arrow keys to do the same thing.
+So instead you can use <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> or shifted arrow keys to do the same thing.
 
-You can change the functionality of `HJKL` by typing `w` followed by a character (mnemonic: `w` is for _write_). Valid keys include:
+You can change the functionality of <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> by typing `w` followed by a character (mnemonic: `w` is for _write_). Valid keys include:
 
 - `ww`: drawing solid lines (default)
 - `wd`: dashed lines
@@ -163,8 +163,8 @@ The complete list of all keystrokes is in [WriteSet.scala](https://github.com/be
 These commands change which positions the cursor is allowed to be in. They are useful if you only intend on drawing on cells or on intersections with rare or homogeneous paths on the edges, especially in combination with the above keys for drawing continuous paths.
 
 - `:unlock`: no restriction (default)
-- `:lock`: cursor only selects cells; `hjkl` jumps to the next cell
-- `:ilock`: cursor only selects intersections; `hjkl` jumps to the next intersection
+- `:lock`: cursor only selects cells; <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> or arrow keys jump to the next cell
+- `:ilock`: cursor only selects intersections; <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd> or arrow keys jumps to the next intersection
 
 ### Change the color
 
@@ -194,13 +194,13 @@ Sometimes, two dimensions aren't enough. For example, sometimes you want to draw
 To let you do this, Gridderface has layers. In Draw mode, the `1/1` in the status indicates the current layer, where you're drawing, and how many layers there are total.
 
 - `:newlayer` adds a new layer.
-- `TAB` switches between different layers.
+- <kbd>TAB</kbd> switches between different layers.
 - `:rmlayer` removes the current layer.
 - `:clear` clears the current layer of all marks.
 
 This is useful in solving puzzles too: if you want to bifurcate in solving, you can create a new layer and draw on it; if it doesn't work out, it's easy to clear or delete just your marks on that layer.
 
-By the way, `CTRL+Tab` lets you draw on the `undercontent`, which is its own group of layers that is underneath the decoration grid. This is useful if you want to shade certain cells of the grid without covering the grid lines.
+By the way, <kbd>CTRL+Tab</kbd> lets you draw on the `undercontent`, which is its own group of layers that is underneath the decoration grid. This is useful if you want to shade certain cells of the grid without covering the grid lines.
 
 ## Buffers
 
@@ -217,5 +217,18 @@ Here are commands.
 
 - `:opacity` (or `:op`), as mentioned above, changes the opacity of layers
 `:hide` and `:show` are short for calling `:opacity` with `0` or `1`.
-- `:multiply` (or `:mul`) makes the layer drawn by multiplying each pixel value with the one below. Black multiplied by any color is black, but white multiplied by any color is that color. `:nomultiply` (or `:nomul`) undoes this. This often makes filling cells look nicer: for example, if the puzzle image is a black grid and you fill a cell with red, normally the red will block part of the black grid. It's even worse if the black cell had black text in it you still want to see. If you `:multiply content`, then the black will show neatly through the red.
+- `:multiply` (or `:mul`) makes the layer drawn by multiplying each pixel value with the one below. Black multiplied by any color is black, but white multiplied by any color is that color. `:nomultiply` (or `:nomul`) undoes this. This often makes filling cells look nicer: for example, if the puzzle image is a black grid and you fill a cell with cyan, normally the cyan will block part of the black grid. It's even worse if the black cell had black text in it you still want to see.
+
+  ![Half-solved without multiply](examples/nomul.png)
+
+  (The puzzle is [mathgrant's Evil Zinger 6](http://mathgrant.blogspot.tw/2009/05/evil-zinger-6-room-and-reason.html), CC-BY-NC 3.0. This also demonstrates how Gridderface is usable with puzzle images found in the wild. I hope I'm not spoiling anything.)
+
+  You can somewhat work around this by changing your opacity, but that dilutes your color and it's still ugly when the gridlines are half-colored.
+
+  ![Half-solved with half-opacity](examples/half-op.png)
+
+  So, if you `:multiply content`, then the black will show neatly through the cyan.
+
+  ![Half-solved with multiply](examples/mul.png)
+
 - `:antialias` (`:aa`; `:noantialias`, `:noaa`) changes the general antialias settings for the layer. `:textantialias` (`:taa`; `:notextantialias`, `:notaa`) does the same only for text.
