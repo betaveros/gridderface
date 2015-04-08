@@ -39,6 +39,24 @@ object PaintSet {
   val skyBlueSet      = new PaintSet("SkyBlue",      new Color(153,204,255))
   val ultramarineSet  = new PaintSet("Ultramarine",  new Color( 63,  0,255))
   val violetSet       = new PaintSet("Violet",       new Color(128,  0,255))
+  // d3.js ordinal categorical colors
+  val d3Map: Map[KeyData, PaintSet] = List(
+    new Color(31,119,180),
+    new Color(255,127,14),
+    new Color(44,160,44),
+    new Color(214,39,40),
+    new Color(148,103,189),
+    new Color(140,86,75),
+    new Color(227,119,194),
+    new Color(127,127,127),
+    new Color(188,189,34),
+    new Color(23,190,207)
+  )
+    .zipWithIndex
+    .map({case (c, i) => (
+      KeyTypedData(('0' + (i + 1) % 10).toChar)
+      -> new PaintSet("d3/" ++ (i + 1).toString, c))})
+    .toMap
 
   val basicMap: HashMap[KeyData, PaintSet] = HashMap(
     KeyTypedData('r') -> redSet,
@@ -48,7 +66,7 @@ object PaintSet {
     KeyTypedData('m') -> magentaSet,
     KeyTypedData('y') -> yellowSet
   )
-  val defaultMap: HashMap[KeyData, PaintSet] = basicMap ++ HashMap(
+  val defaultMap: Map[KeyData, PaintSet] = basicMap ++ d3Map ++ HashMap(
     KeyTypedData('K') -> lightGraySet,
     KeyTypedData('R') -> lightRedSet,
     KeyTypedData('G') -> lightGreenSet,
