@@ -1,6 +1,8 @@
 gridderface
 ===========
 
+[![Join the chat at https://gitter.im/betaveros/gridderface](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/betaveros/gridderface?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A Scala reboot of a keyboard interface for marking grid-based puzzles --- Nikoli-style, generally.
 
 ![Example Gridderface image](example.png)
