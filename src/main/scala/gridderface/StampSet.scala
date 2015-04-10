@@ -38,6 +38,12 @@ object StampSet {
     "\\", Some(MajorDiagonalStamp), None, None)
   val slash2Set = StampSet(
     "/", Some(MinorDiagonalStamp), None, None)
+  val horizontalSet = StampSet(
+    "-", Some(HorizontalLineStamp), None, None)
+  val verticalSet = StampSet(
+    "|", Some(VerticalLineStamp), None, None)
+  val plusSet = StampSet(
+    "+", Some(PlusStamp), None, None)
   val crossSet = StampSet(
     "Cross", Some(CrossStamp), Some(crossMark), Some(crossMark))
   val checkSet = StampSet(
@@ -76,6 +82,9 @@ object StampSet {
         KeyTypedData('t') -> thickSet,
         KeyTypedData('\\') -> slash1Set,
         KeyTypedData('/') -> slash2Set,
+        KeyTypedData('-') -> horizontalSet,
+        KeyTypedData('|') -> verticalSet,
+        KeyTypedData('+') -> plusSet,
         KeyTypedData('v') -> checkSet,
         KeyTypedData('<') -> lessSet,
         KeyTypedData('>') -> greaterSet,
