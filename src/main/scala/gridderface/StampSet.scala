@@ -60,6 +60,10 @@ object StampSet {
     "UpShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, true, false, false, true)), None, None)
   val downShipSet = StampSet(
     "DownShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, true, true, false)), None, None)
+  val questionSet = StampSet(
+    "?", Some(OneTextRectStamp("?")), None, None)
+  val bangSet = StampSet(
+    "!", Some(OneTextRectStamp("!")), None, None)
 
   def charMappings(cs: Seq[Char]): Seq[(KeyData, StampSet)] = cs map (c => KeyTypedData(c) ->
     new StampSet("'" + c + "'", Some(new OneTextRectStamp(c.toString)), None, None))
@@ -92,6 +96,8 @@ object StampSet {
         KeyTypedData(')') -> rightShipSet,
         KeyTypedData('n') -> upShipSet,
         KeyTypedData('u') -> downShipSet,
+        KeyTypedData('?') -> questionSet,
+        KeyTypedData('!') -> bangSet,
         KeyTypedData(' ') -> clearSet,
         KeyTypedData('x') -> crossSet)
     HashMap((basicMappings ++ digitMappings): _*)
