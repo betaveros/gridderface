@@ -29,6 +29,8 @@ object StampSet {
     "Circle", Some(CircleRectStamp(0.6875)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.25, ThinStrokeVal)))
   val bulbSet = StampSet(
     "Bulb", Some(BulbRectStamp(0.75)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.28125)))
+  val starSet = StampSet(
+    "Star", Some(StarStamp), None, None)
   val eSet = StampSet(
     "11/Trans", Some(OneTextRectStamp("11")), Some(TransverseLineStamp(NormalStrokeVal)), None)
   val clearSet = StampSet(
@@ -98,6 +100,7 @@ object StampSet {
         KeyTypedData('u') -> downShipSet,
         KeyTypedData('?') -> questionSet,
         KeyTypedData('!') -> bangSet,
+        KeyTypedData('*') -> starSet,
         KeyTypedData(' ') -> clearSet,
         KeyTypedData('x') -> crossSet)
     HashMap((basicMappings ++ digitMappings): _*)
