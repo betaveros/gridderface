@@ -156,8 +156,13 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   }
   def paintReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
     case List(KeyTypedData('c')) => KeyIncomplete
-    case List(KeyTypedData('c'), d2) =>
-      unitComplete(PaintSet.defaultMap andThen setPaintSet lift d2)
+    case List(KeyTypedData('c'), d2) => d2 match {
+      case KeyTypedData('d') => KeyIncomplete
+      case KeyTypedData('l') => KeyIncomplete
+      case _ => unitComplete(PaintSet.defaultMap andThen setPaintSet lift d2)
+    }
+    case List(KeyTypedData('c'), KeyTypedData('d'), d3) => unitComplete(PaintSet.defaultMap andThen (_.darkerSet.get) andThen setPaintSet lift d3)
+    case List(KeyTypedData('c'), KeyTypedData('l'), d3) => unitComplete(PaintSet.defaultMap andThen (_.lighterSet.get) andThen setPaintSet lift d3)
 
     case List(KeyTypedData('C')) => KeyIncomplete
     case List(KeyTypedData('C'), KeyTypedData('c')) => KeyIncomplete
