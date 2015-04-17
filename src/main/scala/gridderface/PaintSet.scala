@@ -55,6 +55,9 @@ object PaintSet {
   val ultramarineSet  = PaintSet("Ultramarine",  new Color( 63,  0,255))
   val violetSet       = PaintSet("Violet",       new Color(128,  0,255))
 
+  val amberSet        = PaintSet("Amber",        new Color(255,204,  0))
+  val cardinalSet     = PaintSet("Cardinal",     new Color(204,  0, 51))
+
   val devRedSet       = PaintSet("DevRed",       new Color(204,  0,  0))
   // d3.js ordinal categorical colors
   val d3Map: Map[KeyData, PaintSet] = List(
@@ -105,6 +108,8 @@ object PaintSet {
     KeyTypedData('u') -> ultramarineSet,
     KeyTypedData('v') -> violetSet,
 
+    KeyTypedData('&') -> amberSet,
+    KeyTypedData('^') -> cardinalSet,
     KeyTypedData('$') -> devRedSet
   )
 }
