@@ -22,3 +22,17 @@ case class FillDraw(strokeVal: StrokeVal) extends DrawVal {
     g2d draw shape
   }
 }
+object DrawVal {
+  private val FillChar = '+'
+  def parse(s: String): Option[DrawVal] = s.headOption match {
+    case None => None
+    case Some(FillChar) =>
+      if (s.length == 1) Some(Fill) else StrokeVal.parse(s).map(FillDraw(_))
+    case _ => StrokeVal.parse(s).map(Draw(_))
+  }
+  def stringify(s: DrawVal): String = s match {
+    case Fill => FillChar.toString
+    case Draw(s) => StrokeVal.stringify(s)
+    case FillDraw(s) => StrokeVal.stringify(s)
+  }
+}
