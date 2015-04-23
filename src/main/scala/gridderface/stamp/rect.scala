@@ -15,19 +15,10 @@ case class OutlineRectStamp(sv: StrokeVal) extends ScalableRectStamp {
   }
 }
 
-case class BulbRectStamp(size: Double, xOffset: Double = 0, yOffset: Double = 0) extends ScalableRectStamp {
+case class CircleRectStamp(size: Double, dv: DrawVal = Draw(NormalStrokeVal), xOffset: Double = 0, yOffset: Double = 0) extends ScalableRectStamp {
   val sx = 0.5 - size / 2.0
-  val bulb = new Ellipse2D.Double(xOffset + sx, yOffset + sx, size, size)
+  val circ = new Ellipse2D.Double(xOffset + sx, yOffset + sx, size, size)
   override def drawUnit(g2d: Graphics2D) = {
-    g2d fill bulb
-  }
-}
-
-case class CircleRectStamp(size: Double, sv: StrokeVal = NormalStrokeVal) extends ScalableRectStamp {
-  val sx = 0.5 - size / 2.0
-  val circ = new Ellipse2D.Double(sx, sx, size, size)
-  override def drawUnit(g2d: Graphics2D) = {
-    g2d setStroke sv.stroke
-    g2d draw circ
+    dv.draw(g2d, circ)
   }
 }

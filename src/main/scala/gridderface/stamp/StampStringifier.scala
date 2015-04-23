@@ -46,8 +46,7 @@ object StampStringifier {
     case CheckStamp => "v"
     case FillRectStamp => "f"
     case OutlineRectStamp(sv) => "ol %s".format(StrokeVal.stringify(sv))
-    case BulbRectStamp(size, xoff, yoff) => "b %s %s %s".format(size.toString, xoff.toString, yoff.toString)
-    case CircleRectStamp(size, sv) => "O %s %s".format(size.toString, StrokeVal.stringify(sv))
+    case CircleRectStamp(size, dv, xoff, yoff) => "O %s %s %s".format(size.toString, DrawVal.stringify(dv), xoff.toString, yoff.toString)
     case DiagonalFillRectStamp => "diagf"
     case DashedFillRectStamp => "dashf"
     case DottedFillRectStamp => "dotf"
@@ -65,8 +64,7 @@ object StampStringifier {
     case "v" => CheckStamp
     case "f" => FillRectStamp
     case "ol" => OutlineRectStamp(StrokeVal.parse(tokens(1)).get)
-    case "b" => BulbRectStamp(tokens(1).toFloat, tokens(2).toFloat, tokens(3).toFloat)
-    case "O" => CircleRectStamp(tokens(1).toFloat, StrokeVal.parse(tokens(2)).get)
+    case "O" => CircleRectStamp(tokens(1).toDouble, DrawVal.parse(tokens(2)).get, tokens(3).toDouble, tokens(4).toDouble)
     case "diagf" => DiagonalFillRectStamp
     case "dashf" => DashedFillRectStamp
     case "dotf" => DottedFillRectStamp
