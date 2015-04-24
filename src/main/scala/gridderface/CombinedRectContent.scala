@@ -2,7 +2,7 @@ package gridderface
 
 import java.awt.Graphics2D
 import java.awt.Paint
-import gridderface.stamp.FillRectStamp
+import gridderface.stamp._
 
 class CombinedRectContent(val contents: Seq[RectContent]) extends RectContent {
   def draw(g2d: Graphics2D, x: Double, y: Double, w: Double, h: Double) {
@@ -13,6 +13,6 @@ class CombinedRectContent(val contents: Seq[RectContent]) extends RectContent {
 object CombinedRectContent {
   def apply(contents: RectContent*) = new CombinedRectContent(contents)
   def withBackground(background: Paint, content: RectContent) =
-    CombinedRectContent(new RectStampContent(FillRectStamp, background),
+    CombinedRectContent(new RectStampContent(FullRectStamp(Fill), background),
         content)
 }

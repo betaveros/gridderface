@@ -5,7 +5,6 @@ import scala.collection.immutable.HashMap
 import gridderface.stamp.{ RectStamp, LineStamp, PointStamp, TextRectStamp }
 import scala.swing.event.{ MouseEvent, MouseClicked }
 import scala.swing.event.MousePressed
-import gridderface.stamp.FillRectStamp
 import gridderface.stamp.ClearStamp
 
 class GridderfaceViewportMode(panel: GridPanel) extends GridderfaceMode {

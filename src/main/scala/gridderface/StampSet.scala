@@ -10,7 +10,7 @@ case class StampSet(val name: String,
 
 object StampSet {
   val fillSet = StampSet(
-    "Fill", Some(FillRectStamp), Some(StrokeLineStamp(NormalStrokeVal)), Some(FilledSquareFixedMark(0.125)))
+    "Fill", Some(FullRectStamp(Fill)), Some(StrokeLineStamp(NormalStrokeVal)), Some(FilledSquareFixedMark(0.125)))
   val thickSet = StampSet(
     "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(FilledSquareFixedMark(0.25)))
   val mediumSet = StampSet(
