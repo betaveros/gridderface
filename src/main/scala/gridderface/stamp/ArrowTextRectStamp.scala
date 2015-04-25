@@ -49,3 +49,15 @@ case object LeftArrow extends ArrowTextArrow(
     new Line2D.Float(0.375f, 0.125f, 0.25f, 0.25f),
     new Line2D.Float(0.375f, 0.375f, 0.25f, 0.25f)
   ))
+object ArrowTextArrow {
+  private val corrs: Seq[(ArrowTextArrow, String)] = Seq(
+    UpArrow -> "^",
+    DownArrow -> "v",
+    LeftArrow -> "<",
+    RightArrow -> ">"
+  )
+  private val arrowStringMap: Map[ArrowTextArrow, String] = Map(corrs: _*)
+  private val stringArrowMap: Map[String, ArrowTextArrow] = Map(corrs map (_.swap): _*)
+  def parse(s: String): Option[ArrowTextArrow] = stringArrowMap get s
+  def stringify(s: ArrowTextArrow): String = arrowStringMap(s)
+}

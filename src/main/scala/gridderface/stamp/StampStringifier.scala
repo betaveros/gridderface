@@ -38,6 +38,13 @@ object StampStringifier {
     b.toString
   }
 
+  private def sb(b: Boolean): String = if (b) "1" else "0"
+  private def bs(s: String) = s match {
+    case "0" => false
+    case "1" => true
+    case _ => throw new IllegalArgumentException("cannot parse boolean: " ++ s)
+  }
+
   def stringifyRectStamp(s: RectStamp) = s match {
     case ClearStamp => "clear" // this shouldn't be used
     case CrossStamp => "X"
@@ -46,9 +53,16 @@ object StampStringifier {
     case CheckStamp => "v"
     case FullRectStamp(dv) => "f %s".format(DrawVal.stringify(dv))
     case CircleRectStamp(size, dv, xoff, yoff) => "O %s %s %s".format(size.toString, DrawVal.stringify(dv), xoff.toString, yoff.toString)
+    case RectangleArcRectStamp(size, xoff, yoff, dv, tr, br, bl, tl) => "ra %s %s %s %s %s %s %s %s".format(size.toString, xoff.toString, yoff.toString, DrawVal.stringify(dv), sb(tr), sb(br), sb(bl), sb(tl))
     case DiagonalFillRectStamp => "diagf"
     case DashedFillRectStamp => "dashf"
     case DottedFillRectStamp => "dotf"
+    case HorizontalLineStamp => "-"
+    case VerticalLineStamp => "|"
+    case PlusStamp => "+"
+    case StarStamp => "*"
+    case ArrowStamp(dx, dy) => "arr %s %s".format(dx, dy)
+    case ArrowTextRectStamp(s, arr, sv) => "tarr %s %s %s".format(quoteString(s), ArrowTextArrow.stringify(arr), StrokeVal.stringify(sv))
     case OneTextRectStamp(s1, fsv, hAlign, vAlign) => "t %s %s %s %s".format(quoteString(s1), OneTextRectStamp.stringify(fsv), hAlign.toString, vAlign.toString)
     case TwoTextRectStamp(s1, s2) => "t2 %s %s".format(quoteString(s1), quoteString(s2))
     case ThreeTextRectStamp(s1, s2, s3) => "t3 %s %s %s".format(quoteString(s1), quoteString(s2), quoteString(s3))
@@ -63,9 +77,16 @@ object StampStringifier {
     case "v" => CheckStamp
     case "f" => FullRectStamp(DrawVal.parse(tokens(1)).get)
     case "O" => CircleRectStamp(tokens(1).toDouble, DrawVal.parse(tokens(2)).get, tokens(3).toDouble, tokens(4).toDouble)
+    case "ra" => RectangleArcRectStamp(tokens(1).toDouble, tokens(2).toDouble, tokens(3).toDouble, DrawVal.parse(tokens(4)).get, bs(tokens(5)), bs(tokens(6)), bs(tokens(7)), bs(tokens(8)))
     case "diagf" => DiagonalFillRectStamp
     case "dashf" => DashedFillRectStamp
     case "dotf" => DottedFillRectStamp
+    case "-" => HorizontalLineStamp
+    case "|" => VerticalLineStamp
+    case "+" => PlusStamp
+    case "*" => StarStamp
+    case "arr" => ArrowStamp(tokens(1).toInt, tokens(2).toInt)
+    case "tarr" => ArrowTextRectStamp(unquoteString(tokens(1)), ArrowTextArrow.parse(tokens(2)).get, StrokeVal.parse(tokens(3)).get)
     case "t" => OneTextRectStamp(unquoteString(tokens(1)), OneTextRectStamp.parse(tokens(2)).get, tokens(3).toFloat, tokens(4).toFloat)
     case "t2" => TwoTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2)))
     case "t3" => ThreeTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2)), unquoteString(tokens(3)))
