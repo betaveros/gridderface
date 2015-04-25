@@ -5,9 +5,10 @@ import java.awt.Stroke
 import java.awt.Shape
 import java.awt.geom._
 
-class PathRectStamp(val shapes: Seq[Shape], val dv: DrawVal = Draw(NormalStrokeVal)) extends ScalableRectStamp {
+class PathRectStamp(val shapes: Seq[Shape], val roundShapes: Seq[Shape] = List(), val dv: DrawVal = Draw(NormalStrokeVal)) extends ScalableRectStamp {
   def drawUnit(g2d: Graphics2D): Unit = {
     shapes foreach (dv.draw(g2d, _))
+    roundShapes foreach (dv.drawRound(g2d, _))
   }
 }
 
@@ -49,28 +50,43 @@ object PathRectStamp {
   starPath.transform(AffineTransform.getTranslateInstance(0.5, 0.515625))
 
   def createArrowPath(dx: Int, dy: Int) = {
-    val path: Path2D = new Path2D.Float();
     val ctx: Float = dx * 0.25f // coords of tip of arrow
     val cty: Float = dy * 0.25f // from center of cell
 
+    val path: Path2D = new Path2D.Float()
     path.moveTo(-ctx, -cty)
-    path.lineTo(ctx, cty)
+    path.lineTo(0, 0)
     path.moveTo(cty, ctx)
     path.lineTo(ctx, cty)
     path.lineTo(-cty, -ctx)
 
     path.transform(AffineTransform.getTranslateInstance(0.5, 0.5))
+
+    path
+  }
+  def createAuxArrowPath(dx: Int, dy: Int) = {
+    val ctx: Float = dx * 0.25f // coords of tip of arrow
+    val cty: Float = dy * 0.25f // from center of cell
+
+    val path: Path2D = new Path2D.Float()
+    path.moveTo(0, 0)
+    path.lineTo(ctx, cty)
+
+    path.transform(AffineTransform.getTranslateInstance(0.5, 0.5))
+
     path
   }
 }
 
-case object CrossStamp extends PathRectStamp(List(PathRectStamp.majorDiagonal, PathRectStamp.minorDiagonal))
-case object MajorDiagonalStamp extends PathRectStamp(List(PathRectStamp.majorDiagonal))
-case object MinorDiagonalStamp extends PathRectStamp(List(PathRectStamp.minorDiagonal))
-case object CheckStamp extends PathRectStamp(List(PathRectStamp.checkPath))
-case object HorizontalLineStamp extends PathRectStamp(List(PathRectStamp.horizontalPath))
-case object VerticalLineStamp extends PathRectStamp(List(PathRectStamp.verticalPath))
-case object PlusStamp extends PathRectStamp(List(PathRectStamp.horizontalPath, PathRectStamp.verticalPath))
-case object StarStamp extends PathRectStamp(List(PathRectStamp.starPath), Fill)
+import PathRectStamp._
 
-case class ArrowStamp(dx: Int, dy: Int) extends PathRectStamp(List(PathRectStamp.createArrowPath(dx, dy)))
+case object CrossStamp extends PathRectStamp(List(), List(majorDiagonal, minorDiagonal))
+case object MajorDiagonalStamp extends PathRectStamp(List(), List(majorDiagonal))
+case object MinorDiagonalStamp extends PathRectStamp(List(), List(minorDiagonal))
+case object CheckStamp extends PathRectStamp(List(checkPath))
+case object HorizontalLineStamp extends PathRectStamp(List(horizontalPath))
+case object VerticalLineStamp extends PathRectStamp(List(verticalPath))
+case object PlusStamp extends PathRectStamp(List(horizontalPath, verticalPath))
+case object StarStamp extends PathRectStamp(List(starPath), List(), Fill)
+
+case class ArrowStamp(dx: Int, dy: Int) extends PathRectStamp(List(createArrowPath(dx, dy)), List(createAuxArrowPath(dx, dy)))
