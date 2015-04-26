@@ -8,6 +8,7 @@ class GriddablePositionMap extends Griddable with ContentPutter {
   def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     map foreach {_._2.drawOnGrid(grid, g2d)}
   }
+  def get(p: Position) = map get p
   def put(p: Position, g: Griddable) = {
     map += ((p, g))
     publish(GriddableChanged(this))

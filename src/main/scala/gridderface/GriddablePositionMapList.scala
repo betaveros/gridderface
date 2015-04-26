@@ -23,6 +23,9 @@ class GriddablePositionMapList extends Griddable with ContentPutter {
   def put(p: Position, g: Griddable) = {
     _currentMap.put(p, g)
   }
+  def get(p: Position) = {
+    _currentMap.get(p)
+  }
   def putCell(p: CellPosition, c: RectContent) =
     put(p, new CellGriddable(c, p))
   def putEdge(p: EdgePosition, c: LineContent) =

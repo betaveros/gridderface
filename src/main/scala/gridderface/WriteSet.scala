@@ -2,20 +2,48 @@ package gridderface
 
 import gridderface.stamp._
 import scala.collection.immutable.HashMap
+import java.awt.Paint
 
-class WriteSet(val name: String,
-  val cellWriteStamp: Option[LineStamp], val intersectionWriteStamp: Option[LineStamp])
+abstract class WriteSet(val name: String) {
+  def         cellWrite(currentPaint: Paint, oldContent: Option[LineContent]): LineContent
+  def intersectionWrite(currentPaint: Paint, oldContent: Option[LineContent]): LineContent
+}
+
+class PlainWriteSet(name: String, val cellLineStamp: LineStamp, val intersectionLineStamp: LineStamp) extends WriteSet(name) {
+  def         cellWrite(currentPaint: Paint, oldContent: Option[LineContent]) = new LineStampContent(        cellLineStamp, currentPaint)
+  def intersectionWrite(currentPaint: Paint, oldContent: Option[LineContent]) = new LineStampContent(intersectionLineStamp, currentPaint)
+}
+class TwiceWriteSet(name: String, val cellLineStamp: LineStamp,         val alternateCellLineStamp: LineStamp,
+                          val intersectionLineStamp: LineStamp, val alternateIntersectionLineStamp: LineStamp) extends WriteSet(name) {
+  def cellWrite(currentPaint: Paint, oldContent: Option[LineContent]) = {
+    oldContent match {
+      case Some(LineStampContent(stamp, _)) if stamp == cellLineStamp => new LineStampContent(alternateCellLineStamp, currentPaint)
+      case _ => new LineStampContent(cellLineStamp, currentPaint)
+    }
+  }
+  def intersectionWrite(currentPaint: Paint, oldContent: Option[LineContent]) = {
+    oldContent match {
+      case Some(LineStampContent(stamp, _)) if stamp == intersectionLineStamp => new LineStampContent(alternateIntersectionLineStamp, currentPaint)
+      case _ => new LineStampContent(intersectionLineStamp, currentPaint)
+    }
+  }
+}
+object NoneSet extends WriteSet("None") {
+  def         cellWrite(currentPaint: Paint, oldContent: Option[LineContent]) = oldContent getOrElse new LineStampContent(ClearStamp, currentPaint)
+  def intersectionWrite(currentPaint: Paint, oldContent: Option[LineContent]) = oldContent getOrElse new LineStampContent(ClearStamp, currentPaint)
+}
 
 object WriteSet {
-  val writeSet = new WriteSet("Write", Some(TransverseLineStamp(NormalStrokeVal)), Some(StrokeLineStamp(NormalStrokeVal)))
-  val blockSet = new WriteSet("Block", Some(StrokeLineStamp(NormalStrokeVal)), Some(TransverseLineStamp(NormalStrokeVal)))
-  val eraseSet = new WriteSet("Erase", Some(ClearStamp), Some(ClearStamp))
+  def plain2(name: String, lineStamp: LineStamp) = new PlainWriteSet(name, lineStamp, lineStamp)
+  val writeSet  = new PlainWriteSet("Write" , TransverseLineStamp(      NormalStrokeVal),     StrokeLineStamp(      NormalStrokeVal))
+  val blockSet  = new PlainWriteSet("Block" ,     StrokeLineStamp(      NormalStrokeVal), TransverseLineStamp(      NormalStrokeVal))
+  val dashedSet = new PlainWriteSet("Dashed", TransverseLineStamp(NormalDashedStrokeVal),     StrokeLineStamp(NormalDashedStrokeVal))
   val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
-  val crossSet = new WriteSet("Cross", Some(crossMark), Some(crossMark))
-  val dashedSet = new WriteSet("Dashed", Some(TransverseLineStamp(NormalDashedStrokeVal)), Some(StrokeLineStamp(NormalDashedStrokeVal)))
-  val dotMark = CrossFixedMark(0.125)
-  val dotSet = new WriteSet("Dot", Some(dotMark), Some(dotMark))
-  val noneSet = new WriteSet("None", None, None)
+  val crossSet  = plain2("Cross", crossMark)
+  val eraseSet  = plain2("Erase", ClearStamp)
+  val dotSet    = plain2("Dot", DiskFixedMark(0.125))
+  val twiceWriteSet      = new TwiceWriteSet("Write <> Clear" , TransverseLineStamp(NormalStrokeVal), ClearStamp, StrokeLineStamp(NormalStrokeVal), ClearStamp)
+  val twiceWriteCrossSet = new TwiceWriteSet("Write <> Cross" , TransverseLineStamp(NormalStrokeVal),  crossMark, StrokeLineStamp(NormalStrokeVal),  crossMark)
   val defaultMap: Map[KeyData, WriteSet] = {
     val basicMappings = List(
         KeyTypedData('w') -> writeSet,
@@ -25,8 +53,10 @@ object WriteSet {
         KeyTypedData('d') -> dashedSet,
         KeyTypedData('D') -> dotSet,
         KeyTypedData('.') -> dotSet,
-        KeyTypedData('z') -> noneSet,
-        KeyTypedData('n') -> noneSet
+        KeyTypedData('t') -> twiceWriteSet,
+        KeyTypedData('X') -> twiceWriteCrossSet,
+        KeyTypedData('z') -> NoneSet,
+        KeyTypedData('n') -> NoneSet
       )
     HashMap(basicMappings: _*)
   }

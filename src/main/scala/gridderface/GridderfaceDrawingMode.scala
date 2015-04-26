@@ -99,28 +99,34 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
     ensureLock()
   }
+  def lineContentify(g: Griddable): Option[LineContent] = g match {
+    case EdgeGriddable(c: LineContent, _) => Some(c)
+    case _ => None
+  }
   def moveAndDrawSelected(rd: Int, cd: Int) = {
     sel.selected foreach (se => {
       val dpos = se.deltaPosition(rd, cd)
       se match {
         case cpos: CellPosition => {
           dpos match {
-            case depos: EdgePosition => writeSet.cellWriteStamp foreach {s => putLineStamp(depos, s)}
+            case depos: EdgePosition => {
+              _gridList.putEdge(depos, writeSet.cellWrite(edgePaint, _gridList get depos flatMap lineContentify))
+            }
             case _ => throw new AssertionError("moveAndDrawSelected: cell to non-edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
         }
         case ipos: IntersectionPosition => {
           dpos match {
-            case depos: EdgePosition => writeSet.intersectionWriteStamp foreach {s => putLineStamp(depos, s)}
+            case depos: EdgePosition => _gridList.putEdge(depos, writeSet.intersectionWrite(edgePaint, _gridList get depos flatMap lineContentify))
             case _ => throw new AssertionError("moveAndDrawSelected: intersection to non-edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
         }
         case epos: EdgePosition => {
           dpos match {
-            case dcpos: CellPosition => writeSet.cellWriteStamp foreach {s => putLineStamp(epos, s)}
-            case dipos: IntersectionPosition => writeSet.intersectionWriteStamp foreach {s => putLineStamp(epos, s)}
+            case dcpos:         CellPosition => _gridList.putEdge(epos, writeSet.        cellWrite(edgePaint, _gridList get epos flatMap lineContentify))
+            case dipos: IntersectionPosition => _gridList.putEdge(epos, writeSet.intersectionWrite(edgePaint, _gridList get epos flatMap lineContentify))
             case _ => throw new AssertionError("moveAndDrawSelected: edge to edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(rd, cd))
