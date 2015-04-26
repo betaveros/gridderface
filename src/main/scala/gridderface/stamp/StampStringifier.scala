@@ -52,7 +52,7 @@ object StampStringifier {
     case MinorDiagonalStamp => "/"
     case CheckStamp => "v"
     case FullRectStamp(dv) => "f %s".format(DrawVal.stringify(dv))
-    case CircleRectStamp(size, dv, xoff, yoff) => "O %s %s %s".format(size.toString, DrawVal.stringify(dv), xoff.toString, yoff.toString)
+    case CircleRectStamp(size, dv, xoff, yoff) => "O %s %s %s %s".format(size.toString, DrawVal.stringify(dv), xoff.toString, yoff.toString)
     case RectangleArcRectStamp(size, xoff, yoff, dv, tr, br, bl, tl) => "ra %s %s %s %s %s %s %s %s".format(size.toString, xoff.toString, yoff.toString, DrawVal.stringify(dv), sb(tr), sb(br), sb(bl), sb(tl))
     case DiagonalFillRectStamp => "diagf"
     case DashedFillRectStamp => "dashf"
@@ -114,7 +114,7 @@ object StampStringifier {
     case "hex" => HexagonLineStamp(StrokeVal.parse(tokens(1)).get)
     case "i" => InequalityLineStamp(StrokeVal.parse(tokens(1)).get, InequalityLineStamp.parse(tokens(2)).get)
     case "s" => StrokeLineStamp(StrokeVal.parse(tokens(1)).get)
-    case "tv" => TransverseLineStamp(StrokeVal.parse(tokens(2)).get)
+    case "tv" => TransverseLineStamp(StrokeVal.parse(tokens(1)).get)
     case _ => throw new IllegalArgumentException("LineStamp cannot be parsed from " ++ tokens.toString)
   }
   def stringifyPointStamp(s: PointStamp) = s match {
