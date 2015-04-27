@@ -48,8 +48,10 @@ object StampSet {
     "+", Some(PlusStamp), None, None)
   val crossSet = StampSet(
     "Cross", Some(CrossStamp), Some(crossMark), Some(crossMark))
-  val checkSet = StampSet(
-    "Check", Some(CheckStamp), None, None)
+  val bigCheckSet = StampSet(
+    "B.Check", Some(BigCheckStamp), None, None)
+  val smallCheckSet = StampSet(
+    "S.Check", Some(SmallCheckStamp), None, None)
   val lessSet = StampSet(
     "LessThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Less)), None)
   val greaterSet = StampSet(
@@ -91,7 +93,8 @@ object StampSet {
         KeyTypedData('-') -> horizontalSet,
         KeyTypedData('|') -> verticalSet,
         KeyTypedData('+') -> plusSet,
-        KeyTypedData('v') -> checkSet,
+        KeyTypedData('v') -> bigCheckSet,
+        KeyTypedData('V') -> smallCheckSet,
         KeyTypedData('<') -> lessSet,
         KeyTypedData('>') -> greaterSet,
         KeyTypedData('(') -> leftShipSet,
