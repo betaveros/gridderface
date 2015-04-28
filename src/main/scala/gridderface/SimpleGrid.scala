@@ -1,7 +1,7 @@
 package gridderface
 
 
-class SimpleGrid(val rowHeight: Double, val colWidth: Double, val xOffset: Double = 0.0, val yOffset: Double = 0.0) {
+case class SimpleGrid(rowHeight: Double, colWidth: Double, xOffset: Double = 0.0, yOffset: Double = 0.0) {
 
   def computeX(col: Int): Double = xOffset + col * colWidth
   def computeY(row: Int): Double = yOffset + row * rowHeight
@@ -29,29 +29,14 @@ class SimpleGrid(val rowHeight: Double, val colWidth: Double, val xOffset: Doubl
   }
 
   def offsetBy(xd: Double, yd: Double) = {
-    new SimpleGrid(rowHeight, colWidth, xOffset + xd, yOffset + yd)
+    SimpleGrid(rowHeight, colWidth, xOffset + xd, yOffset + yd)
   }
   def gridSizeAdjustedBy(rd: Double, cd: Double) = {
-    new SimpleGrid((rowHeight + rd) max 0.0, (colWidth + cd) max 0.0, xOffset, yOffset)
+    SimpleGrid((rowHeight + rd) max 0.0, (colWidth + cd) max 0.0, xOffset, yOffset)
   }
-
-  override def equals(other: Any) = {
-    other match {
-      case p: SimpleGrid => (
-        rowHeight == p.rowHeight &&
-        colWidth == p.colWidth &&
-        xOffset == p.xOffset &&
-        yOffset == p.yOffset)
-      case _ => false
-    }
-  }
-  private lazy val _hash = {
-    rowHeight.##() + 13*colWidth.##() + 37*xOffset.##() + 79*yOffset.##()
-  }
-  override def hashCode() = _hash
 }
 
 object SimpleGrid {
-  val defaultGrid = new SimpleGrid(32, 32, 0, 0)
-  val generationGrid = new SimpleGrid(32, 32, 16, 16)
+  val defaultGrid    = SimpleGrid(32, 32, 0, 0)
+  val generationGrid = SimpleGrid(32, 32, 16, 16)
 }
