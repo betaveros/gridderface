@@ -39,4 +39,19 @@ case class SimpleGrid(rowHeight: Double, colWidth: Double, xOffset: Double = 0.0
 object SimpleGrid {
   val defaultGrid    = SimpleGrid(32, 32, 0, 0)
   val generationGrid = SimpleGrid(32, 32, 16, 16)
+  def stringify(g: SimpleGrid): String = g match {
+    case SimpleGrid(rh, cw, xoff, yoff) => "%s %s %s %s".format(rh.toString, cw.toString, xoff.toString, yoff.toString)
+  }
+  def parse(s: String): Option[SimpleGrid] = {
+    val parts = "\\s+".r.split(s.substring(2))
+    try {
+      parts match {
+        case Array(s1, s2, s3, s4) =>
+          Some(SimpleGrid(s1.toDouble, s2.toDouble, s3.toDouble, s4.toDouble))
+        case _ => None
+      }
+    } catch {
+      case _: NumberFormatException => None
+    }
+  }
 }
