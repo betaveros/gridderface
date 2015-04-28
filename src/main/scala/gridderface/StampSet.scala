@@ -46,10 +46,12 @@ object StampSet {
     "|", Some(VerticalLineStamp), None, None)
   val plusSet = StampSet(
     "+", Some(PlusStamp), None, None)
-  val crossSet = StampSet(
-    "Cross", Some(CrossStamp), Some(crossMark), Some(crossMark))
+  val bigCrossSet = StampSet(
+    "Cross", Some(BigCrossStamp), Some(crossMark), Some(crossMark))
+  val smallCrossSet = StampSet(
+    "S.Cross", Some(SmallCrossStamp), Some(crossMark), Some(crossMark))
   val bigCheckSet = StampSet(
-    "B.Check", Some(BigCheckStamp), None, None)
+    "Check", Some(BigCheckStamp), None, None)
   val smallCheckSet = StampSet(
     "S.Check", Some(SmallCheckStamp), None, None)
   val lessSet = StampSet(
@@ -105,7 +107,9 @@ object StampSet {
         KeyTypedData('!') -> bangSet,
         KeyTypedData('*') -> starSet,
         KeyTypedData(' ') -> clearSet,
-        KeyTypedData('x') -> crossSet)
+        KeyTypedData('x') -> bigCrossSet,
+        KeyTypedData('X') -> smallCrossSet
+      )
     HashMap((basicMappings ++ digitMappings): _*)
   }
   val alphaMap: Map[KeyData, StampSet] = defaultMap ++ letterMappings

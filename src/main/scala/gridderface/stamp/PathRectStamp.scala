@@ -33,6 +33,11 @@ object PathRectStamp {
   smallCheckPath.moveTo(0.65, 0.75)
   smallCheckPath.lineTo(0.75, 0.9)
   smallCheckPath.lineTo(0.9, 0.6)
+  val smallCrossPath = new Path2D.Double
+  smallCrossPath.moveTo(0.25, 0.25)
+  smallCrossPath.lineTo(0.75, 0.75)
+  smallCrossPath.moveTo(0.25, 0.75)
+  smallCrossPath.lineTo(0.75, 0.25)
 
   def createStar(arms: Int, outerRadius: Double, innerRadius: Double, baseAngle: Double) = {
     val angle = Math.PI / arms
@@ -84,9 +89,10 @@ object PathRectStamp {
 
 import PathRectStamp._
 
-case object CrossStamp extends PathRectStamp(List(), List(majorDiagonal, minorDiagonal))
 case object  MajorDiagonalStamp extends PathRectStamp(List(), List(majorDiagonal))
 case object  MinorDiagonalStamp extends PathRectStamp(List(), List(minorDiagonal))
+case object       BigCrossStamp extends PathRectStamp(List(), List(majorDiagonal, minorDiagonal))
+case object     SmallCrossStamp extends PathRectStamp(List(smallCrossPath))
 case object       BigCheckStamp extends PathRectStamp(List(  bigCheckPath))
 case object     SmallCheckStamp extends PathRectStamp(List(smallCheckPath))
 case object HorizontalLineStamp extends PathRectStamp(List(horizontalPath))

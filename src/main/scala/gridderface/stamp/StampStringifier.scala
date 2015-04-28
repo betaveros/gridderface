@@ -47,7 +47,8 @@ object StampStringifier {
 
   def stringifyRectStamp(s: RectStamp) = s match {
     case ClearStamp => "clear" // this shouldn't be used
-    case CrossStamp => "x"
+    case BigCrossStamp => "x"
+    case SmallCrossStamp => "smx"
     case MajorDiagonalStamp => "mjdg"
     case MinorDiagonalStamp => "mndg"
     case BigCheckStamp => "bigv"
@@ -72,7 +73,8 @@ object StampStringifier {
   }
   def parseRectStamp(tokens: Seq[String]) = tokens(0) match {
     case "clear" => ClearStamp
-    case "x" => CrossStamp
+    case "x"    => BigCrossStamp
+    case "smx"  => SmallCrossStamp
     case "mjdg" => MajorDiagonalStamp
     case "mndg" => MinorDiagonalStamp
     case "bigv" => BigCheckStamp
