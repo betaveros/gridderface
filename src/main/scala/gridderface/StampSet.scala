@@ -36,6 +36,7 @@ object StampSet {
   val clearSet = StampSet(
     "Clear", Some(ClearStamp), Some(ClearStamp), Some(ClearStamp))
   val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
+  val smallCrossMark = CrossFixedMark(0.125, ThinStrokeVal)
   val slash1Set = StampSet(
     "\\", Some(MajorDiagonalStamp), None, None)
   val slash2Set = StampSet(
@@ -49,7 +50,7 @@ object StampSet {
   val bigCrossSet = StampSet(
     "Cross", Some(BigCrossStamp), Some(crossMark), Some(crossMark))
   val smallCrossSet = StampSet(
-    "S.Cross", Some(SmallCrossStamp), Some(crossMark), Some(crossMark))
+    "S.Cross", Some(SmallCrossStamp), Some(smallCrossMark), Some(smallCrossMark))
   val bigCheckSet = StampSet(
     "Check", Some(BigCheckStamp), None, None)
   val smallCheckSet = StampSet(
