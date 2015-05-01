@@ -41,7 +41,7 @@ object WriteSet {
   val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
   val crossSet  = plain2("Cross", crossMark)
   val eraseSet  = plain2("Erase", ClearStamp)
-  val dotSet    = plain2("Dot", DiskFixedMark(0.125))
+  val dotSet    = plain2("Dot", CircleFixedMark(0.125, Fill))
   val twiceWriteSet      = new TwiceWriteSet("Write <> Clear" , TransverseLineStamp(NormalStrokeVal), ClearStamp, StrokeLineStamp(NormalStrokeVal), ClearStamp)
   val twiceWriteCrossSet = new TwiceWriteSet("Write <> Cross" , TransverseLineStamp(NormalStrokeVal),  crossMark, StrokeLineStamp(NormalStrokeVal),  crossMark)
   val defaultMap: Map[KeyData, WriteSet] = {

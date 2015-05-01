@@ -10,25 +10,25 @@ case class StampSet(val name: String,
 
 object StampSet {
   val fillSet = StampSet(
-    "Fill", Some(FullRectStamp(Fill)), Some(StrokeLineStamp(NormalStrokeVal)), Some(FilledSquareFixedMark(0.125)))
+    "Fill", Some(FullRectStamp(Fill)), Some(StrokeLineStamp(NormalStrokeVal)), Some(SquareFixedMark(0.125, Fill)))
   val thickSet = StampSet(
-    "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(FilledSquareFixedMark(0.25)))
+    "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(SquareFixedMark(0.25, Fill)))
   val mediumSet = StampSet(
-    "Medium", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, false, false, false)), Some(StrokeLineStamp(MediumStrokeVal)), Some(FilledSquareFixedMark(0.1875)))
+    "Medium", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, false, false, false)), Some(StrokeLineStamp(MediumStrokeVal)), Some(SquareFixedMark(0.1875, Fill)))
   val shadefillSet = StampSet(
-    "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(FilledSquareFixedMark(0.125)))
+    "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(SquareFixedMark(0.125, Fill)))
   val dashSet = StampSet(
-    "Dash", Some(DashedFillRectStamp), Some(StrokeLineStamp(NormalDashedStrokeVal)), Some(DiskFixedMark(0.125)))
+    "Dash", Some(DashedFillRectStamp), Some(StrokeLineStamp(NormalDashedStrokeVal)), Some(CircleFixedMark(0.125, Fill)))
   val thinDashSet = StampSet(
-    "thinDash", Some(DashedFillRectStamp), Some(StrokeLineStamp(ThinDashedStrokeVal)), Some(DiskFixedMark(0.125)))
+    "thinDash", Some(DashedFillRectStamp), Some(StrokeLineStamp(ThinDashedStrokeVal)), Some(CircleFixedMark(0.125, Fill)))
   val dotSet = StampSet(
-    "Dot", Some(CircleRectStamp(0.25, Fill)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.125)))
+    "Dot", Some(CircleRectStamp(0.25, Fill)), Some(CircleFixedMark(0.125, Fill)), Some(CircleFixedMark(0.125, Fill)))
   val cornerDotSet = StampSet(
-    "CornerDot", Some(CircleRectStamp(0.25, Fill, 0.25, 0.25)), Some(DiskFixedMark(0.125)), Some(CircleFixedMark(0.125, ThinStrokeVal)))
+    "CornerDot", Some(CircleRectStamp(0.25, Fill, 0.25, 0.25)), Some(CircleFixedMark(0.125, Fill)), Some(CircleFixedMark(0.125, Draw(ThinStrokeVal))))
   val circleSet = StampSet(
-    "Circle", Some(CircleRectStamp(0.6875)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.25, ThinStrokeVal)))
+    "Circle", Some(CircleRectStamp(0.6875)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.25, Draw(ThinStrokeVal))))
   val bulbSet = StampSet(
-    "Bulb", Some(CircleRectStamp(0.75, Fill)), Some(DiskFixedMark(0.125)), Some(DiskFixedMark(0.28125)))
+    "Bulb", Some(CircleRectStamp(0.75, Fill)), Some(CircleFixedMark(0.125, Fill)), Some(CircleFixedMark(0.28125, Fill)))
   val starSet = StampSet(
     "Star", Some(StarStamp), None, None)
   val eSet = StampSet(

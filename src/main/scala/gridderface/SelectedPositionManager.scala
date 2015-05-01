@@ -10,12 +10,12 @@ class SelectedPositionManager(initselected: Option[Position] = None) extends Gri
   def paint = _paint
   var cellContent = new RectStampContent(outlineStamp, paint)
   var edgeContent = new LineStampContent(HexagonLineStamp(ThickStrokeVal), paint)
-  var intersectionContent = new PointStampContent(CircleFixedMark(0.25, ThickStrokeVal), paint)
+  var intersectionContent = new PointStampContent(CircleFixedMark(0.25, Draw(ThickStrokeVal)), paint)
   def paint_=(p: Paint): Unit = {
     _paint = p
     cellContent = new RectStampContent(outlineStamp, paint)
     edgeContent = new LineStampContent(HexagonLineStamp(ThickStrokeVal), paint)
-    intersectionContent = new PointStampContent(CircleFixedMark(0.25, ThickStrokeVal), paint)
+    intersectionContent = new PointStampContent(CircleFixedMark(0.25, Draw(ThickStrokeVal)), paint)
     publish(GriddableChanged(this))
   }
 

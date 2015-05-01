@@ -68,7 +68,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   private val dashedPreset = new PresetEdges(new LineStampContent(StrokeLineStamp(ThinDashedStrokeVal), Color.GRAY))
   private val slitherPresetList = List(
     new PresetEdges(new LineStampContent(StrokeLineStamp(MediumStrokeVal), new Color(254, 254, 254))),
-    new PresetIntersections(new PointStampContent(DiskFixedMark(0.125), Color.BLACK)))
+    new PresetIntersections(new PointStampContent(CircleFixedMark(0.125, Fill), Color.BLACK)))
   private val whitedashedPresetList = List(
     new PresetEdges(new LineStampContent(StrokeLineStamp(ThinStrokeVal), new Color(254, 254, 254))),
     dashedPreset)

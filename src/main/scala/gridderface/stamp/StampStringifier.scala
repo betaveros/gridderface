@@ -100,9 +100,8 @@ object StampStringifier {
   def stringifyLineStamp(s: LineStamp) = s match {
     case ClearStamp => "clear" // this shouldn't be used
     case CrossFixedMark(size, sv) => "x %s %s".format(size.toString, StrokeVal.stringify(sv))
-    case CircleFixedMark(size, sv) => "o %s %s".format(size.toString, StrokeVal.stringify(sv))
-    case DiskFixedMark(size) => "disk %s".format(size.toString)
-    case FilledSquareFixedMark(size) => "fsq %s".format(size.toString)
+    case CircleFixedMark(size, dv) => "o %s %s".format(size.toString, DrawVal.stringify(dv))
+    case SquareFixedMark(size, dv) => "sq %s %s".format(size.toString, DrawVal.stringify(dv))
     case HexagonLineStamp(sv) => "hex %s".format(StrokeVal.stringify(sv))
     case InequalityLineStamp(sv, v) => "i %s".format(StrokeVal.stringify(sv), InequalityLineStamp.stringify(v))
     case StrokeLineStamp(sv) => "s %s".format(StrokeVal.stringify(sv))
@@ -112,9 +111,8 @@ object StampStringifier {
   def parseLineStamp(tokens: Seq[String]) = tokens(0) match {
     case "clear" => ClearStamp
     case "x" => CrossFixedMark(tokens(1).toFloat, StrokeVal.parse(tokens(2)).get)
-    case "o" => CircleFixedMark(tokens(1).toFloat, StrokeVal.parse(tokens(2)).get)
-    case "disk" => DiskFixedMark(tokens(1).toFloat)
-    case "fsq" => FilledSquareFixedMark(tokens(1).toFloat)
+    case "o" => CircleFixedMark(tokens(1).toFloat, DrawVal.parse(tokens(2)).get)
+    case "sq" => SquareFixedMark(tokens(1).toFloat, DrawVal.parse(tokens(2)).get)
     case "hex" => HexagonLineStamp(StrokeVal.parse(tokens(1)).get)
     case "i" => InequalityLineStamp(StrokeVal.parse(tokens(1)).get, InequalityLineStamp.parse(tokens(2)).get)
     case "s" => StrokeLineStamp(StrokeVal.parse(tokens(1)).get)
@@ -124,17 +122,15 @@ object StampStringifier {
   def stringifyPointStamp(s: PointStamp) = s match {
     case ClearStamp => "clear" // this shouldn't be used
     case CrossFixedMark(size, sv) => "x %s %s".format(size.toString, StrokeVal.stringify(sv))
-    case CircleFixedMark(size, sv) => "o %s %s".format(size.toString, StrokeVal.stringify(sv))
-    case DiskFixedMark(size) => "disk %s".format(size.toString)
-    case FilledSquareFixedMark(size) => "fsq %s".format(size.toString)
+    case CircleFixedMark(size, dv) => "o %s %s".format(size.toString, DrawVal.stringify(dv))
+    case SquareFixedMark(size, dv) => "sq %s %s".format(size.toString, DrawVal.stringify(dv))
     case _ => throw new IllegalArgumentException("PointStamp cannot be stringified: " ++ s.toString)
   }
   def parsePointStamp(tokens: Seq[String]) = tokens(0) match {
     case "clear" => ClearStamp
     case "x" => CrossFixedMark(tokens(1).toFloat, StrokeVal.parse(tokens(2)).get)
-    case "o" => CircleFixedMark(tokens(1).toFloat, StrokeVal.parse(tokens(2)).get)
-    case "disk" => DiskFixedMark(tokens(1).toFloat)
-    case "fsq" => FilledSquareFixedMark(tokens(1).toFloat)
+    case "o" => CircleFixedMark(tokens(1).toFloat, DrawVal.parse(tokens(2)).get)
+    case "sq" => SquareFixedMark(tokens(1).toFloat, DrawVal.parse(tokens(2)).get)
     case _ => throw new IllegalArgumentException("PointStamp cannot be parsed from " ++ tokens.toString)
   }
 }
