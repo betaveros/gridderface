@@ -18,7 +18,9 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   private var intersectionPaint: Paint = Color.BLACK
   private var intersectionPaintName: String = "Black"
   private var writeSet: WriteSet = WriteSet.writeSet
-  private var lastStampSet: Option[StampSet] = None
+  private var lastRectStamp: Option[RectStamp] = None
+  private var lastLineStamp: Option[LineStamp] = None
+  private var lastPointStamp: Option[PointStamp] = None
   private var _paintStatus: String = "Black"
   private var _drawStatus: String = ""
   private var _lockFunction: Position => Position = identity[Position]
@@ -63,9 +65,18 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     lineStamp: Option[LineStamp] = None,
     pointStamp: Option[PointStamp] = None) {
     pos match {
-      case cpos: CellPosition => rectStamp foreach (putRectStamp(cpos, _))
-      case epos: EdgePosition => lineStamp foreach (putLineStamp(epos, _))
-      case ipos: IntersectionPosition => pointStamp foreach (putPointStamp(ipos, _))
+      case cpos: CellPosition => {
+        rectStamp foreach (putRectStamp(cpos, _))
+        lastRectStamp = rectStamp orElse lastRectStamp
+      }
+      case epos: EdgePosition => {
+        lineStamp foreach (putLineStamp(epos, _))
+        lastLineStamp = lineStamp orElse lastLineStamp
+      }
+      case ipos: IntersectionPosition => {
+        pointStamp foreach (putPointStamp(ipos, _))
+        lastPointStamp = pointStamp orElse lastPointStamp
+      }
     }
   }
   def putStampAtSelected(rectStamp: Option[RectStamp] = None,
@@ -88,7 +99,6 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       case Some(s) => "(" ++ s ++ ")"
     }) ++ _gridList.status
   def putStampSet(s: StampSet): Unit = {
-    lastStampSet = Some(s)
     putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
   }
   def putContentSet(s: ContentSet): Unit = {
@@ -338,13 +348,21 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   val fillDrawReactions = completePF(ContentSet.fillMap andThen putContentSet)
   private var _drawReactions = defaultDrawReactions
 
+  def repeatReaction: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
+    case List(KeyTypedData('q')) => {
+      putStampAtSelected(lastRectStamp, lastLineStamp, lastPointStamp)
+      KeyComplete
+    }
+  }
+
   def keyListReactions = (moveReactions
     orElse commandStartReactions
     orElse _drawReactions
     orElse moveAndDrawReactions
     orElse paintReactions
     orElse writeReactions
-    orElse gridListReactions)
+    orElse gridListReactions
+    orElse repeatReaction)
   def selectNear(pt: Point) {
     sel.selected = Some(point2pos(pt))
     ensureLock()
