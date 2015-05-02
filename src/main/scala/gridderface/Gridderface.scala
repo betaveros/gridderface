@@ -238,7 +238,7 @@ object Gridderface extends SimpleSwingApplication {
     bg.image = new java.awt.Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()))
   }
   def setColor(arg: String) = {
-    for (set <- GridderfaceStringParser.parseColorString(arg)) yield {
+    for (set <- PaintStringifier.parsePaintSet(arg)) yield {
       drawMode.setPaintSet(set); "Set color to " + arg
     }
   }

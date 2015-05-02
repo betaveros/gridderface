@@ -4,16 +4,9 @@ import gridderface.stamp._
 import java.awt.Color
 import scala.io.Source
 
+import PaintStringifier._
+
 object GridderfaceStringifier {
-  def stringifyColor(c: Color): String = Seq(c.getRed(), c.getGreen(), c.getBlue()).mkString(",")
-  def parseColor(s: String): Status[Color] = s.split(",") match {
-    case Array(rs, gs, bs) => for (
-      r <- StatusUtilities tryToInt rs;
-      g <- StatusUtilities tryToInt gs;
-      b <- StatusUtilities tryToInt bs
-    ) yield new Color(r, g, b)
-    case _ => Failed("Color does not have 3 components")
-  }
   def stringifyGriddablePositionMap(m: GriddablePositionMap): Iterable[String] = {
     m.map flatMap (_ match {
       case (CellPosition(r, c), CellGriddable(RectStampContent(s, color: Color), _)) => {

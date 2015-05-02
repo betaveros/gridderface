@@ -240,7 +240,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case '_' =>
       putStampAtSelected(Some(new OneTextRectStamp(str, OneTextRectStamp.FontSize.Small, 0.125f, 1f))); Success("You put " + str)
     case '%' =>
-      for (ps <- GridderfaceStringParser.parseColorString(str)) yield {
+      for (ps <- PaintStringifier.parsePaintSet(str)) yield {
         setPaintSet(ps); "Set color to " ++ ps.name
       }
     case '&' => {
@@ -278,7 +278,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
 
     case "recolor" => for (
       arg <- StatusUtilities.getSingleElement(args);
-      set <- GridderfaceStringParser.parseColorString(arg)) yield {
+      set <- PaintStringifier.parsePaintSet(arg)) yield {
       _gridList mapUpdateCurrent (_ match {
           case CellGriddable(RectStampContent(stamp, _), pos) => (
             CellGriddable(RectStampContent(stamp, set.paint), pos)
