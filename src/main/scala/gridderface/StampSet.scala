@@ -14,7 +14,7 @@ object StampSet {
   val thickSet = StampSet(
     "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(SquareFixedMark(0.25, Fill)))
   val mediumSet = StampSet(
-    "Medium", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, false, false, false)), Some(StrokeLineStamp(MediumStrokeVal)), Some(SquareFixedMark(0.1875, Fill)))
+    "Medium", Some(RectangleArcRectStamp(0.75, Fill, false, false, false, false)), Some(StrokeLineStamp(MediumStrokeVal)), Some(SquareFixedMark(0.1875, Fill)))
   val shadefillSet = StampSet(
     "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(SquareFixedMark(0.125, Fill)))
   val dashSet = StampSet(
@@ -60,13 +60,13 @@ object StampSet {
   val greaterSet = StampSet(
     "GreaterThan", None, Some(InequalityLineStamp(NormalStrokeVal, InequalityLineStamp.Greater)), None)
   val leftShipSet = StampSet(
-    "LeftShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, false, true, true)), None, None)
+    "LeftShip",  Some(RectangleArcRectStamp(0.75, Fill, false, false, true , true )), None, None)
   val rightShipSet = StampSet(
-    "RightShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, true, true, false, false)), None, None)
+    "RightShip", Some(RectangleArcRectStamp(0.75, Fill, true , true , false, false)), None, None)
   val upShipSet = StampSet(
-    "UpShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, true, false, false, true)), None, None)
+    "UpShip",    Some(RectangleArcRectStamp(0.75, Fill, true , false, false, true )), None, None)
   val downShipSet = StampSet(
-    "DownShip", Some(RectangleArcRectStamp(0.75, 0, 0, Fill, false, true, true, false)), None, None)
+    "DownShip",  Some(RectangleArcRectStamp(0.75, Fill, false, true , true , false)), None, None)
   val questionSet = StampSet(
     "?", Some(OneTextRectStamp("?")), None, None)
   val bangSet = StampSet(

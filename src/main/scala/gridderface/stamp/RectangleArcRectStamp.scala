@@ -3,7 +3,7 @@ package gridderface.stamp
 import java.awt._
 import java.awt.geom._
 
-case class RectangleArcRectStamp(size: Double, xOffset: Double = 0, yOffset: Double = 0, dv: DrawVal, topRightArc: Boolean, bottomRightArc: Boolean, bottomLeftArc: Boolean, topLeftArc: Boolean) extends ScalableRectStamp {
+case class RectangleArcRectStamp(size: Double, dv: DrawVal, topRightArc: Boolean, bottomRightArc: Boolean, bottomLeftArc: Boolean, topLeftArc: Boolean, xOffset: Double = 0, yOffset: Double = 0) extends ScalableRectStamp {
   val path = {
     val sx = 0.5 - size / 2.0
     if (topRightArc && bottomRightArc && bottomLeftArc && topLeftArc)

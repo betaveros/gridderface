@@ -79,7 +79,7 @@ object StampStringifier {
     case SmallCheckStamp => "smv"
     case FullRectStamp(dv) => "f %s".format(DrawVal.stringify(dv))
     case CircleRectStamp(size, dv, xoff, yoff) => "o %s %s %s %s".format(size.toString, DrawVal.stringify(dv), xoff.toString, yoff.toString)
-    case RectangleArcRectStamp(size, xoff, yoff, dv, tr, br, bl, tl) => "ra %s %s %s %s %s %s %s %s".format(size.toString, xoff.toString, yoff.toString, DrawVal.stringify(dv), sb(tr), sb(br), sb(bl), sb(tl))
+    case RectangleArcRectStamp(size, dv, tr, br, bl, tl, xoff, yoff) => "ra %s %s %s %s %s %s %s %s".format(size.toString, DrawVal.stringify(dv), sb(tr), sb(br), sb(bl), sb(tl), xoff.toString, yoff.toString)
     case DiagonalFillRectStamp => "dgf"
     case DashedFillRectStamp => "dsf"
     case DottedFillRectStamp => "dtf"
@@ -111,13 +111,13 @@ object StampStringifier {
       yo <- tryToDouble (tokens(4))) yield CircleRectStamp(sz, dv, xo, yo)
     case "ra" => for (
       sz <- tryToDouble (tokens(1));
-      xo <- tryToDouble (tokens(2));
-      yo <- tryToDouble (tokens(3));
-      dv <- parseDrawVal(tokens(4));
-      b1 <- tryToBoolean(tokens(5));
-      b2 <- tryToBoolean(tokens(6));
-      b3 <- tryToBoolean(tokens(7));
-      b4 <- tryToBoolean(tokens(8))) yield RectangleArcRectStamp(sz, xo, yo, dv, b1, b2, b3, b4)
+      dv <- parseDrawVal(tokens(2));
+      b1 <- tryToBoolean(tokens(3));
+      b2 <- tryToBoolean(tokens(4));
+      b3 <- tryToBoolean(tokens(5));
+      b4 <- tryToBoolean(tokens(6));
+      xo <- tryToDouble (tokens(7));
+      yo <- tryToDouble (tokens(8))) yield RectangleArcRectStamp(sz, dv, b1, b2, b3, b4, xo, yo)
     case "dgf"  => Success(DiagonalFillRectStamp)
     case "dsf"  => Success(  DashedFillRectStamp)
     case "dtf"  => Success(  DottedFillRectStamp)
