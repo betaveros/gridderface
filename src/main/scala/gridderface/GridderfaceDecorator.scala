@@ -27,7 +27,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
     for (
       ecs <- StatusUtilities.getElementByIndex(restArgs, 0);
       bt <- getBoundTuple(restArgs.tail, rows, cols);
-      econt <- GridderfaceStringParser.parseLineContentString(ecs)
+      econt <- GridderfaceStringifier.parseLineContent(ecs)
     ) yield {
       seq.griddable = seq.griddable :+
         new HomogeneousEdgeGrid(econt, bt._1, bt._2, bt._3, bt._4)
@@ -38,7 +38,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
     for (
       ecs <- StatusUtilities.getElementByIndex(restArgs, 0);
       bt <- getBoundTuple(restArgs.tail, rows, cols);
-      econt <- GridderfaceStringParser.parseLineContentString(ecs)
+      econt <- GridderfaceStringifier.parseLineContent(ecs)
     ) yield {
       seq.griddable = seq.griddable :+
         new HomogeneousBorderGrid(econt, bt._1, bt._2, bt._3, bt._4)

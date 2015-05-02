@@ -245,16 +245,6 @@ object Gridderface extends SimpleSwingApplication {
   def readColorCommand(args: Array[String]) = {
     StatusUtilities.getSingleElement(args) flatMap setColor
   }
-  /*
-  def parseHomogeneousGrid(pair: (String, String), rows: Int, cols: Int) = {
-    val (choice, str) = pair
-    choice match {
-      case "edge" => GridderfaceStringParser.parseLineContentString(str) map {
-        new HomogeneousEdgeGrid(_, rows, cols)
-      }
-    }
-  }
-  */
   def decorationCommand(args: Array[String]): Status[String] = {
     generationDimensions match {
       case Some(dim) => decorator.decorationCommand(args, dim)

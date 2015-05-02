@@ -119,6 +119,13 @@ object StampStringifier {
     case "tv" => TransverseLineStamp(StrokeVal.parse(tokens(1)).get)
     case _ => throw new IllegalArgumentException("LineStamp cannot be parsed from " ++ tokens.toString)
   }
+  def parseLineStampWithStrokeDefault(tokens: Seq[String]) = {
+    if (tokens.length == 1) {
+      StrokeLineStamp(StrokeVal.parse(tokens(0)).get)
+    } else {
+      parseLineStamp(tokens)
+    }
+  }
   def stringifyPointStamp(s: PointStamp) = s match {
     case ClearStamp => "clear" // this shouldn't be used
     case CrossFixedMark(size, sv) => "x %s %s".format(size.toString, StrokeVal.stringify(sv))

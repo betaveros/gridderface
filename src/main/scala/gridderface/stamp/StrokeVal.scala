@@ -33,7 +33,9 @@ object StrokeVal {
   // experimentally chosen as Slitherlink-flood-fill edge width
   val mediumWidth = 0.1875f
 
-  private val strokeValStringCorrespondences: Seq[(StrokeVal, String)] = Seq(
+  // ok so there's some initialization order wonkiness here
+  // somehow, without lazy, ThickStrokeVal is null here
+  private lazy val strokeValStringCorrespondences: Seq[(StrokeVal, String)] = Seq(
     NormalStrokeVal -> "n",
     MediumStrokeVal -> "m",
     ThickStrokeVal -> "t",
@@ -41,8 +43,8 @@ object StrokeVal {
     NormalDashedStrokeVal -> "nd",
     ThinDashedStrokeVal -> "d"
   )
-  private val strokeValStringMap: Map[StrokeVal, String] = Map(strokeValStringCorrespondences: _*)
-  private val stringStrokeValMap: Map[String, StrokeVal] = Map(strokeValStringCorrespondences map (_.swap): _*)
+  private lazy val strokeValStringMap: Map[StrokeVal, String] = Map(strokeValStringCorrespondences: _*)
+  private lazy val stringStrokeValMap: Map[String, StrokeVal] = Map(strokeValStringCorrespondences map (_.swap): _*)
   def parse(s: String): Option[StrokeVal] = stringStrokeValMap get s
   def stringify(s: StrokeVal): String = strokeValStringMap(s)
 }

@@ -1,7 +1,7 @@
 package gridderface
 
 import gridderface.stamp._
-import java.awt.Color
+import java.awt.{ Color, Paint }
 import scala.io.Source
 
 import PaintStringifier._
@@ -62,5 +62,16 @@ object GridderfaceStringifier {
       case _: java.nio.charset.MalformedInputException
         => Failed("Malformed input")
     }
+  }
+  def parseLineContent(str: String, defaultPaint: Paint = Color.BLACK): Status[LineContent] = {
+    val colonParts = str.split(":")
+    val paintStat = colonParts.length match {
+      case 1 => Success(defaultPaint)
+      case 2 => PaintStringifier.parseColor(colonParts(1))
+      case _ => Failed("Error: extra colon while parsing LineContent")
+    }
+    val commaParts = colonParts(0).split(",")
+    val stamp = StampStringifier.parseLineStampWithStrokeDefault(colonParts(0).split(","))
+    for (paint <- paintStat) yield new LineStampContent(stamp, paint)
   }
 }
