@@ -17,12 +17,24 @@ object StatusUtilities {
       case e: NumberFormatException => Failed("Error: cannot parse float: " + str)
     }
   }
+  def tryToDouble(str: String): Status[Double] = {
+    try {
+      Success(str.toDouble)
+    } catch {
+      case e: NumberFormatException => Failed("Error: cannot parse double: " + str)
+    }
+  }
   def tryToInt(str: String): Status[Int] = {
     try {
       Success(str.toInt)
     } catch {
       case e: NumberFormatException => Failed("Error: cannot parse int: " + str)
     }
+  }
+  def tryToBoolean(str: String): Status[Boolean] = str match {
+    case "0" => Success(false)
+    case "1" => Success(true )
+    case _ => Failed("Error: cannot parse boolean: " + str)
   }
   def tryToInts(strs: Seq[String]): Status[Seq[Int]] = {
     (strs map tryToInt).foldLeft(Success(List.empty): Status[Seq[Int]])(

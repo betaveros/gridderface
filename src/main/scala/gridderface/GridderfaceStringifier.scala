@@ -42,14 +42,18 @@ object GridderfaceStringifier {
           c <- StatusUtilities tryToInt t2;
           color <- parseColor(t3);
           ret <- tokens(0) match {
-            case "c" => p.putCell(CellPosition(r, c),
-              RectStampContent(StampStringifier.parseRectStamp(tokens drop 4), color)); Success(())
-            case "h" => p.putEdge(EdgePosition(r, c, EdgeOrientation.Horizontal),
-              LineStampContent(StampStringifier.parseLineStamp(tokens drop 4), color)); Success(())
-            case "v" => p.putEdge(EdgePosition(r, c, EdgeOrientation.Vertical),
-              LineStampContent(StampStringifier.parseLineStamp(tokens drop 4), color)); Success(())
-            case "i" => p.putIntersection(IntersectionPosition(r, c),
-              PointStampContent(StampStringifier.parsePointStamp(tokens drop 4), color)); Success(())
+            case "c" => for (rs <- StampStringifier.parseRectStamp(tokens drop 4)) yield {
+              p.putCell(CellPosition(r, c), RectStampContent(rs, color))
+            }
+            case "h" => for (ls <- StampStringifier.parseLineStamp(tokens drop 4)) yield {
+              p.putEdge(EdgePosition(r, c, EdgeOrientation.Horizontal), LineStampContent(ls, color))
+            }
+            case "v" => for (ls <- StampStringifier.parseLineStamp(tokens drop 4)) yield {
+              p.putEdge(EdgePosition(r, c, EdgeOrientation.Vertical), LineStampContent(ls, color))
+            }
+            case "i" => for (ps <- StampStringifier.parsePointStamp(tokens drop 4)) yield {
+              p.putIntersection(IntersectionPosition(r, c), PointStampContent(ps, color))
+            }
             case _ => Failed("Cannot parse t0: " ++ t0)
           }) yield ret
         res match {
@@ -65,13 +69,14 @@ object GridderfaceStringifier {
   }
   def parseLineContent(str: String, defaultPaint: Paint = Color.BLACK): Status[LineContent] = {
     val colonParts = str.split(":")
-    val paintStat = colonParts.length match {
-      case 1 => Success(defaultPaint)
-      case 2 => PaintStringifier.parseColor(colonParts(1))
-      case _ => Failed("Error: extra colon while parsing LineContent")
-    }
     val commaParts = colonParts(0).split(",")
-    val stamp = StampStringifier.parseLineStampWithStrokeDefault(colonParts(0).split(","))
-    for (paint <- paintStat) yield new LineStampContent(stamp, paint)
+    for (
+      paint <- colonParts.length match {
+        case 1 => Success(defaultPaint)
+        case 2 => PaintStringifier.parseColor(colonParts(1))
+        case _ => Failed("Error: extra colon while parsing LineContent")
+      };
+      stamp <- StampStringifier.parseLineStampWithStrokeDefault(colonParts(0).split(",")))
+    yield new LineStampContent(stamp, paint)
   }
 }
