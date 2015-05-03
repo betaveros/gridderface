@@ -294,6 +294,23 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       "Recolored current layer with " + arg
     }
 
+    case "retype" => for (
+      Tuple2(tspec, arg2) <- StatusUtilities.getTwoElements(args);
+      c <- tspec match {
+        case "edge" => for (
+          ls <- StampStringifier.parseLineStamp(arg2.split(","))
+        ) yield {
+          _gridList mapUpdateCurrent (_ match {
+            case EdgeGriddable(LineStampContent(_, p), pos) =>
+              EdgeGriddable(LineStampContent(ls, p), pos)
+            case x => x
+          })
+          "Retyped"
+        }
+        case _ => Failed("Could not parse type " + tspec)
+      }
+    ) yield c
+
     case "newlayer" => addLayer()
     case "addlayer" => addLayer()
     case "rmlayer"  => removeLayer()
