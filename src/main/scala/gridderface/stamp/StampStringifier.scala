@@ -95,43 +95,47 @@ object StampStringifier {
     case FourTextRectStamp(s1, s2, s3, s4) => "t4 %s %s %s %s".format(quoteString(s1), quoteString(s2), quoteString(s3), quoteString(s4))
     case _ => throw new IllegalArgumentException("RectStamp cannot be stringified: " ++ s.toString)
   }
-  def parseRectStamp(tokens: Seq[String]): Status[RectStamp] = tokens(0) match {
-    case "clear" => Success(        ClearStamp)
-    case "x"     => Success(     BigCrossStamp)
-    case "smx"   => Success(   SmallCrossStamp)
-    case "mjdg"  => Success(MajorDiagonalStamp)
-    case "mndg"  => Success(MinorDiagonalStamp)
-    case "bigv"  => Success(     BigCheckStamp)
-    case "smv"   => Success(   SmallCheckStamp)
-    case "f" => for (dv <- parseDrawVal(tokens(1))) yield FullRectStamp(dv)
-    case "o" => for (
-      sz <- tryToDouble (tokens(1));
-      dv <- parseDrawVal(tokens(2));
-      xo <- tryToDouble (tokens(3));
-      yo <- tryToDouble (tokens(4))) yield CircleRectStamp(sz, dv, xo, yo)
-    case "ra" => for (
-      sz <- tryToDouble (tokens(1));
-      dv <- parseDrawVal(tokens(2));
-      b1 <- tryToBoolean(tokens(3));
-      b2 <- tryToBoolean(tokens(4));
-      b3 <- tryToBoolean(tokens(5));
-      b4 <- tryToBoolean(tokens(6));
-      xo <- tryToDouble (tokens(7));
-      yo <- tryToDouble (tokens(8))) yield RectangleArcRectStamp(sz, dv, b1, b2, b3, b4, xo, yo)
-    case "dgf"  => Success(DiagonalFillRectStamp)
-    case "dsf"  => Success(  DashedFillRectStamp)
-    case "dtf"  => Success(  DottedFillRectStamp)
-    case "hl"   => Success(  HorizontalLineStamp)
-    case "vl"   => Success(    VerticalLineStamp)
-    case "plus" => Success(            PlusStamp)
-    case "star" => Success(            StarStamp)
-    case "arr"  => for (dx <- tryToInt(tokens(1)); dy <- tryToInt(tokens(2))) yield ArrowStamp(dx, dy)
-    case "tarr" => for (a <- parseArrowTextArrow(tokens(2)); sv <- parseStrokeVal(tokens(3))) yield ArrowTextRectStamp(unquoteString(tokens(1)), a, sv)
-    case "t"  => for (sz <- parseFontSize(tokens(2)); f1 <- tryToFloat(tokens(3)); f2 <- tryToFloat(tokens(4))) yield OneTextRectStamp(unquoteString(tokens(1)), sz, f1, f2)
-    case "t2" => Success(  TwoTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2))))
-    case "t3" => Success(ThreeTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2)), unquoteString(tokens(3))))
-    case "t4" => Success( FourTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2)), unquoteString(tokens(3)), unquoteString(tokens(4))))
-    case _ => Failed("RectStamp cannot be parsed from " ++ tokens.toString)
+  def parseRectStamp(tokens: Seq[String]): Status[RectStamp] = try {
+    tokens(0) match {
+      case "clear" => Success(        ClearStamp)
+      case "x"     => Success(     BigCrossStamp)
+      case "smx"   => Success(   SmallCrossStamp)
+      case "mjdg"  => Success(MajorDiagonalStamp)
+      case "mndg"  => Success(MinorDiagonalStamp)
+      case "bigv"  => Success(     BigCheckStamp)
+      case "smv"   => Success(   SmallCheckStamp)
+      case "f" => for (dv <- parseDrawVal(tokens(1))) yield FullRectStamp(dv)
+      case "o" => for (
+        sz <- tryToDouble (tokens(1));
+        dv <- parseDrawVal(tokens(2));
+        xo <- tryToDouble (tokens(3));
+        yo <- tryToDouble (tokens(4))) yield CircleRectStamp(sz, dv, xo, yo)
+      case "ra" => for (
+        sz <- tryToDouble (tokens(1));
+        dv <- parseDrawVal(tokens(2));
+        b1 <- tryToBoolean(tokens(3));
+        b2 <- tryToBoolean(tokens(4));
+        b3 <- tryToBoolean(tokens(5));
+        b4 <- tryToBoolean(tokens(6));
+        xo <- tryToDouble (tokens(7));
+        yo <- tryToDouble (tokens(8))) yield RectangleArcRectStamp(sz, dv, b1, b2, b3, b4, xo, yo)
+      case "dgf"  => Success(DiagonalFillRectStamp)
+      case "dsf"  => Success(  DashedFillRectStamp)
+      case "dtf"  => Success(  DottedFillRectStamp)
+      case "hl"   => Success(  HorizontalLineStamp)
+      case "vl"   => Success(    VerticalLineStamp)
+      case "plus" => Success(            PlusStamp)
+      case "star" => Success(            StarStamp)
+      case "arr"  => for (dx <- tryToInt(tokens(1)); dy <- tryToInt(tokens(2))) yield ArrowStamp(dx, dy)
+      case "tarr" => for (a <- parseArrowTextArrow(tokens(2)); sv <- parseStrokeVal(tokens(3))) yield ArrowTextRectStamp(unquoteString(tokens(1)), a, sv)
+      case "t"  => for (sz <- parseFontSize(tokens(2)); f1 <- tryToFloat(tokens(3)); f2 <- tryToFloat(tokens(4))) yield OneTextRectStamp(unquoteString(tokens(1)), sz, f1, f2)
+      case "t2" => Success(  TwoTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2))))
+      case "t3" => Success(ThreeTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2)), unquoteString(tokens(3))))
+      case "t4" => Success( FourTextRectStamp(unquoteString(tokens(1)), unquoteString(tokens(2)), unquoteString(tokens(3)), unquoteString(tokens(4))))
+      case _ => Failed("RectStamp cannot be parsed from " ++ tokens.toString)
+    }
+  } catch {
+    case _: IndexOutOfBoundsException => Failed("Wrong number of tokens for parsing RectStamp from tokens " ++ tokens.toString)
   }
   def stringifyLineStamp(s: LineStamp) = s match {
     case ClearStamp => "clear" // this shouldn't be used
@@ -144,16 +148,20 @@ object StampStringifier {
     case TransverseLineStamp(sv) => "tv %s".format(StrokeVal.stringify(sv))
     case _ => throw new IllegalArgumentException("LineStamp cannot be stringified: " ++ s.toString)
   }
-  def parseLineStamp(tokens: Seq[String]): Status[LineStamp] = tokens(0) match {
-    case "clear" => Success(ClearStamp)
-    case "x"   => for (sz <- tryToFloat(tokens(1)); sv <- parseStrokeVal(tokens(2))) yield  CrossFixedMark(sz, sv)
-    case "o"   => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield CircleFixedMark(sz, dv)
-    case "sq"  => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield SquareFixedMark(sz, dv)
-    case "hex" => for (sv <- parseStrokeVal(tokens(1))) yield HexagonLineStamp(sv)
-    case "i"   => for (sv <- parseStrokeVal(tokens(1)); ils <- parseInequality(tokens(2))) yield InequalityLineStamp(sv, ils)
-    case "s"   => for (sv <- parseStrokeVal(tokens(1))) yield StrokeLineStamp(sv)
-    case "tv"  => for (sv <- parseStrokeVal(tokens(1))) yield TransverseLineStamp(sv)
-    case _ => throw new IllegalArgumentException("LineStamp cannot be parsed from " ++ tokens.toString)
+  def parseLineStamp(tokens: Seq[String]): Status[LineStamp] = try {
+    tokens(0) match {
+      case "clear" => Success(ClearStamp)
+      case "x"   => for (sz <- tryToFloat(tokens(1)); sv <- parseStrokeVal(tokens(2))) yield  CrossFixedMark(sz, sv)
+      case "o"   => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield CircleFixedMark(sz, dv)
+      case "sq"  => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield SquareFixedMark(sz, dv)
+      case "hex" => for (sv <- parseStrokeVal(tokens(1))) yield HexagonLineStamp(sv)
+      case "i"   => for (sv <- parseStrokeVal(tokens(1)); ils <- parseInequality(tokens(2))) yield InequalityLineStamp(sv, ils)
+      case "s"   => for (sv <- parseStrokeVal(tokens(1))) yield StrokeLineStamp(sv)
+      case "tv"  => for (sv <- parseStrokeVal(tokens(1))) yield TransverseLineStamp(sv)
+      case tok => Failed("Unrecognized LineStamp first token " ++ tok)
+    }
+  } catch {
+    case _: IndexOutOfBoundsException => Failed("Wrong number of tokens for parsing LineStamp from tokens " ++ tokens.toString)
   }
   def parseLineStampWithStrokeDefault(tokens: Seq[String]): Status[LineStamp] = {
     tokens match {
@@ -171,11 +179,15 @@ object StampStringifier {
     case SquareFixedMark(size, dv) => "sq %s %s".format(size.toString, DrawVal.stringify(dv))
     case _ => throw new IllegalArgumentException("PointStamp cannot be stringified: " ++ s.toString)
   }
-  def parsePointStamp(tokens: Seq[String]): Status[PointStamp] = tokens(0) match {
-    case "clear" => Success(ClearStamp)
-    case "x"  => for (sz <- tryToFloat(tokens(1)); sv <- parseStrokeVal(tokens(2))) yield  CrossFixedMark(sz, sv)
-    case "o"  => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield CircleFixedMark(sz, dv)
-    case "sq" => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield SquareFixedMark(sz, dv)
-    case _ => Failed("PointStamp cannot be parsed from " ++ tokens.toString)
+  def parsePointStamp(tokens: Seq[String]): Status[PointStamp] = try {
+    tokens(0) match {
+      case "clear" => Success(ClearStamp)
+      case "x"  => for (sz <- tryToFloat(tokens(1)); sv <- parseStrokeVal(tokens(2))) yield  CrossFixedMark(sz, sv)
+      case "o"  => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield CircleFixedMark(sz, dv)
+      case "sq" => for (sz <- tryToFloat(tokens(1)); dv <- parseDrawVal  (tokens(2))) yield SquareFixedMark(sz, dv)
+      case _ => Failed("PointStamp cannot be parsed from " ++ tokens.toString)
+    }
+  } catch {
+    case _: IndexOutOfBoundsException => Failed("Wrong number of tokens for parsing PointStamp from tokens " ++ tokens.toString)
   }
 }
