@@ -177,8 +177,8 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       case KeyTypedData('l') => KeyIncomplete
       case _ => unitComplete(PaintSet.defaultMap andThen setPaintSet lift d2)
     }
-    case List(KeyTypedData('c'), KeyTypedData('d'), d3) => unitComplete(PaintSet.defaultMap andThen (_.darkerSet.get) andThen setPaintSet lift d3)
-    case List(KeyTypedData('c'), KeyTypedData('l'), d3) => unitComplete(PaintSet.defaultMap andThen (_.lighterSet.get) andThen setPaintSet lift d3)
+    case List(KeyTypedData('c'), KeyTypedData('d'), d3) => unitComplete(PaintSet.defaultMap andThen (_.darkerSet) andThen setPaintSet lift d3)
+    case List(KeyTypedData('c'), KeyTypedData('l'), d3) => unitComplete(PaintSet.defaultMap andThen (_.lighterSet) andThen setPaintSet lift d3)
 
     case List(KeyTypedData('C')) => KeyIncomplete
     case List(KeyTypedData('C'), KeyTypedData('c')) => KeyIncomplete
@@ -345,7 +345,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       Success("All content cleared")
     case c => Failed("Unrecognized command: " + c)
   }
-  def setPaintSet(ps: PaintSet) {
+  def setPaintSet(ps: PaintSet[Paint]) {
     cellPaint = ps.paint
     cellPaintName = ps.name
     edgePaint = ps.paint
@@ -358,19 +358,19 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   def createPaintStatus() {
     _paintStatus = cellPaintName ++ " / " ++ edgePaintName ++ " / " ++ intersectionPaintName
   }
-  def setCellPaintSet(ps: PaintSet) {
+  def setCellPaintSet(ps: PaintSet[Paint]) {
     cellPaint = ps.paint
     cellPaintName = ps.name
     createPaintStatus()
     publish(StatusChanged(this))
   }
-  def setEdgePaintSet(ps: PaintSet) {
+  def setEdgePaintSet(ps: PaintSet[Paint]) {
     edgePaint = ps.paint
     edgePaintName = ps.name
     createPaintStatus()
     publish(StatusChanged(this))
   }
-  def setIntersectionPaintSet(ps: PaintSet) {
+  def setIntersectionPaintSet(ps: PaintSet[Paint]) {
     intersectionPaint = ps.paint
     intersectionPaintName = ps.name
     createPaintStatus()

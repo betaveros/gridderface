@@ -1,6 +1,6 @@
 package gridderface
 
-import java.awt.Color
+import java.awt.{ Color, Paint }
 import scala.collection.immutable.HashMap
 
 object PaintStringifier {
@@ -58,7 +58,7 @@ object PaintStringifier {
       }
     } else Failed("Cannot parse color " ++ s)
   }
-  def parsePaintSet(s: String): Status[PaintSet] = {
+  def parsePaintSet(s: String): Status[PaintSet[Paint]] = {
     namedPaintMap get s match {
       case Some(set) => Success(set)
       case None => parseColor(s) map (PaintSet.createColorSet(_))

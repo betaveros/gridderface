@@ -6,21 +6,15 @@ import scala.swing.event.KeyEvent
 import scala.swing.event.KeyTyped
 import scala.collection.immutable.HashMap
 
-case class PaintSet(name: String, paint: Paint) {
-  def darkerSet = paint match {
-    case c: Color => Some(PaintSet("Dark " ++ name, new Color(
-      c.getRed / 2,
-      c.getGreen / 2,
-      c.getBlue / 2)))
-    case _ => None
-  }
-  def lighterSet = paint match {
-    case c: Color => Some(PaintSet("Light " ++ name, new Color(
-      (c.getRed + 255) / 2,
-      (c.getGreen + 255) / 2,
-      (c.getBlue + 255) / 2)))
-    case _ => None
-  }
+case class PaintSet[+A <: Paint](name: String, paint: A) {
+  def darkerSet(implicit ev: A => Color) = PaintSet("Dark " ++ name, new Color(
+      paint.getRed / 2,
+      paint.getGreen / 2,
+      paint.getBlue / 2))
+  def lighterSet(implicit ev: A => Color) = PaintSet("Light " ++ name, new Color(
+      (paint.getRed + 255) / 2,
+      (paint.getGreen + 255) / 2,
+      (paint.getBlue + 255) / 2))
 }
 
 object PaintSet {
@@ -60,7 +54,7 @@ object PaintSet {
 
   val devRedSet       = PaintSet("DevRed",       new Color(204,  0,  0))
   // d3.js ordinal categorical colors
-  val d3Map: Map[KeyData, PaintSet] = List(
+  val d3Map: Map[KeyData, PaintSet[Color]] = List(
     new Color(31,119,180),
     new Color(255,127,14),
     new Color(44,160,44),
@@ -78,7 +72,7 @@ object PaintSet {
       -> PaintSet("d3/" ++ (i + 1).toString, c))})
     .toMap
 
-  val basicMap: HashMap[KeyData, PaintSet] = HashMap(
+  val basicMap: HashMap[KeyData, PaintSet[Color]] = HashMap(
     KeyTypedData('r') -> redSet,
     KeyTypedData('g') -> greenSet,
     KeyTypedData('b') -> blueSet,
@@ -86,7 +80,7 @@ object PaintSet {
     KeyTypedData('m') -> magentaSet,
     KeyTypedData('y') -> yellowSet
   )
-  val defaultMap: Map[KeyData, PaintSet] = basicMap ++ d3Map ++ HashMap(
+  val defaultMap: Map[KeyData, PaintSet[Color]] = basicMap ++ d3Map ++ HashMap(
     KeyTypedData('K') -> lightGraySet,
     KeyTypedData('R') -> lightRedSet,
     KeyTypedData('G') -> lightGreenSet,

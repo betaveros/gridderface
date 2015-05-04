@@ -17,7 +17,7 @@ object ContentSet {
     s.pointStamp map (st => PointStampContent(st, p))
   )
   def makeBlackContentSet(ss: StampSet): ContentSet = makeStampContentSet(ss.name, Color.BLACK, ss)
-  def makeFillContentSet(ps: PaintSet): ContentSet = makeStampContentSet(ps.name, ps.paint, StampSet.fillSet)
+  def makeFillContentSet(ps: PaintSet[Paint]): ContentSet = makeStampContentSet(ps.name, ps.paint, StampSet.fillSet)
   val fillMap = (
     StampSet.defaultMap.mapValues(s => makeBlackContentSet(s))
     ++
