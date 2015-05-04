@@ -297,12 +297,32 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "retype" => for (
       Tuple2(tspec, arg2) <- StatusUtilities.getTwoElements(args);
       c <- tspec match {
+        case "cell" => for (
+          rs <- StampStringifier.parseRectStamp(arg2.split(","))
+        ) yield {
+          _gridList mapUpdateCurrent (_ match {
+            case CellGriddable(RectStampContent(_, p), pos) =>
+              CellGriddable(RectStampContent(rs, p), pos)
+            case x => x
+          })
+          "Retyped"
+        }
         case "edge" => for (
           ls <- StampStringifier.parseLineStamp(arg2.split(","))
         ) yield {
           _gridList mapUpdateCurrent (_ match {
             case EdgeGriddable(LineStampContent(_, p), pos) =>
               EdgeGriddable(LineStampContent(ls, p), pos)
+            case x => x
+          })
+          "Retyped"
+        }
+        case "intersection" => for (
+          ins <- StampStringifier.parsePointStamp(arg2.split(","))
+        ) yield {
+          _gridList mapUpdateCurrent (_ match {
+            case IntersectionGriddable(PointStampContent(_, p), pos) =>
+              IntersectionGriddable(PointStampContent(ins, p), pos)
             case x => x
           })
           "Retyped"
