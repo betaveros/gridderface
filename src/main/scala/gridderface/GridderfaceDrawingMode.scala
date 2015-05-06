@@ -276,22 +276,40 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "alpha"   => _drawStatus = "[alpha]"; _drawReactions = alphaDrawReactions; publish(StatusChanged(this)); Success("Alpha")
     case "fill"    => _drawStatus = "[fill]"; _drawReactions = fillDrawReactions; publish(StatusChanged(this)); Success("Fill")
 
-    case "recolor" => for (
-      arg <- StatusUtilities.getSingleElement(args);
-      set <- PaintStringifier.parsePaintSet(arg)) yield {
-      _gridList mapUpdateCurrent (_ match {
-          case CellGriddable(RectStampContent(stamp, _), pos) => (
-            CellGriddable(RectStampContent(stamp, set.paint), pos)
-          )
-          case EdgeGriddable(LineStampContent(stamp, _), pos) => (
-            EdgeGriddable(LineStampContent(stamp, set.paint), pos)
-          )
-          case IntersectionGriddable(PointStampContent(stamp, _), pos) => (
-            IntersectionGriddable(PointStampContent(stamp, set.paint), pos)
-          )
-          case x => x
-        })
-      "Recolored current layer with " + arg
+    case "recolor" => args match {
+      case Array(arg) => for (color <- PaintStringifier.parseColor(arg)) yield {
+        _gridList mapUpdateCurrent (_ match {
+            case CellGriddable(RectStampContent(stamp, _), pos) => (
+              CellGriddable(RectStampContent(stamp, color), pos)
+            )
+            case EdgeGriddable(LineStampContent(stamp, _), pos) => (
+              EdgeGriddable(LineStampContent(stamp, color), pos)
+            )
+            case IntersectionGriddable(PointStampContent(stamp, _), pos) => (
+              IntersectionGriddable(PointStampContent(stamp, color), pos)
+            )
+            case x => x
+          })
+        "Recolored current layer with " + arg
+      }
+      case Array(arg1, arg2) => for (
+        color1 <- PaintStringifier.parseColor(arg1);
+        color2 <- PaintStringifier.parseColor(arg2)) yield {
+        _gridList mapUpdateCurrent (_ match {
+            case CellGriddable(RectStampContent(stamp, c), pos) if c == color1 => (
+              CellGriddable(RectStampContent(stamp, color2), pos)
+            )
+            case EdgeGriddable(LineStampContent(stamp, c), pos) if c == color1 => (
+              EdgeGriddable(LineStampContent(stamp, color2), pos)
+            )
+            case IntersectionGriddable(PointStampContent(stamp, c), pos) if c == color1 => (
+              IntersectionGriddable(PointStampContent(stamp, color2), pos)
+            )
+            case x => x
+          })
+        "Recolored current layer " + arg1 + " with " + arg2
+      }
+      case _ => Failed("Wrong numbers of arguments to recolor")
     }
 
     case "retype" => for (

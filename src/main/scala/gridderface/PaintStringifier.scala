@@ -56,7 +56,12 @@ object PaintStringifier {
         ) yield new Color(r, g, b)
         case _ => Failed("Color does not have 3 components")
       }
-    } else Failed("Cannot parse color " ++ s)
+    } else {
+      namedPaintMap get s match {
+        case Some(set) => Success(set.paint)
+        case None => Failed("Cannot parse paint set " ++ s)
+      }
+    }
   }
   def parsePaintSet(s: String): Status[PaintSet[Paint]] = {
     namedPaintMap get s match {
