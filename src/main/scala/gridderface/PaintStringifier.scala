@@ -35,11 +35,16 @@ object PaintStringifier {
   }
   def stringifyColor(c: Color): String = Seq(c.getRed(), c.getGreen(), c.getBlue()).mkString(",")
   val namedPaintMap = HashMap(
-    "red"   -> PaintSet.redSet,
-    "blue"  -> PaintSet.blueSet,
-    "black" -> PaintSet.blackSet,
-    "gray"  -> PaintSet.graySet,
-    "white" -> PaintSet.whiteSet)
+    "red"     -> PaintSet.redSet,
+    "blue"    -> PaintSet.blueSet,
+    "green"   -> PaintSet.greenSet,
+    "cyan"    -> PaintSet.cyanSet,
+    "magenta" -> PaintSet.magentaSet,
+    "yellow"  -> PaintSet.yellowSet,
+    "devred"  -> PaintSet.devRedSet,
+    "black"   -> PaintSet.blackSet,
+    "gray"    -> PaintSet.graySet,
+    "white"   -> PaintSet.whiteSet)
   def parseColor(s: String): Status[Color] = {
     if (s.length == 0) return Failed("Empty color string")
     if (s(0) == '#') {
