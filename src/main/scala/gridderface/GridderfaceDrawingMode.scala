@@ -249,7 +249,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
         case 2 => putStampAtSelected(Some(new TwoTextRectStamp(tokens(0), tokens(1)))); Success("")
         case 3 => putStampAtSelected(Some(new ThreeTextRectStamp(tokens(0), tokens(1), tokens(2)))); Success("")
         case 4 => putStampAtSelected(Some(new FourTextRectStamp(tokens(0), tokens(1), tokens(2), tokens(3)))); Success("")
-        case _ => Failed("Wrong number of tokens for &")
+        case _ => Failed("wrong number of tokens for &")
       }
     }
     case '#' =>
@@ -309,7 +309,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
           })
         "Recolored current layer " + arg1 + " with " + arg2
       }
-      case _ => Failed("Wrong numbers of arguments to recolor")
+      case _ => Failed("wrong numbers of arguments to recolor")
     }
 
     case "retype" => for (
@@ -345,7 +345,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
           })
           "Retyped"
         }
-        case _ => Failed("Could not parse type " + tspec)
+        case _ => Failed("could not parse type " + tspec)
       }
     ) yield c
 
@@ -361,7 +361,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "clearall" =>
       _gridList.clearAll(); publish(StatusChanged(this))
       Success("All content cleared")
-    case c => Failed("Unrecognized command: " + c)
+    case c => Failed("unrecognized command: " + c)
   }
   def setPaintSet(ps: PaintSet[Paint]) {
     cellPaint = ps.paint

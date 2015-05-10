@@ -14,27 +14,27 @@ object StatusUtilities {
     try {
       Success(str.toFloat)
     } catch {
-      case e: NumberFormatException => Failed("Error: cannot parse float: " + str)
+      case e: NumberFormatException => Failed("cannot parse float: " + str)
     }
   }
   def tryToDouble(str: String): Status[Double] = {
     try {
       Success(str.toDouble)
     } catch {
-      case e: NumberFormatException => Failed("Error: cannot parse double: " + str)
+      case e: NumberFormatException => Failed("cannot parse double: " + str)
     }
   }
   def tryToInt(str: String): Status[Int] = {
     try {
       Success(str.toInt)
     } catch {
-      case e: NumberFormatException => Failed("Error: cannot parse int: " + str)
+      case e: NumberFormatException => Failed("cannot parse int: " + str)
     }
   }
   def tryToBoolean(str: String): Status[Boolean] = str match {
     case "0" => Success(false)
     case "1" => Success(true )
-    case _ => Failed("Error: cannot parse boolean: " + str)
+    case _ => Failed("cannot parse boolean: " + str)
   }
   def tryToInts(strs: Seq[String]): Status[Seq[Int]] = {
     (strs map tryToInt).foldLeft(Success(List.empty): Status[Seq[Int]])(
@@ -47,7 +47,7 @@ object StatusUtilities {
       result <- tryToInts(strs)
     ) yield result
   }
-  val wrongArgumentNumberMessage = "Error: wrong number of arguments"
+  val wrongArgumentNumberMessage = "wrong number of arguments"
   // GenSeqLike[Any,Any] is largest type that contains .length
   // unfortunately, Array is not a GenSeqLike
   // it must be implicitly converted to WrappedArray, which is one
@@ -82,13 +82,13 @@ object StatusUtilities {
         if (file.createNewFile()) {
           ImageIO.write(img, "png", file)
           Success("Created and written image to file " + filename)
-        } else Failed("Error: cannot create file: " + filename)
+        } else Failed("cannot create file: " + filename)
       } else if (file.canWrite()){
         ImageIO.write(img, "png", file)
         Success("Written image to file " + filename)
-      } else Failed("Error: cannot write to file: " + filename)
+      } else Failed("cannot write to file: " + filename)
     } catch {
-      case e: IOException => Failed("Error: IOException: " + e.getMessage())
+      case e: IOException => Failed("IOException: " + e.getMessage())
     }
   }
   def readImage(filename: String): Status[BufferedImage] = {
@@ -97,10 +97,10 @@ object StatusUtilities {
       if (file.exists() && file.canRead()){
         Success(ImageIO.read(file))
       } else {
-        Failed("Error: file does not exist or is not readable: " + filename)
+        Failed("file does not exist or is not readable: " + filename)
       }
     } catch {
-      case e: IOException => Failed("Error: IOException: " + e.getMessage())
+      case e: IOException => Failed("IOException: " + e.getMessage())
     }
   }
   def createFilledImage(w: Int, h: Int, p: Paint) = {

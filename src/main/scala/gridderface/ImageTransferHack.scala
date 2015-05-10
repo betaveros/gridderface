@@ -6,7 +6,7 @@ import java.io._
 
 object ImageTransferHack {
   def getImage(): Status[Image] = {
-    var ret: Status[Image] = Failed("Could not run pngpaste")
+    var ret: Status[Image] = Failed("could not run pngpaste")
     def dumpImage(input: InputStream) = {
       ret = Success(javax.imageio.ImageIO.read(input))
       input.close()
@@ -14,7 +14,7 @@ object ImageTransferHack {
     try {
       Seq("pngpaste","-").run(new ProcessIO(_.close(), dumpImage _, _.close(), true)).exitValue() // block
     } catch {
-      case e: Exception => ret = Failed("Attempt to run pngpaste failed: " + e.getMessage)
+      case e: Exception => ret = Failed("attempt to run pngpaste failed: " + e.getMessage)
     }
     ret
   }

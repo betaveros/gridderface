@@ -16,7 +16,7 @@ trait GridderfaceMode extends Publisher {
   def status: String
   def handleCommand(prefix: Char, str: String): Status[String]
   def handleColonCommand(command: String, args: Array[String]): Status[String] =
-    Failed("Unrecognized command: " + command)
+    Failed("unrecognized command: " + command)
   def cursorPaint: Paint
 }
 case class StatusChanged(src: GridderfaceMode) extends Event

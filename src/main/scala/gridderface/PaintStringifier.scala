@@ -46,11 +46,11 @@ object PaintStringifier {
     "gray"    -> PaintSet.graySet,
     "white"   -> PaintSet.whiteSet)
   def parseColor(s: String): Status[Color] = {
-    if (s.length == 0) return Failed("Empty color string")
+    if (s.length == 0) return Failed("empty color string")
     if (s(0) == '#') {
       optionHexStringToColor(s.substring(1)) match {
         case Some(c) => Success(c)
-        case None => Failed("Error: could not parse hex color: " + s)
+        case None => Failed("could not parse hex color: " + s)
       }
     } else if (s(0).isDigit) {
       s.split(",") match {
@@ -59,12 +59,12 @@ object PaintStringifier {
           g <- StatusUtilities tryToInt gs;
           b <- StatusUtilities tryToInt bs
         ) yield new Color(r, g, b)
-        case _ => Failed("Color does not have 3 components")
+        case _ => Failed("color does not have 3 components")
       }
     } else {
       namedPaintMap get s match {
         case Some(set) => Success(set.paint)
-        case None => Failed("Cannot parse paint set " ++ s)
+        case None => Failed("cannot parse paint set " ++ s)
       }
     }
   }

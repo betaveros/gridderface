@@ -8,7 +8,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   def decorationClearCommand(restArgs: Array[String]): Status[String] = {
     for (
       _ <- StatusUtilities.counted(
-        restArgs, (0 == _), "Error: decorate clear takes no extra arguments")
+        restArgs, (0 == _), "decorate clear takes no extra arguments")
     ) yield {
       seq.griddable = GriddableSeq.empty
       "Cleared decoration grids"
@@ -88,7 +88,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   def getPresetAsStatus(presetName: String) = {
     presetMap get presetName match {
       case Some(list) => Success(list)
-      case None => Failed("Error: no such preset: " + presetName)
+      case None => Failed("no such preset: " + presetName)
     }
   }
   def decorationPresetCommand(restArgs: Array[String], rows: Int, cols: Int, append: Boolean): Status[String] = {
@@ -112,7 +112,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
   def decorationCommand(args: Array[String], dim: (Int, Int)): Status[String] = {
     val (rows, cols) = dim
     for (
-      _ <- StatusUtilities.counted(args, (0 < _), "Error: decorate requires arguments");
+      _ <- StatusUtilities.counted(args, (0 < _), "decorate requires arguments");
       result <- (args(0) match {
         case "clear" => decorationClearCommand(args.tail)
         case "edge" => decorationEdgeCommand(args.tail, rows, cols)
@@ -120,7 +120,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
         case "pre" => decorationPresetCommand(args.tail, rows, cols, false)
         case "p" => decorationPresetCommand(args.tail, rows, cols, false)
         case "padd" => decorationPresetCommand(args.tail, rows, cols, true)
-        case sc => Failed("Error: unrecognized decorate subcommand: " + sc)
+        case sc => Failed("unrecognized decorate subcommand: " + sc)
       })
     ) yield result
   }

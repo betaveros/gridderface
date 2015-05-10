@@ -135,7 +135,7 @@ object StampStringifier {
       case _ => Failed("RectStamp cannot be parsed from " ++ tokens.toString)
     }
   } catch {
-    case _: IndexOutOfBoundsException => Failed("Wrong number of tokens for parsing RectStamp from tokens " ++ tokens.toString)
+    case _: IndexOutOfBoundsException => Failed("wrong number of tokens for parsing RectStamp from tokens " ++ tokens.toString)
   }
   def stringifyLineStamp(s: LineStamp) = s match {
     case ClearStamp => "clear" // this shouldn't be used
@@ -158,10 +158,10 @@ object StampStringifier {
       case "i"   => for (sv <- parseStrokeVal(tokens(1)); ils <- parseInequality(tokens(2))) yield InequalityLineStamp(sv, ils)
       case "s"   => for (sv <- parseStrokeVal(tokens(1))) yield StrokeLineStamp(sv)
       case "tv"  => for (sv <- parseStrokeVal(tokens(1))) yield TransverseLineStamp(sv)
-      case tok => Failed("Unrecognized LineStamp first token " ++ tok)
+      case tok => Failed("unrecognized LineStamp first token " ++ tok)
     }
   } catch {
-    case _: IndexOutOfBoundsException => Failed("Wrong number of tokens for parsing LineStamp from tokens " ++ tokens.toString)
+    case _: IndexOutOfBoundsException => Failed("wrong number of tokens for parsing LineStamp from tokens " ++ tokens.toString)
   }
   def parseLineStampWithStrokeDefault(tokens: Seq[String]): Status[LineStamp] = {
     tokens match {
@@ -188,6 +188,6 @@ object StampStringifier {
       case _ => Failed("PointStamp cannot be parsed from " ++ tokens.toString)
     }
   } catch {
-    case _: IndexOutOfBoundsException => Failed("Wrong number of tokens for parsing PointStamp from tokens " ++ tokens.toString)
+    case _: IndexOutOfBoundsException => Failed("wrong number of tokens for parsing PointStamp from tokens " ++ tokens.toString)
   }
 }

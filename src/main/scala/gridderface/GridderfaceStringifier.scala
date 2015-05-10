@@ -54,7 +54,7 @@ object GridderfaceStringifier {
             case "i" => for (ps <- StampStringifier.parsePointStamp(tokens drop 4)) yield {
               p.putIntersection(IntersectionPosition(r, c), PointStampContent(ps, color))
             }
-            case _ => Failed("Cannot parse t0: " ++ t0)
+            case _ => Failed("cannot parse t0: " ++ t0)
           }) yield ret
         res match {
           case Failed(s) => return Failed(s)
@@ -64,7 +64,7 @@ object GridderfaceStringifier {
       Success(())
     } catch {
       case _: java.nio.charset.MalformedInputException
-        => Failed("Malformed input")
+        => Failed("malformed input")
     }
   }
   def parseLineContent(str: String, defaultPaint: Paint = Color.BLACK): Status[LineContent] = {
@@ -74,7 +74,7 @@ object GridderfaceStringifier {
       paint <- colonParts.length match {
         case 1 => Success(defaultPaint)
         case 2 => PaintStringifier.parseColor(colonParts(1))
-        case _ => Failed("Error: extra colon while parsing LineContent")
+        case _ => Failed("extra colon while parsing LineContent")
       };
       stamp <- StampStringifier.parseLineStampWithStrokeDefault(colonParts(0).split(",")))
     yield new LineStampContent(stamp, paint)

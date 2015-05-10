@@ -35,7 +35,7 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
   }
   def showStatus(stat: Status[String]) {
     stat match {
-      case Failed(text) => showMessage(text, true)
+      case Failed(text) => showMessage("Error: " + text, true)
       case Success(text) => showMessage(text, false)
     }
   }

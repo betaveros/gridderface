@@ -142,13 +142,13 @@ object Gridderface extends SimpleSwingApplication {
   }
   def getOpacityBufferAsStatus(name: String): Status[OpacityBuffer] = {
     opacityBufferMap get name match {
-      case None => Failed("Error: no such buffer: " + name)
+      case None => Failed("no such buffer: " + name)
       case Some(buf) => Success(buf)
     }
   }
   def safeAlpha(a: Float): Status[Float] = {
     if (0 <= a && a <= 1) Success(a)
-    else Failed("Error: alpha out of range: " + a)
+    else Failed("alpha out of range: " + a)
   }
   def fixedOpacityCommand(op: Float, args: Array[String]): Status[String] = {
     for (
@@ -221,9 +221,9 @@ object Gridderface extends SimpleSwingApplication {
     })
   }
   def writeGeneratedImage(args: Array[String]): Status[String] = {
-    if (args.length != 1) Failed("Error: wrong number of arguments")
+    if (args.length != 1) Failed("wrong number of arguments")
     else generateImage() match {
-      case None => Failed("Error: no background")
+      case None => Failed("no background")
       case Some(img) => StatusUtilities.writeImage(img, args(0))
 
     }
@@ -248,7 +248,7 @@ object Gridderface extends SimpleSwingApplication {
   def decorationCommand(args: Array[String]): Status[String] = {
     generationDimensions match {
       case Some(dim) => decorator.decorationCommand(args, dim)
-      case None => Failed("Error: not in generation mode")
+      case None => Failed("not in generation mode")
     }
   }
   def copyToClipboard(str: String): Status[String] = {
@@ -331,8 +331,8 @@ object Gridderface extends SimpleSwingApplication {
         case "parse" => parseGriddablesFrom(parts.tail)
         case "guess" => bg.image match {
           case Some(img: BufferedImage) => gridMode.grid = GridGuesser guess img; Success("Guess")
-          case Some(_) => Failed("Background image not buffered (!?)")
-          case None => Failed("No background image")
+          case Some(_) => Failed("background image not buffered (!?)")
+          case None => Failed("no background image")
         }
 
         case "pngpaste" => {
