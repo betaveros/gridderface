@@ -1,3 +1,5 @@
 *.DS_Store
 *.png
+*.gif
+*.txt
 target/
