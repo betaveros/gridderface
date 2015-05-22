@@ -26,9 +26,9 @@ object StampSet {
   val cornerDotSet = StampSet(
     "CornerDot", Some(CircleRectStamp(0.25, Fill, 0.25, 0.25)), Some(CircleFixedMark(0.125, Fill)), Some(CircleFixedMark(0.125, Draw(ThinStrokeVal))))
   val circleSet = StampSet(
-    "Circle", Some(CircleRectStamp(0.6875)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.25, Draw(ThinStrokeVal))))
+    "Circle", Some(CircleRectStamp(0.625)), Some(CircleFixedMark(0.125)), Some(CircleFixedMark(0.25, Draw(ThinStrokeVal))))
   val bulbSet = StampSet(
-    "Bulb", Some(CircleRectStamp(0.75, Fill)), Some(CircleFixedMark(0.125, Fill)), Some(CircleFixedMark(0.28125, Fill)))
+    "Bulb", Some(CircleRectStamp(0.625, FillDraw(NormalStrokeVal))), Some(CircleFixedMark(0.125, Fill)), Some(CircleFixedMark(0.28125, Fill)))
   val starSet = StampSet(
     "Star", Some(StarStamp), None, None)
   val eSet = StampSet(
