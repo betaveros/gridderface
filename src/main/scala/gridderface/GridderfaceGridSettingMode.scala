@@ -93,11 +93,16 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
       case KeyTypedData('s') => snap()
       case KeyTypedData('S') => snapAll()
       case KeyTypedData('r') => pending = 'r'; publish(StatusChanged(this))
+      case KeyTypedData('m') => pending = 'm'; publish(StatusChanged(this))
   }
-  val pendingGridReactions: PartialFunction[KeyData, Unit] = {
+  val pendingResizeGridReactions: PartialFunction[KeyData, Unit] = {
       case KeyTypedData('d') => grid = SimpleGrid.defaultGrid; resetPending()
       case KeyTypedData('g') => grid = SimpleGrid.generationGrid; resetPending()
-      case KeyPressedData(Key.Escape, _) => resetPending()
+      case KeyTypedData('\u001b' /*esc*/) => resetPending()
+  }
+  val pendingMoveGridReactions: PartialFunction[KeyData, Unit] = {
+      case KeyTypedData('r') => grid = grid.withOffset(0, 0); resetPending()
+      case KeyTypedData('\u001b' /*esc*/) => resetPending()
   }
   val singlyResizeGridReactions = KeyDataCombinations.keyDataShiftRCFunction(adjustGridSize)
   def status = pending match {
@@ -105,6 +110,7 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
       "%.2fx%.2f (M2^%d%s)".format(_grid.colWidth, _grid.rowHeight, gridExponent,
           if (negateFlag) "`" else "")
     case 'r' => "Pending resize... (d/g/esc/drag with the mouse)"
+    case 'm' => "Pending move... (r/esc/drag with the mouse)"
     case _ => throw new AssertionError("GridSettingMode has unexpected pending status")
   }
   val setGridMultiplierReactions = KeyDataCombinations.keyDataDigitFunction(dig => {
@@ -115,8 +121,10 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
   val negateMultiplierReactions: PartialFunction[KeyData, Unit] = {
     case KeyTypedData('`') => negateFlag = true; publish(StatusChanged(this))
   }
-  val pendingKeyListReactions = new SingletonListPartialFunction(
-    pendingGridReactions andThen {u: Unit => KeyComplete})
+  val pendingResizeKeyListReactions = new SingletonListPartialFunction(
+    pendingResizeGridReactions andThen {u: Unit => KeyComplete})
+  val pendingMoveKeyListReactions = new SingletonListPartialFunction(
+    pendingMoveGridReactions andThen {u: Unit => KeyComplete})
   val normalKeyListReactions = new SingletonListPartialFunction(
     moveGridReactions
     orElse resizeGridReactions orElse singlyResizeGridReactions
@@ -125,11 +133,14 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
     andThen {u: Unit => KeyComplete}
   )
   def keyListReactions = pending match {
-    case 'r' => pendingKeyListReactions
+    case 'r' => pendingResizeKeyListReactions
+    case 'm' => pendingMoveKeyListReactions
     case _ => normalKeyListReactions
   }
   def handleCommand(prefix: Char, str: String) = Success("")
   var startPt: Point2D = new Point2D.Double(0, 0)
+  var origXOffset: Double = 0.0
+  var origYOffset: Double = 0.0
   private def drag(pt: Point) = {
     val endPt = viewed2grid(pt)
     val lx = startPt.getX min endPt.getX
@@ -142,18 +153,40 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
       lx, ly)
     publish(GridChanged())
   }
+  private def move(pt: Point) = {
+    val endPt = viewed2grid(pt)
+    val lx = startPt.getX min endPt.getX
+    val ly = startPt.getY min endPt.getY
+    val hx = startPt.getX max endPt.getX
+    val hy = startPt.getY max endPt.getY
+    grid = new SimpleGrid(
+      grid.rowHeight,
+      grid.colWidth,
+      origXOffset + endPt.getX - startPt.getX,
+      origYOffset + endPt.getY - startPt.getY)
+    publish(GridChanged())
+  }
   val mouseReactions: PartialFunction[MouseEvent, Unit] = _ match {
     case MousePressed(_, pt, _, _, _) => pending match {
       case 'r' => startPt = viewed2grid(pt)
+      case 'm' => {
+        startPt = viewed2grid(pt)
+        origXOffset = grid.xOffset
+        origYOffset = grid.yOffset
+      }
       case _ => ()
     }
     case MouseDragged(_, pt, _) => pending match {
       case 'r' => drag(pt)
+      case 'm' => move(pt)
       case _ => ()
     }
     case MouseReleased(_, pt, _, _, _) => pending match {
       case 'r' =>
         drag(pt)
+        resetPending()
+      case 'm' =>
+        move(pt)
         resetPending()
       case _ => ()
     }

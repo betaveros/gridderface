@@ -28,6 +28,9 @@ case class SimpleGrid(rowHeight: Double, colWidth: Double, xOffset: Double = 0.0
     (y - computeY(row)) <= tol || (computeY(row + 1) - y) <= tol
   }
 
+  def withOffset(x: Double, y: Double) = {
+    SimpleGrid(rowHeight, colWidth, x, y)
+  }
   def offsetBy(xd: Double, yd: Double) = {
     SimpleGrid(rowHeight, colWidth, xOffset + xd, yOffset + yd)
   }
