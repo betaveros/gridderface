@@ -34,6 +34,12 @@ case class SimpleGrid(rowHeight: Double, colWidth: Double, xOffset: Double = 0.0
   def gridSizeAdjustedBy(rd: Double, cd: Double) = {
     SimpleGrid((rowHeight + rd) max 0.0, (colWidth + cd) max 0.0, xOffset, yOffset)
   }
+  def offsetRounded = {
+    SimpleGrid(rowHeight, colWidth, xOffset.round, yOffset.round)
+  }
+  def allRounded = {
+    SimpleGrid(rowHeight.round, colWidth.round, xOffset.round, yOffset.round)
+  }
 }
 
 object SimpleGrid {

@@ -22,12 +22,22 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
   def adjustGridSize(xm: Int, ym: Int) {
     grid = grid.gridSizeAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
   }
+  def snap() {
+    grid = grid.offsetRounded
+  }
+  def snapAll() {
+    grid = grid.allRounded
+  }
 
   private def create: Griddable = HomogeneousEdgeGrid.defaultEdgeGrid(_rowCount, _colCount)
   private var _griddable = create
 
   // to be typesafe this ought to be an enum or something, sorry
   private var pending: Char = ' '
+  private def resetPending(): Unit = {
+    pending = ' '
+    publish(StatusChanged(this))
+  }
 
   def rowCount = _rowCount
   def colCount = _colCount
@@ -58,6 +68,10 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
     _griddable = create
     publish(GriddableChanged(this))
   }
+  def adjustGridExponent(d: Int): Unit = {
+    gridExponent += d
+    publish(StatusChanged(this))
+  }
 
   def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
     _griddable.drawOnGrid(grid, g2d)
@@ -74,14 +88,23 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
       case KeyTypedData(']') => adjustRowCount( 1)
       case KeyTypedData('{') => adjustColCount(-1)
       case KeyTypedData('}') => adjustColCount( 1)
+      case KeyTypedData('f') => adjustGridExponent(-1)
+      case KeyTypedData('c') => adjustGridExponent( 1)
+      case KeyTypedData('s') => snap()
+      case KeyTypedData('S') => snapAll()
       case KeyTypedData('r') => pending = 'r'; publish(StatusChanged(this))
+  }
+  val pendingGridReactions: PartialFunction[KeyData, Unit] = {
+      case KeyTypedData('d') => grid = SimpleGrid.defaultGrid; resetPending()
+      case KeyTypedData('g') => grid = SimpleGrid.generationGrid; resetPending()
+      case KeyPressedData(Key.Escape, _) => resetPending()
   }
   val singlyResizeGridReactions = KeyDataCombinations.keyDataShiftRCFunction(adjustGridSize)
   def status = pending match {
     case ' ' =>
       "%.2fx%.2f (M2^%d%s)".format(_grid.colWidth, _grid.rowHeight, gridExponent,
           if (negateFlag) "`" else "")
-    case 'r' => "Pending resize... (drag with the mouse)"
+    case 'r' => "Pending resize... (d/g/esc/drag with the mouse)"
     case _ => throw new AssertionError("GridSettingMode has unexpected pending status")
   }
   val setGridMultiplierReactions = KeyDataCombinations.keyDataDigitFunction(dig => {
@@ -92,13 +115,19 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
   val negateMultiplierReactions: PartialFunction[KeyData, Unit] = {
     case KeyTypedData('`') => negateFlag = true; publish(StatusChanged(this))
   }
-  val keyListReactions = new SingletonListPartialFunction(
+  val pendingKeyListReactions = new SingletonListPartialFunction(
+    pendingGridReactions andThen {u: Unit => KeyComplete})
+  val normalKeyListReactions = new SingletonListPartialFunction(
     moveGridReactions
     orElse resizeGridReactions orElse singlyResizeGridReactions
     orElse setGridMultiplierReactions
     orElse negateMultiplierReactions
     andThen {u: Unit => KeyComplete}
   )
+  def keyListReactions = pending match {
+    case 'r' => pendingKeyListReactions
+    case _ => normalKeyListReactions
+  }
   def handleCommand(prefix: Char, str: String) = Success("")
   var startPt: Point2D = new Point2D.Double(0, 0)
   private def drag(pt: Point) = {
@@ -125,8 +154,7 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
     case MouseReleased(_, pt, _, _, _) => pending match {
       case 'r' =>
         drag(pt)
-        pending = ' '
-        publish(StatusChanged(this))
+        resetPending()
       case _ => ()
     }
     case _ => ()
