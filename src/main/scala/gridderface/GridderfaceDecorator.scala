@@ -79,8 +79,7 @@ class GridderfaceDecorator(seq: GriddableAdaptor[GriddableSeq]) {
     "bold" -> List(boldPreset),
     "slither" -> slitherPresetList,
     "slitherlink" -> slitherPresetList,
-    "fillomino" -> (whitedashedPresetList
-      :+ new PresetBorder(new LineStampContent(StrokeLineStamp(NormalStrokeVal), Color.BLACK))),
+    "fillomino" -> (whitedashedPresetList :+ boldPreset),
     "whitedashed" -> whitedashedPresetList,
     "corral" -> whitedashedPresetList,
     "nurikabe" -> List(plainPreset, boldPreset)
