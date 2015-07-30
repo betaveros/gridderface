@@ -9,6 +9,7 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
   private val prefixLabel = new Label
   private val field = new TextField
   field.font = new Font("Monospaced", Font.PLAIN, 20)
+  field.peer setFocusTraversalKeysEnabled false // prevent tab key from being consumed
   prefixLabel.font = new Font("Monospaced", Font.PLAIN, 20)
   private var prefix = '0' // whatever
   val enabledColor = new Color(192, 255, 255)
@@ -45,6 +46,17 @@ class CommandLinePanel(val responder: (Char, String) => Status[String]) extends 
     case _: FocusLost => stopCommandMode
     case KeyPressed(_, Key.Escape, _, _) => stopCommandMode
     case KeyPressed(_, Key.OpenBracket, Key.Modifier.Control, _) => stopCommandMode
+    case KeyPressed(_, Key.Tab, _, _) => field.text = field.text match {
+      // this is just a mock-up, don't take it too seriously
+      case "w" => "write "
+      case "q" => "quit"
+      case "d" => "dump"
+      case "n" => "newlayer"
+      case "dec pre s" => "dec pre slitherlink"
+      case "dec pre f" => "dec pre fillomino"
+      case "dec pre n" => "dec pre nurikabe"
+      case s => s
+    }
     case KeyPressed(_, Key.BackSpace, _, _) => {
       if (field.text.length == 0) stopCommandMode
     }
