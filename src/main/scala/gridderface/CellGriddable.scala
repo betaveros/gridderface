@@ -11,10 +11,8 @@ object CellGriddable {
   def drawOnGrid(content: RectContent, position: CellPosition, grid: SimpleGrid, g2d: Graphics2D) {
     val row = position.row
     val col = position.col
-    val x1 = grid.computeX(col)
-    val x2 = grid.computeX(col + 1)
-    val y1 = grid.computeY(row)
-    val y2 = grid.computeY(row + 1)
+    val (x1, x2) = grid.computeXBounds(col)
+    val (y1, y2) = grid.computeYBounds(row)
 
     content.draw(g2d, x1, y1, x2 - x1, y2 - y1)
   }

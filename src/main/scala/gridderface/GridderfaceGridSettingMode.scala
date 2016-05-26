@@ -22,6 +22,9 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
   def adjustGridSize(xm: Int, ym: Int) {
     grid = grid.gridSizeAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
   }
+  def adjustExcess(xm: Int, ym: Int) {
+    grid = grid.excessAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
+  }
   def snap() {
     grid = grid.offsetRounded
   }
@@ -84,6 +87,8 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
   val resizeGridReactions: PartialFunction[KeyData, Unit] = {
       case KeyTypedData('+') => adjustGridSize( 1,  1)
       case KeyTypedData('-') => adjustGridSize(-1, -1)
+      case KeyTypedData('<') => adjustExcess(-1, -1)
+      case KeyTypedData('>') => adjustExcess( 1,  1)
       case KeyTypedData('[') => adjustRowCount(-1)
       case KeyTypedData(']') => adjustRowCount( 1)
       case KeyTypedData('{') => adjustColCount(-1)
@@ -105,10 +110,18 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
       case KeyTypedData('\u001b' /*esc*/) => resetPending()
   }
   val singlyResizeGridReactions = KeyDataCombinations.keyDataShiftRCFunction(adjustGridSize)
+  def normalStatus = {
+    val dimPart = "%.2fx%.2f".format(_grid.colWidth, _grid.rowHeight)
+    val expPart = " (M2^%d%s)".format(gridExponent, if (negateFlag) "`" else "")
+    val excPart = if (_grid.xExcess == 0 && _grid.yExcess == 0) {
+        ""
+      } else {
+        " +[%.2fx%.2f]".format(_grid.xExcess, _grid.yExcess)
+      }
+    dimPart + expPart + excPart
+  }
   def status = pending match {
-    case ' ' =>
-      "%.2fx%.2f (M2^%d%s)".format(_grid.colWidth, _grid.rowHeight, gridExponent,
-          if (negateFlag) "`" else "")
+    case ' ' => normalStatus
     case 'r' => "Pending resize... (d/g/esc/drag with the mouse)"
     case 'm' => "Pending move... (r/esc/drag with the mouse)"
     case _ => throw new AssertionError("GridSettingMode has unexpected pending status")
