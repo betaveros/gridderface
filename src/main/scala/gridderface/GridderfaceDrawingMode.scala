@@ -6,9 +6,9 @@ import scala.swing.event._
 import gridderface.stamp._
 
 class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
-  gridLists: List[GriddablePositionMapList],
-  gridListNames: List[Option[String]],
-  private var _currentListIndex: Int,
+  gridModels: List[GriddableModel],
+  gridModelNames: List[Option[String]],
+  private var _currentModelIndex: Int,
   point2pos: java.awt.Point => Position, commandStarter: Char => Unit) extends GridderfaceMode {
 
   private var cellPaint: Paint = Color.BLACK
@@ -25,10 +25,10 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   private var _drawStatus: String = ""
   private var _lockFunction: Position => Position = identity[Position]
   private var _lockMultiplier = 1
-  private var _gridList = gridLists(_currentListIndex)
+  private var _gridModel = gridModels(_currentModelIndex)
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, cellPaint)
-    _gridList.putCell(cpos, fgContent)
+    _gridModel.putCell(cpos, fgContent)
   }
   def ensureLock() {
     sel.selected = sel.selected map _lockFunction
@@ -50,13 +50,13 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     _lockMultiplier = 1
   }
   def putLineStamp(epos: EdgePosition, st: LineStamp) =
-    _gridList.putEdge(epos, new LineStampContent(st, edgePaint))
+    _gridModel.putEdge(epos, new LineStampContent(st, edgePaint))
   def putPointStamp(ipos: IntersectionPosition, st: PointStamp) =
-    _gridList.putIntersection(ipos, new PointStampContent(st, intersectionPaint))
+    _gridModel.putIntersection(ipos, new PointStampContent(st, intersectionPaint))
 
   def putClearRectStampAtSelected() = {
     sel.selected foreach (se => se match {
-      case cpos: CellPosition => _gridList.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
+      case cpos: CellPosition => _gridModel.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
       case epos: EdgePosition => putLineStamp(epos, ClearStamp)
       case ipos: IntersectionPosition => putPointStamp(ipos, ClearStamp)
     })
@@ -89,15 +89,15 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     lineContent: Option[LineContent] = None,
     pointContent: Option[PointContent] = None) {
     sel.selected foreach (_ match {
-      case cpos: CellPosition => rectContent foreach (_gridList.putCell(cpos, _))
-      case epos: EdgePosition => lineContent foreach (_gridList.putEdge(epos, _))
-      case ipos: IntersectionPosition => pointContent foreach (_gridList.putIntersection(ipos, _))
+      case cpos: CellPosition => rectContent foreach (_gridModel.putCell(cpos, _))
+      case epos: EdgePosition => lineContent foreach (_gridModel.putEdge(epos, _))
+      case ipos: IntersectionPosition => pointContent foreach (_gridModel.putIntersection(ipos, _))
     })
   }
-  def status = _drawStatus ++ _paintStatus ++ " | " ++ (gridListNames(_currentListIndex) match {
+  def status = _drawStatus ++ _paintStatus ++ " | " ++ (gridModelNames(_currentModelIndex) match {
       case None => ""
       case Some(s) => "(" ++ s ++ ")"
-    }) ++ _gridList.status
+    }) ++ _gridModel.status
   def putStampSet(s: StampSet): Unit = {
     putStampAtSelected(s.rectStamp, s.lineStamp, s.pointStamp)
   }
@@ -120,7 +120,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
         case cpos: CellPosition => {
           dpos match {
             case depos: EdgePosition => {
-              _gridList.putEdge(depos, writeSet.cellWrite(edgePaint, _gridList get depos flatMap lineContentify))
+              _gridModel.putEdge(depos, writeSet.cellWrite(edgePaint, _gridModel get depos flatMap lineContentify))
             }
             case _ => throw new AssertionError("moveAndDrawSelected: cell to non-edge")
           }
@@ -128,15 +128,15 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
         }
         case ipos: IntersectionPosition => {
           dpos match {
-            case depos: EdgePosition => _gridList.putEdge(depos, writeSet.intersectionWrite(edgePaint, _gridList get depos flatMap lineContentify))
+            case depos: EdgePosition => _gridModel.putEdge(depos, writeSet.intersectionWrite(edgePaint, _gridModel get depos flatMap lineContentify))
             case _ => throw new AssertionError("moveAndDrawSelected: intersection to non-edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(2*rd, 2*cd))
         }
         case epos: EdgePosition => {
           dpos match {
-            case dcpos:         CellPosition => _gridList.putEdge(epos, writeSet.        cellWrite(edgePaint, _gridList get epos flatMap lineContentify))
-            case dipos: IntersectionPosition => _gridList.putEdge(epos, writeSet.intersectionWrite(edgePaint, _gridList get epos flatMap lineContentify))
+            case dcpos:         CellPosition => _gridModel.putEdge(epos, writeSet.        cellWrite(edgePaint, _gridModel get epos flatMap lineContentify))
+            case dipos: IntersectionPosition => _gridModel.putEdge(epos, writeSet.intersectionWrite(edgePaint, _gridModel get epos flatMap lineContentify))
             case _ => throw new AssertionError("moveAndDrawSelected: edge to edge")
           }
           sel.selected = sel.selected map (_.deltaPosition(rd, cd))
@@ -198,18 +198,18 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   }
   def gridListReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
     case List(KeyPressedData(Key.Tab, 0)) => {
-      _gridList.selectNextGrid()
+      _gridModel.selectNextGrid()
       publish(StatusChanged(this))
-      KeyCompleteWith(Success("Selected layer " ++ _gridList.status))
+      KeyCompleteWith(Success("Selected layer " ++ _gridModel.status))
     }
     case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
-      _gridList.selectNextGrid()
+      _gridModel.selectNextGrid()
       publish(StatusChanged(this))
-      KeyCompleteWith(Success("Selected layer " ++ _gridList.status))
+      KeyCompleteWith(Success("Selected layer " ++ _gridModel.status))
     }
     case List(KeyPressedData(Key.Tab, Key.Modifier.Control)) => {
-      _currentListIndex = (_currentListIndex + 1) % gridLists.length
-      _gridList = gridLists(_currentListIndex)
+      _currentModelIndex = (_currentModelIndex + 1) % gridModels.length
+      _gridModel = gridModels(_currentModelIndex)
       publish(StatusChanged(this))
       KeyCompleteWith(Success("Selected layer list"))
     }
@@ -270,15 +270,15 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       putStampAtSelected(Some(SudokuPencilRectStamp.createSudokuPencilRectStampFromString(str))); Success("")
   }
   def addLayer(): Status[String] = {
-    _gridList.addGrid(); publish(StatusChanged(this))
+    _gridModel.addGrid(); publish(StatusChanged(this))
     Success("New layer added")
   }
   def removeLayer(): Status[String] = {
-    _gridList.removeGrid(); publish(StatusChanged(this))
+    _gridModel.removeGrid(); publish(StatusChanged(this))
     Success("Current layer removed")
   }
   def removeAll(): Status[String] = {
-    _gridList.removeAll(); publish(StatusChanged(this))
+    _gridModel.removeAll(); publish(StatusChanged(this))
     Success("All layers removed")
   }
   override def handleColonCommand(command: String, args: Array[String]) = command match {
@@ -292,7 +292,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
 
     case "recolor" => args match {
       case Array(arg) => for (color <- PaintStringifier.parseColor(arg)) yield {
-        _gridList mapUpdateCurrent (_ match {
+        _gridModel mapUpdateCurrent (_ match {
             case CellGriddable(RectStampContent(stamp, _), pos) => (
               CellGriddable(RectStampContent(stamp, color), pos)
             )
@@ -309,7 +309,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       case Array(arg1, arg2) => for (
         color1 <- PaintStringifier.parseColor(arg1);
         color2 <- PaintStringifier.parseColor(arg2)) yield {
-        _gridList mapUpdateCurrent (_ match {
+        _gridModel mapUpdateCurrent (_ match {
             case CellGriddable(RectStampContent(stamp, c), pos) if c == color1 => (
               CellGriddable(RectStampContent(stamp, color2), pos)
             )
@@ -332,7 +332,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
         case "cell" => for (
           rs <- StampStringifier.parseRectStamp(arg2.split(","))
         ) yield {
-          _gridList mapUpdateCurrent (_ match {
+          _gridModel mapUpdateCurrent (_ match {
             case CellGriddable(RectStampContent(_, p), pos) =>
               CellGriddable(RectStampContent(rs, p), pos)
             case x => x
@@ -342,7 +342,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
         case "edge" => for (
           ls <- StampStringifier.parseLineStamp(arg2.split(","))
         ) yield {
-          _gridList mapUpdateCurrent (_ match {
+          _gridModel mapUpdateCurrent (_ match {
             case EdgeGriddable(LineStampContent(_, p), pos) =>
               EdgeGriddable(LineStampContent(ls, p), pos)
             case x => x
@@ -352,7 +352,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
         case "intersection" => for (
           ins <- StampStringifier.parsePointStamp(arg2.split(","))
         ) yield {
-          _gridList mapUpdateCurrent (_ match {
+          _gridModel mapUpdateCurrent (_ match {
             case IntersectionGriddable(PointStampContent(_, p), pos) =>
               IntersectionGriddable(PointStampContent(ins, p), pos)
             case x => x
@@ -370,10 +370,10 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "rmall"    => removeAll()
     case "delall"   => removeAll()
     case "clear" =>
-      _gridList.clearGrid(); publish(StatusChanged(this))
+      _gridModel.clearGrid(); publish(StatusChanged(this))
       Success("Content cleared")
     case "clearall" =>
-      _gridList.clearAll(); publish(StatusChanged(this))
+      _gridModel.clearAll(); publish(StatusChanged(this))
       Success("All content cleared")
     case c => Failed("unrecognized command: " + c)
   }

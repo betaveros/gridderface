@@ -21,8 +21,8 @@ import scala.io.Source
 object Gridderface extends SimpleSwingApplication {
 
   val selectedManager = new SelectedPositionManager(Some(new IntersectionPosition(0, 0)))
-  val underGridList = new GriddablePositionMapList()
-  val gridList = new GriddablePositionMapList()
+  val underGridModel = new GriddableModel()
+  val gridModel = new GriddableModel()
   // qq, initialization order
   val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid, 10, 10,
     (pt: Point2D) => gridPanel.viewToGrid(pt))
@@ -101,9 +101,9 @@ object Gridderface extends SimpleSwingApplication {
 
   val griddableList: List[Tuple4[Griddable, Float, String, Boolean]] = List(
     (bg, 1.0f, "image", true),
-    (underGridList, 1.0f, "undercontent", true),
+    (underGridModel, 1.0f, "undercontent", true),
     (decorationGridSeq, 1.0f, "decoration", true),
-    (gridList, 1.0f, "content", true),
+    (gridModel, 1.0f, "content", true),
     (gridMode, 0.5f, "grid", false),
     (selectedManager, 0.75f, "cursor", false))
   val opacityBufferList: List[Tuple3[String, OpacityBuffer, Boolean]] =
@@ -258,11 +258,11 @@ object Gridderface extends SimpleSwingApplication {
   }
   def dumpGriddables(args: Array[String]): Status[String] = {
     for (arg <- StatusUtilities.getOptionalElement(args)) yield arg match {
-      case None => gridList flatMap (GridderfaceStringifier stringifyGriddablePositionMap _) foreach (println _)
+      case None => gridModel flatMap (GridderfaceStringifier stringifyGriddablePositionMap _.griddableMap) foreach (println _)
       case Some(f) => {
         val p = new java.io.PrintWriter(new java.io.File(f))
         try {
-          gridList flatMap (GridderfaceStringifier stringifyGriddablePositionMap _) foreach (p println _)
+          gridModel flatMap (GridderfaceStringifier stringifyGriddablePositionMap _.griddableMap) foreach (p println _)
         } finally {
           p.close()
         }
@@ -274,7 +274,7 @@ object Gridderface extends SimpleSwingApplication {
     for (
       arg <- StatusUtilities.getSingleElement(args);
       _ <- GridderfaceStringifier.readGriddablePositionsFromInto(
-        Source.fromFile(arg), gridList)
+        Source.fromFile(arg), gridModel)
     ) yield "OK"
   }
 
@@ -354,7 +354,7 @@ object Gridderface extends SimpleSwingApplication {
   val statusLabel = new Label()
   val drawMode = new GridderfaceDrawingMode("Draw",
     selectedManager,
-    List(gridList, underGridList),
+    List(gridModel, underGridModel),
     List(None, Some("under")),
     0,
     pt => computePosition(pt), commandLine.startCommandMode(_))
