@@ -8,12 +8,19 @@ class SelectedPositionManager(initselected: Option[Position] = None) extends Gri
   private var _selected: Option[Position] = initselected
   var _paint: Paint = SelectedPositionManager.greenPaint
   def paint = _paint
-  var cellContent = new RectStampContent(outlineStamp, paint)
+  private var _cellStamp: RectStamp = outlineStamp
+  def cellStamp = _cellStamp
+  def cellStamp_=(stamp: RectStamp) = {
+    _cellStamp = stamp
+    cellContent = new RectStampContent(cellStamp, paint)
+    publish(GriddableChanged(this))
+  }
+  var cellContent = new RectStampContent(cellStamp, paint)
   var edgeContent = new LineStampContent(HexagonLineStamp(ThickStrokeVal), paint)
   var intersectionContent = new PointStampContent(CircleFixedMark(0.25, Draw(ThickStrokeVal)), paint)
   def paint_=(p: Paint): Unit = {
     _paint = p
-    cellContent = new RectStampContent(outlineStamp, paint)
+    cellContent = new RectStampContent(cellStamp, paint)
     edgeContent = new LineStampContent(HexagonLineStamp(ThickStrokeVal), paint)
     intersectionContent = new PointStampContent(CircleFixedMark(0.25, Draw(ThickStrokeVal)), paint)
     publish(GriddableChanged(this))
@@ -40,6 +47,8 @@ class SelectedPositionManager(initselected: Option[Position] = None) extends Gri
 
 object SelectedPositionManager {
   val outlineStamp = FullRectStamp(Draw(ThickStrokeVal))
+  val downPointingStamp = DownPointingFullRectStamp(Draw(ThickStrokeVal))
+  val rightPointingStamp = RightPointingFullRectStamp(Draw(ThickStrokeVal))
   val greenPaint = new GradientPaint(0f, 0f, Color.GREEN, 0.5f, 0.5f, new Color(0, 192, 0), true)
   val blueGrayPaint = new GradientPaint(0f, 0f, new Color(176, 176, 192), 0.5f, 0.5f, new Color(64, 64, 80), true)
   val redGrayPaint = new GradientPaint(0f, 0f, new Color(192, 176, 176), 0.5f, 0.5f, new Color(80, 64, 64), true)

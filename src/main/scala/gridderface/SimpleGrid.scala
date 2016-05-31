@@ -40,10 +40,23 @@ case class SimpleGrid(rowHeight: Double, colWidth: Double, xOffset: Double = 0.0
     SimpleGrid(rowHeight, colWidth, xOffset + xd, yOffset + yd, xExcess, yExcess)
   }
   def gridSizeAdjustedBy(rd: Double, cd: Double) = {
-    SimpleGrid((rowHeight + rd) max 0.0, (colWidth + cd) max 0.0, xOffset, yOffset, xExcess, yExcess)
+    SimpleGrid((rowHeight + rd) max 0.0, (colWidth + cd) max 0.0, 
+      xOffset, yOffset,
+      xExcess, yExcess)
   }
   def excessAdjustedBy(xd: Double, yd: Double) = {
-    SimpleGrid(rowHeight, colWidth, xOffset, yOffset, xExcess + xd, yExcess + yd)
+    SimpleGrid(rowHeight, colWidth,
+      xOffset, yOffset,
+      xExcess + xd, yExcess + yd)
+  }
+  def withExcess(x: Double, y: Double) = {
+    SimpleGrid(rowHeight, colWidth, xOffset, yOffset, x, y)
+  }
+  def excessSquared = {
+    val avg = (rowHeight + 2*xExcess + colWidth + 2*yExcess) / 2
+    SimpleGrid(rowHeight, colWidth,
+      xOffset, yOffset,
+      (avg - colWidth) / 2, (avg - rowHeight) / 2)
   }
   def offsetRounded = {
     SimpleGrid(rowHeight, colWidth, xOffset.round, yOffset.round, xExcess, yExcess)

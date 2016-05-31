@@ -186,6 +186,10 @@ class GridderfaceGridSettingMode(val model: GriddableModel,
     case 'm' => pendingMoveKeyListReactions
     case _ => normalKeyListReactions
   }
+  def squareGrid() = {
+    grid = grid.excessSquared
+    Success("Squared grid cells")
+  }
   def handleCommand(prefix: Char, str: String) = Success("")
   override def handleColonCommand(command: String, args: Array[String]) = command match {
     case "reset" => {
@@ -200,6 +204,12 @@ class GridderfaceGridSettingMode(val model: GriddableModel,
       model.currentGridOverride = None
       Success("Attached grid")
     }
+    case "resetexcess" => {
+      grid = grid.withExcess(0, 0)
+      Success("Reset grid excess")
+    }
+    case "square" => squareGrid()
+    case "squared" => squareGrid()
     case "newlayer" => StatusUtilities.addLayerTo(model)
     case "addlayer" => StatusUtilities.addLayerTo(model)
     case "rmlayer"  => StatusUtilities.removeLayerFrom(model)

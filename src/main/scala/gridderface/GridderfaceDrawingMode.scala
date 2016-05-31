@@ -30,6 +30,9 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   private var _drawStatus: String = ""
   private var _lockFunction: Position => Position = identity[Position]
   private var _lockMultiplier = 1
+  private var _advanceEnabled = false
+  private var _advanceRowDelta = 0
+  private var _advanceColDelta = 2
   private var _gridModel = gridModels(_currentModelIndex)
   def putRectStamp(cpos: CellPosition, st: RectStamp) = {
     val fgContent = new RectStampContent(st, cellPaint)
@@ -54,6 +57,27 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     setLockFunction(identity[Position])
     _lockMultiplier = 1
   }
+  def refreshSelectedStamp(): Unit = {
+    if (_advanceEnabled) {
+      if (_advanceColDelta == 0) {
+        sel.cellStamp = SelectedPositionManager.downPointingStamp
+      } else {
+        sel.cellStamp = SelectedPositionManager.rightPointingStamp
+      }
+    } else {
+      sel.cellStamp = SelectedPositionManager.outlineStamp
+    }
+  }
+  def advanceEnabled = _advanceEnabled
+  def advanceEnabled_=(e: Boolean): Unit = {
+    _advanceEnabled = e
+    refreshSelectedStamp()
+  }
+  def setAdvanceDelta(rd: Int, cd: Int) {
+    _advanceRowDelta = rd
+    _advanceColDelta = cd
+    refreshSelectedStamp()
+  }
   def putLineStamp(epos: EdgePosition, st: LineStamp) =
     _gridModel.putEdge(epos, new LineStampContent(st, edgePaint))
   def putPointStamp(ipos: IntersectionPosition, st: PointStamp) =
@@ -65,6 +89,15 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       case epos: EdgePosition => putLineStamp(epos, ClearStamp)
       case ipos: IntersectionPosition => putPointStamp(ipos, ClearStamp)
     })
+    advanceSelected()
+  }
+  def backspace() = {
+    sel.selected foreach (se => se match {
+      case cpos: CellPosition => _gridModel.putCell(cpos, new RectStampContent(ClearStamp, cellPaint))
+      case epos: EdgePosition => putLineStamp(epos, ClearStamp)
+      case ipos: IntersectionPosition => putPointStamp(ipos, ClearStamp)
+    })
+    retreatSelected()
   }
   def putStampAtPosition(pos: Position, rectStamp: Option[RectStamp] = None,
     lineStamp: Option[LineStamp] = None,
@@ -89,6 +122,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     pointStamp: Option[PointStamp] = None) {
     sel.selected foreach (pos => putStampAtPosition(pos, rectStamp, lineStamp,
       pointStamp))
+    advanceSelected()
   }
   def putContentAtSelected(rectContent: Option[RectContent] = None,
     lineContent: Option[LineContent] = None,
@@ -98,6 +132,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       case epos: EdgePosition => lineContent foreach (_gridModel.putEdge(epos, _))
       case ipos: IntersectionPosition => pointContent foreach (_gridModel.putIntersection(ipos, _))
     })
+    advanceSelected()
   }
   def status = _drawStatus ++ _paintStatus ++ " | " ++ (gridModelNames(_currentModelIndex) match {
       case None => ""
@@ -110,9 +145,27 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     putContentAtSelected(s.rectContent, s.lineContent, s.pointContent)
   }
   def moveSelected(rd: Int, cd: Int) = {
+    if (!(rd == 0 && cd == 0)) {
+      sel.selected = sel.selected map (_.deltaPosition(rd, cd))
+      ensureLock()
+    }
+  }
+  def advanceSelected() = {
+    if (_advanceEnabled) {
+      moveSelected(_advanceRowDelta, _advanceColDelta)
+    }
+  }
+  def retreatSelected() = {
+    if (_advanceEnabled) {
+      moveSelected(-_advanceRowDelta, -_advanceColDelta)
+    }
+  }
+  def moveSelectedFromInput(rd: Int, cd: Int) = {
     val mult = _lockMultiplier
-    sel.selected = sel.selected map (_.deltaPosition(mult*rd, mult*cd))
-    ensureLock()
+    moveSelected(mult*rd, mult*cd)
+    if (_advanceEnabled) {
+      setAdvanceDelta(rd.abs * 2, cd.abs * 2)
+    }
   }
   def lineContentify(g: Griddable): Option[LineContent] = g match {
     case EdgeGriddable(c: LineContent, _) => Some(c)
@@ -152,7 +205,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   }
   private def completePF[B](pf: PartialFunction[KeyData, B]): PartialFunction[List[KeyData], KeyResult] =
     new SingletonListPartialFunction(pf andThen {u: B => KeyComplete})
-  val moveReactions = completePF(KeyDataCombinations.keyDataRCFunction(moveSelected))
+  val moveReactions = completePF(KeyDataCombinations.keyDataRCFunction(moveSelectedFromInput))
   val moveAndDrawReactions = completePF(KeyDataCombinations.keyDataShiftRCFunction(moveAndDrawSelected))
 
   private val globalMap: Map[KeyData, Char] = HashMap(
@@ -285,6 +338,9 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "alpha"   => _drawStatus = "[alpha]"; _drawReactions = alphaDrawReactions; publish(StatusChanged(this)); Success("Alpha")
     case "fill"    => _drawStatus = "[fill]"; _drawReactions = fillDrawReactions; publish(StatusChanged(this)); Success("Fill")
 
+    case "advance" => advanceEnabled = true; Success("Auto-advance enabled")
+    case "noadvance" => advanceEnabled = false; Success("Auto-advance disabled")
+
     case "recolor" => args match {
       case Array(arg) => for (color <- PaintStringifier.parseColor(arg)) yield {
         _gridModel mapUpdateCurrent (_ match {
@@ -412,6 +468,12 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   val fillDrawReactions = completePF(ContentSet.fillMap andThen putContentSet)
   private var _drawReactions = defaultDrawReactions
 
+  def backspaceReaction: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
+    case List(KeyTypedData('\u0008' /*^H*/)) => {
+      backspace()
+      KeyComplete
+    }
+  }
   def repeatReaction: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
     case List(KeyTypedData('q')) => {
       putStampAtSelected(lastRectStamp, lastLineStamp, lastPointStamp)
@@ -426,6 +488,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     orElse paintReactions
     orElse writeReactions
     orElse gridListReactions
+    orElse backspaceReaction
     orElse repeatReaction)
   def selectNear(pt: Point) {
     sel.selected = Some(point2pos(pt))
