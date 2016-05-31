@@ -19,4 +19,4 @@ trait GridderfaceMode extends Publisher {
     Failed("unrecognized command: " + command)
   def cursorPaint: Paint
 }
-case class StatusChanged(src: GridderfaceMode) extends Event
+case class StatusChanged(src: Any) extends Event

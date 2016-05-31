@@ -11,6 +11,11 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   private var _currentModelIndex: Int,
   point2pos: java.awt.Point => Position, commandStarter: Char => Unit) extends GridderfaceMode {
 
+  gridModels.foreach(listenTo(_))
+  reactions += {
+    case StatusChanged(g) if g != this => publish(StatusChanged(this))
+  }
+
   private var cellPaint: Paint = Color.BLACK
   private var cellPaintName: String = "Black"
   private var edgePaint: Paint = Color.BLACK
@@ -199,12 +204,10 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
   def gridListReactions: PartialFunction[List[KeyData], KeyResult] = kd => kd match {
     case List(KeyPressedData(Key.Tab, 0)) => {
       _gridModel.selectNextGrid()
-      publish(StatusChanged(this))
       KeyCompleteWith(Success("Selected layer " ++ _gridModel.status))
     }
     case List(KeyPressedData(Key.Tab, Key.Modifier.Shift)) => {
-      _gridModel.selectNextGrid()
-      publish(StatusChanged(this))
+      _gridModel.selectPreviousGrid()
       KeyCompleteWith(Success("Selected layer " ++ _gridModel.status))
     }
     case List(KeyPressedData(Key.Tab, Key.Modifier.Control)) => {
@@ -269,16 +272,8 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case '#' =>
       putStampAtSelected(Some(SudokuPencilRectStamp.createSudokuPencilRectStampFromString(str))); Success("")
   }
-  def addLayer(): Status[String] = {
-    _gridModel.addGrid(); publish(StatusChanged(this))
-    Success("New layer added")
-  }
-  def removeLayer(): Status[String] = {
-    _gridModel.removeGrid(); publish(StatusChanged(this))
-    Success("Current layer removed")
-  }
   def removeAll(): Status[String] = {
-    _gridModel.removeAll(); publish(StatusChanged(this))
+    _gridModel.removeAll()
     Success("All layers removed")
   }
   override def handleColonCommand(command: String, args: Array[String]) = command match {
@@ -363,17 +358,17 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
       }
     ) yield c
 
-    case "newlayer" => addLayer()
-    case "addlayer" => addLayer()
-    case "rmlayer"  => removeLayer()
-    case "dellayer" => removeLayer()
+    case "newlayer" => StatusUtilities.addLayerTo(_gridModel)
+    case "addlayer" => StatusUtilities.addLayerTo(_gridModel)
+    case "rmlayer"  => StatusUtilities.removeLayerFrom(_gridModel)
+    case "dellayer" => StatusUtilities.removeLayerFrom(_gridModel)
     case "rmall"    => removeAll()
     case "delall"   => removeAll()
     case "clear" =>
-      _gridModel.clearGrid(); publish(StatusChanged(this))
+      _gridModel.clearGrid()
       Success("Content cleared")
     case "clearall" =>
-      _gridModel.clearAll(); publish(StatusChanged(this))
+      _gridModel.clearAll()
       Success("All content cleared")
     case c => Failed("unrecognized command: " + c)
   }

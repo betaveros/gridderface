@@ -110,5 +110,12 @@ object StatusUtilities {
     g.fillRect(0, 0, w, h)
     img
   }
-
+  def addLayerTo(model: GriddableModel): Status[String] = {
+    model.addGrid()
+    Success("New layer added")
+  }
+  def removeLayerFrom(model: GriddableModel): Status[String] = {
+    model.removeGrid()
+    Success("Current layer removed")
+  }
 }

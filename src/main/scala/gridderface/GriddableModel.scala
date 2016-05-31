@@ -38,18 +38,23 @@ class GriddableModel extends Griddable with ContentPutter {
     put(p, new IntersectionGriddable(c, p))
   def clearGrid() = {
     _currentEntry.griddableMap.clear()
+    publish(GriddableChanged(this))
   }
   def mapUpdateCurrent(f: Griddable => Griddable) {
     _currentEntry.griddableMap mapUpdate f
+    publish(GriddableChanged(this))
   }
   def clearAll() = {
     _list foreach {_.griddableMap.clear()}
+    publish(GriddableChanged(this))
   }
   def addGrid() = {
     _currentEntry = Entry()
     listenTo(_currentEntry)
     _list = _list :+ _currentEntry
     _currentEntryIndex = _list.length - 1
+    publish(GriddableChanged(this))
+    publish(StatusChanged(this))
   }
   def removeGrid() = {
     if (_list.length == 1) {
@@ -63,6 +68,7 @@ class GriddableModel extends Griddable with ContentPutter {
       _currentEntryIndex = _list.length - 1
     }
     publish(GriddableChanged(this))
+    publish(StatusChanged(this))
   }
   def removeAll() = {
     _currentEntry = Entry()
@@ -70,24 +76,29 @@ class GriddableModel extends Griddable with ContentPutter {
     _list = List(_currentEntry)
     _currentEntryIndex = 0
     publish(GriddableChanged(this))
+    publish(StatusChanged(this))
   }
   def selectPreviousGrid() = {
     _currentEntryIndex = (_currentEntryIndex - 1 + _list.length) % _list.length
     _currentEntry = _list(_currentEntryIndex)
     publish(GriddableChanged(this))
+    publish(StatusChanged(this))
   }
   def selectNextGrid() = {
     _currentEntryIndex = (_currentEntryIndex + 1) % _list.length
     _currentEntry = _list(_currentEntryIndex)
     publish(GriddableChanged(this))
+    publish(StatusChanged(this))
   }
   def currentGridOverride = _currentEntry.gridOverride
   def currentGridOverride_=(grid: Option[SimpleGrid]) = {
     _currentEntry.gridOverride = grid
     publish(GriddableChanged(this))
+    publish(StatusChanged(this))
   }
   def status = {
-    "%d/%d".format(_currentEntryIndex + 1, _list.length)
+    val detachNote = if (_currentEntry.gridOverride.isDefined) "[D]" else ""
+    "%d/%d".format(_currentEntryIndex + 1, _list.length) + detachNote
   }
 }
 object GriddableModel {

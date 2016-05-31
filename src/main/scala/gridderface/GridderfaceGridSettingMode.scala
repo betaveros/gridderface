@@ -108,6 +108,16 @@ class GridderfaceGridSettingMode(val model: GriddableModel,
   def gridMultiplier = scala.math.pow(2.0, gridExponent)
   var negateFlag = false
   val moveGridReactions = KeyDataCombinations.keyDataXYFunction(moveGrid)
+  val gridListReactions: PartialFunction[KeyData, Unit] = kd => kd match {
+    case KeyPressedData(Key.Tab, 0) => {
+      model.selectNextGrid()
+      publish(StatusChanged(this))
+    }
+    case KeyPressedData(Key.Tab, Key.Modifier.Shift) => {
+      model.selectPreviousGrid()
+      publish(StatusChanged(this))
+    }
+  }
   val resizeGridReactions: PartialFunction[KeyData, Unit] = {
       case KeyTypedData('+') => adjustGridSize( 1,  1)
       case KeyTypedData('-') => adjustGridSize(-1, -1)
@@ -165,6 +175,7 @@ class GridderfaceGridSettingMode(val model: GriddableModel,
     pendingMoveGridReactions andThen {u: Unit => KeyComplete})
   val normalKeyListReactions = new SingletonListPartialFunction(
     moveGridReactions
+    orElse gridListReactions
     orElse resizeGridReactions orElse singlyResizeGridReactions
     orElse setGridMultiplierReactions
     orElse negateMultiplierReactions
@@ -189,6 +200,10 @@ class GridderfaceGridSettingMode(val model: GriddableModel,
       model.currentGridOverride = None
       Success("Attached grid")
     }
+    case "newlayer" => StatusUtilities.addLayerTo(model)
+    case "addlayer" => StatusUtilities.addLayerTo(model)
+    case "rmlayer"  => StatusUtilities.removeLayerFrom(model)
+    case "dellayer" => StatusUtilities.removeLayerFrom(model)
     case c => Failed("Unrecognized command: " + c)
   }
   var startPt: Point2D = new Point2D.Double(0, 0)
