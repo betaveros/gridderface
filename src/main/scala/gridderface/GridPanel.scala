@@ -9,7 +9,7 @@ import java.awt.geom.AffineTransform
 import java.awt.geom.Point2D
 import java.awt.geom.Rectangle2D
 
-class GridPanel(val provider: GridProvider) extends Panel {
+class GridPanel extends Panel {
   var buffers: ListBuffer[OpacityBuffer] = ListBuffer()
   private var transform = new AffineTransform()
 //  sample stuff:
@@ -27,7 +27,7 @@ class GridPanel(val provider: GridProvider) extends Panel {
 //  )
   override def paintComponent(g: Graphics2D) {
     super.paintComponent(g)
-    buffers.foreach(b => b.drawOnGrid(provider.grid, g, transform, size))
+    buffers.foreach(b => b.draw(g, transform, size))
   }
   def translate(x: Double, y: Double) = {
     transform.translate(x, y)

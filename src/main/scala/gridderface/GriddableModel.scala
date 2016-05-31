@@ -74,20 +74,33 @@ class GriddableModel extends Griddable with ContentPutter {
   def selectPreviousGrid() = {
     _currentEntryIndex = (_currentEntryIndex - 1 + _list.length) % _list.length
     _currentEntry = _list(_currentEntryIndex)
+    publish(GriddableChanged(this))
   }
   def selectNextGrid() = {
     _currentEntryIndex = (_currentEntryIndex + 1) % _list.length
     _currentEntry = _list(_currentEntryIndex)
+    publish(GriddableChanged(this))
+  }
+  def currentGridOverride = _currentEntry.gridOverride
+  def currentGridOverride_=(grid: Option[SimpleGrid]) = {
+    _currentEntry.gridOverride = grid
+    publish(GriddableChanged(this))
   }
   def status = {
     "%d/%d".format(_currentEntryIndex + 1, _list.length)
   }
 }
 object GriddableModel {
-  case class Entry(griddableMap: GriddablePositionMap = new GriddablePositionMap(), gridOverride: Option[SimpleGrid] = None) extends Griddable {
+  case class Entry(griddableMap: GriddablePositionMap = new GriddablePositionMap(), private var _gridOverride: Option[SimpleGrid] = None) extends Griddable {
     listenTo(griddableMap)
     reactions += {
       case GriddableChanged(g) if g != this => publish(GriddableChanged(this))
+    }
+    def gridOverride = _gridOverride
+    def gridOverride_=(grid: Option[SimpleGrid]): Unit = {
+      if (_gridOverride equals grid) return
+      _gridOverride = grid
+      publish(GriddableChanged(this))
     }
     def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D): Unit = {
       griddableMap.drawOnGrid(gridOverride.getOrElse(grid), g2d)

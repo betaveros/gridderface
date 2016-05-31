@@ -4,32 +4,56 @@ import scala.swing.event._
 import java.awt.{ Graphics2D, Point }
 import java.awt.geom.Point2D
 
-class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
+class GridderfaceGridSettingMode(val model: GriddableModel,
+  private var _activeIndex: Int,
+  private var _masterGrid: SimpleGrid,
   private var _rowCount: Int, private var _colCount: Int,
   viewed2grid: Point => Point2D) extends GridderfaceMode with GridProvider with Griddable {
 
+  listenTo(model)
+  reactions += {
+    case StatusChanged(g) if g != this => publish(StatusChanged(this))
+  }
+
   val name = "Grid"
-  def grid: SimpleGrid = _grid
+  def grid: SimpleGrid = _masterGrid
   def grid_=(g: SimpleGrid): Unit = {
-    if (_grid equals g) return
-    _grid = g
+    _masterGrid = g
     publish(GridChanged())
     publish(StatusChanged(this))
   }
+  def currentGrid: SimpleGrid = model.currentGridOverride getOrElse grid
+  def currentGrid_=(g: SimpleGrid): Unit = {
+    model.currentGridOverride match {
+      case Some(gg) => {
+        if (gg equals g) return
+        model.currentGridOverride = Some(g)
+      }
+      case None => {
+        if (_masterGrid equals g) return
+        _masterGrid = g
+      }
+    }
+    publish(GridChanged())
+    publish(StatusChanged(this))
+  }
+  val currentProvider = new GridProvider {
+    def grid = currentGrid
+  }
   def moveGrid(xd: Int, yd: Int){
-    grid = grid.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
+    currentGrid = currentGrid.offsetBy(xd * gridMultiplier, yd * gridMultiplier)
   }
   def adjustGridSize(xm: Int, ym: Int) {
-    grid = grid.gridSizeAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
+    currentGrid = currentGrid.gridSizeAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
   }
   def adjustExcess(xm: Int, ym: Int) {
-    grid = grid.excessAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
+    currentGrid = currentGrid.excessAdjustedBy(gridMultiplier * xm, gridMultiplier * ym)
   }
   def snap() {
-    grid = grid.offsetRounded
+    currentGrid = currentGrid.offsetRounded
   }
   def snapAll() {
-    grid = grid.allRounded
+    currentGrid = currentGrid.allRounded
   }
 
   private def create: Griddable = HomogeneousEdgeGrid.defaultEdgeGrid(_rowCount, _colCount)
@@ -101,24 +125,25 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
       case KeyTypedData('m') => pending = 'm'; publish(StatusChanged(this))
   }
   val pendingResizeGridReactions: PartialFunction[KeyData, Unit] = {
-      case KeyTypedData('d') => grid = SimpleGrid.defaultGrid; resetPending()
-      case KeyTypedData('g') => grid = SimpleGrid.generationGrid; resetPending()
+      case KeyTypedData('d') => currentGrid = SimpleGrid.defaultGrid; resetPending()
+      case KeyTypedData('g') => currentGrid = SimpleGrid.generationGrid; resetPending()
       case KeyTypedData('\u001b' /*esc*/) => resetPending()
   }
   val pendingMoveGridReactions: PartialFunction[KeyData, Unit] = {
-      case KeyTypedData('r') => grid = grid.withOffset(0, 0); resetPending()
+      case KeyTypedData('r') => currentGrid = currentGrid.withOffset(0, 0); resetPending()
       case KeyTypedData('\u001b' /*esc*/) => resetPending()
   }
   val singlyResizeGridReactions = KeyDataCombinations.keyDataShiftRCFunction(adjustGridSize)
   def normalStatus = {
-    val dimPart = "%.2fx%.2f".format(_grid.colWidth, _grid.rowHeight)
+    val dimPart = "%.2fx%.2f".format(currentGrid.colWidth, currentGrid.rowHeight)
+    val modelPart = " " + model.status
     val expPart = " (M2^%d%s)".format(gridExponent, if (negateFlag) "`" else "")
-    val excPart = if (_grid.xExcess == 0 && _grid.yExcess == 0) {
+    val excPart = if (currentGrid.xExcess == 0 && currentGrid.yExcess == 0) {
         ""
       } else {
-        " +[%.2fx%.2f]".format(_grid.xExcess, _grid.yExcess)
+        " +[%.2fx%.2f]".format(currentGrid.xExcess, currentGrid.yExcess)
       }
-    dimPart + expPart + excPart
+    dimPart + modelPart + expPart + excPart
   }
   def status = pending match {
     case ' ' => normalStatus
@@ -151,6 +176,21 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
     case _ => normalKeyListReactions
   }
   def handleCommand(prefix: Char, str: String) = Success("")
+  override def handleColonCommand(command: String, args: Array[String]) = command match {
+    case "reset" => {
+      grid = SimpleGrid.defaultGrid
+      Success("Reset grid")
+    }
+    case "detach" => {
+      model.currentGridOverride = Some(_masterGrid)
+      Success("Detached grid")
+    }
+    case "attach" => {
+      model.currentGridOverride = None
+      Success("Attached grid")
+    }
+    case c => Failed("Unrecognized command: " + c)
+  }
   var startPt: Point2D = new Point2D.Double(0, 0)
   var origXOffset: Double = 0.0
   var origYOffset: Double = 0.0
@@ -160,7 +200,7 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
     val ly = startPt.getY min endPt.getY
     val hx = startPt.getX max endPt.getX
     val hy = startPt.getY max endPt.getY
-    grid = new SimpleGrid(
+    currentGrid = new SimpleGrid(
       (hy - ly).toDouble / _rowCount,
       (hx - lx).toDouble / _colCount,
       lx, ly)
@@ -172,9 +212,9 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
     val ly = startPt.getY min endPt.getY
     val hx = startPt.getX max endPt.getX
     val hy = startPt.getY max endPt.getY
-    grid = new SimpleGrid(
-      grid.rowHeight,
-      grid.colWidth,
+    currentGrid = new SimpleGrid(
+      currentGrid.rowHeight,
+      currentGrid.colWidth,
       origXOffset + endPt.getX - startPt.getX,
       origYOffset + endPt.getY - startPt.getY)
     publish(GridChanged())
@@ -184,8 +224,8 @@ class GridderfaceGridSettingMode(private var _grid: SimpleGrid,
       case 'r' => startPt = viewed2grid(pt)
       case 'm' => {
         startPt = viewed2grid(pt)
-        origXOffset = grid.xOffset
-        origYOffset = grid.yOffset
+        origXOffset = currentGrid.xOffset
+        origYOffset = currentGrid.yOffset
       }
       case _ => ()
     }

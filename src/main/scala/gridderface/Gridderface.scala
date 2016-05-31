@@ -24,7 +24,7 @@ object Gridderface extends SimpleSwingApplication {
   val underGridModel = new GriddableModel()
   val gridModel = new GriddableModel()
   // qq, initialization order
-  val gridMode = new GridderfaceGridSettingMode(SimpleGrid.defaultGrid, 10, 10,
+  val gridMode = new GridderfaceGridSettingMode(gridModel, 0, SimpleGrid.defaultGrid, 10, 10,
     (pt: Point2D) => gridPanel.viewToGrid(pt))
   val bg = new GriddableImageHolder(None)
 
@@ -59,8 +59,8 @@ object Gridderface extends SimpleSwingApplication {
     statusLabel.text = mode.status
   }
 
-  private def withOpacity(g: Griddable, alpha: Float, name: String): OpacityBuffer = {
-    new OpacityBuffer(g, alpha)
+  private def withOpacity(g: Griddable, prov: GridProvider, alpha: Float, name: String): OpacityBuffer = {
+    new OpacityBuffer(g, prov, alpha)
   }
 
   private var keyList: ListBuffer[KeyData] = ListBuffer()
@@ -99,16 +99,16 @@ object Gridderface extends SimpleSwingApplication {
     }
   }
 
-  val griddableList: List[Tuple4[Griddable, Float, String, Boolean]] = List(
-    (bg, 1.0f, "image", true),
-    (underGridModel, 1.0f, "undercontent", true),
-    (decorationGridSeq, 1.0f, "decoration", true),
-    (gridModel, 1.0f, "content", true),
-    (gridMode, 0.5f, "grid", false),
-    (selectedManager, 0.75f, "cursor", false))
+  val griddableList: List[Tuple5[Griddable, GridProvider, Float, String, Boolean]] = List(
+    (bg, gridMode, 1.0f, "image", true),
+    (underGridModel, gridMode, 1.0f, "undercontent", true),
+    (decorationGridSeq, gridMode, 1.0f, "decoration", true),
+    (gridModel, gridMode, 1.0f, "content", true),
+    (gridMode, gridMode.currentProvider, 0.5f, "grid", false),
+    (selectedManager, gridMode.currentProvider, 0.75f, "cursor", false))
   val opacityBufferList: List[Tuple3[String, OpacityBuffer, Boolean]] =
-    for ((g, opacity, name, generateFlag) <- griddableList) yield {
-      val obuf = withOpacity(g, opacity, name)
+    for ((g, prov, opacity, name, generateFlag) <- griddableList) yield {
+      val obuf = withOpacity(g, prov, opacity, name)
       (name, obuf, generateFlag)
     }
   val generatingOpacityBufferList: List[OpacityBuffer] =
@@ -116,7 +116,7 @@ object Gridderface extends SimpleSwingApplication {
   val opacityBufferMap = HashMap(
     (for ((name, buf, _) <- opacityBufferList) yield (name, buf)): _*)
 
-  val gridPanel: GridPanel = new GridPanel(gridMode) {
+  val gridPanel: GridPanel = new GridPanel {
     peer setFocusTraversalKeysEnabled false // prevent tab key from being consumed
     listenTo(keys)
     listenTo(mouse.clicks)
@@ -215,7 +215,7 @@ object Gridderface extends SimpleSwingApplication {
       val img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
       val g = img.createGraphics()
       for (buf <- generatingOpacityBufferList) {
-        buf.drawOnGrid(gridMode.grid, g, new AffineTransform(), new Dimension(w, h))
+        buf.draw(g, new AffineTransform(), new Dimension(w, h))
       }
       img
     })

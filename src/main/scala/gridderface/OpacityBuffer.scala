@@ -6,6 +6,7 @@ import scala.swing.Publisher
 import java.awt.geom.AffineTransform
 
 class OpacityBuffer(val original: Griddable,
+  val gridProvider: GridProvider,
   private var _opacity: Float,
   private var _antiAlias: Boolean = false,
   private var _textAntiAlias: Boolean = false,
@@ -83,7 +84,8 @@ class OpacityBuffer(val original: Griddable,
 
   def fit(dd: Int, cd: Int) = dd <= cd && dd * 2 >= cd
 
-  def drawOnGrid(grid: SimpleGrid, g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
+  def draw(g2d: Graphics2D, transform: AffineTransform, dim: Dimension) {
+    val grid = gridProvider.grid
     if (!(cache.nonEmpty
         && cacheGrid.exists(_ equals grid)
         && cacheTransform.exists(_ equals transform)
