@@ -31,7 +31,7 @@ On the other hand, if you see any modular things that fit neatly in cells, (e.g.
 
 Gridderface does not provide answer verification of any sort. This can and has been automated for many, many logic puzzle types (e.g. janko.at Puzzle Applets or PUZ-PRE v3), but Gridderface doesn't know how to read the clues or tell what type the puzzle is, and in any case there are countless puzzle types or variations and more are being invented all the time. (The author is particularly guilty of contributing to this.) You don't usually have automatic verification for a puzzle you solved on paper, either.
 
-Gridderface cannot deal with puzzles in nonrectangular grids. Or anything else in nonrectangular grids, for that matter. (Is it possible that hexagonal grids might be added at some very distant point in the future? Maaaaybe?)
+Gridderface cannot create or edit nonrectangular grids; however, you might still be able to hack it by making a grid with overlapping cells squeezed narrowly together, so, in particular, putting letters or numbers in hexagonal grid cells actually kind of works! (Is it possible that creating hexagonal grids might be added at some very distant point in the future?)
 
 ## Installation
 
@@ -63,6 +63,7 @@ Manually adjusting the grid can be done in **grid-setting mode**, entered with t
 - <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> or shift-arrow keys will change one of the grid dimensions.
 - <kbd>+-</kbd> will change both grid dimensions together.
 - <kbd>[]{}</kbd> will change the number of rows or columns in the displayed grid.
+- (experimental feature) <kbd>&lt;&gt;</kbd> will change the *excess*, making the cells smaller or larger than the grid lines that define them. You can use this to hack puzzles in hexagonal or irregular grids.
 
 Typing a number will make all of these keys adjust the grid by (exponentially) larger increments; typing <kbd>\`</kbd> (backquote) followed by a number will make the adjustments change by (exponentially) smaller increments. The exponential increment is displayed in the status bar as `(M2^<number>)`.
 
