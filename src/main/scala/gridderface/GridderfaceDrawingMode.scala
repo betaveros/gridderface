@@ -335,6 +335,8 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     case "unlock" => unlock(); Success("Unlocked")
 
     case "default" => _drawStatus = ""; _drawReactions = defaultDrawReactions; publish(StatusChanged(this)); Success("Default")
+
+    case "caseflipped" => _drawStatus = ""; _drawReactions = caseFlippedDrawReactions; publish(StatusChanged(this)); Success("CaseFlipped")
     case "alpha"   => _drawStatus = "[alpha]"; _drawReactions = alphaDrawReactions; publish(StatusChanged(this)); Success("Alpha")
     case "fill"    => _drawStatus = "[fill]"; _drawReactions = fillDrawReactions; publish(StatusChanged(this)); Success("Fill")
 
@@ -464,6 +466,7 @@ class GridderfaceDrawingMode(val name: String, sel: SelectedPositionManager,
     // publish(StatusChanged(this))
   }
   val defaultDrawReactions = completePF(StampSet.defaultMap andThen putStampSet)
+  val caseFlippedDrawReactions = completePF(StampSet.caseFlippedMap andThen putStampSet)
   val alphaDrawReactions = completePF(StampSet.alphaMap andThen putStampSet)
   val fillDrawReactions = completePF(ContentSet.fillMap andThen putContentSet)
   private var _drawReactions = defaultDrawReactions

@@ -23,7 +23,9 @@ abstract class DashedStrokeVal(strokeWidth: Float, strokeDash: Float) extends St
         Array(strokeDash, strokeDash), 0.0f)
 }
 case object NormalDashedStrokeVal extends DashedStrokeVal(normalWidth, 1.0f / 6.0f)
+case object MediumDashedStrokeVal extends DashedStrokeVal(mediumWidth, 0.125f)
 case object ThinDashedStrokeVal   extends DashedStrokeVal(thinWidth  , 0.125f)
+case object ThickDashedStrokeVal  extends DashedStrokeVal(thickWidth , 0.25f)
 
 object StrokeVal {
   val normalWidth = 0.125f
@@ -41,6 +43,8 @@ object StrokeVal {
     ThickStrokeVal -> "t",
     ThinStrokeVal -> "s",
     NormalDashedStrokeVal -> "nd",
+    MediumDashedStrokeVal -> "md",
+    ThickDashedStrokeVal -> "td",
     ThinDashedStrokeVal -> "d"
   )
   private lazy val strokeValStringMap: Map[StrokeVal, String] = Map(strokeValStringCorrespondences: _*)

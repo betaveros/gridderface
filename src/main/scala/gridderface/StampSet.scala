@@ -13,8 +13,12 @@ object StampSet {
     "Fill", Some(FullRectStamp(Fill)), Some(StrokeLineStamp(NormalStrokeVal)), Some(SquareFixedMark(0.125, Fill)))
   val thickSet = StampSet(
     "10/Thick", Some(new OneTextRectStamp("10")), Some(StrokeLineStamp(ThickStrokeVal)), Some(SquareFixedMark(0.25, Fill)))
+  val thickDashedSet = StampSet(
+    "12/ThickDash", Some(new OneTextRectStamp("12")), Some(StrokeLineStamp(ThickDashedStrokeVal)), Some(SquareFixedMark(0.1875, Fill)))
   val mediumSet = StampSet(
     "Medium", Some(RectangleArcRectStamp(0.75, Fill, false, false, false, false)), Some(StrokeLineStamp(MediumStrokeVal)), Some(SquareFixedMark(0.1875, Fill)))
+  val smallSet = StampSet(
+    "Small", Some(RectangleArcRectStamp(0.5, Fill, false, false, false, false)), Some(StrokeLineStamp(MediumDashedStrokeVal)), Some(SquareFixedMark(0.125, Fill)))
   val shadefillSet = StampSet(
     "shadeFill", Some(DiagonalFillRectStamp), Some(StrokeLineStamp(ThinStrokeVal)), Some(SquareFixedMark(0.125, Fill)))
   val dashSet = StampSet(
@@ -33,6 +37,8 @@ object StampSet {
     "Star", Some(StarStamp), None, None)
   val eSet = StampSet(
     "11/Trans", Some(OneTextRectStamp("11")), Some(TransverseLineStamp(NormalStrokeVal)), None)
+  val epsSet = StampSet(
+    "Eps/thinTrans", Some(OneTextRectStamp("\u03b5")), Some(TransverseLineStamp(ThinStrokeVal)), None)
   val clearSet = StampSet(
     "Clear", Some(ClearStamp), Some(ClearStamp), Some(ClearStamp))
   val crossMark = CrossFixedMark(0.125, NormalStrokeVal)
@@ -84,13 +90,17 @@ object StampSet {
         KeyTypedData('d') -> dashSet,
         KeyTypedData('D') -> thinDashSet,
         KeyTypedData('s') -> mediumSet,
+        KeyTypedData('S') -> smallSet,
         KeyTypedData('.') -> dotSet,
         KeyTypedData(',') -> cornerDotSet,
         KeyTypedData('o') -> bulbSet,
         KeyTypedData('O') -> circleSet,
         KeyTypedData('b') -> bulbSet,
+        KeyTypedData('B') -> circleSet,
         KeyTypedData('e') -> eSet,
+        KeyTypedData('E') -> epsSet,
         KeyTypedData('t') -> thickSet,
+        KeyTypedData('T') -> thickDashedSet,
         KeyTypedData('\\') -> slash1Set,
         KeyTypedData('/') -> slash2Set,
         KeyTypedData('-') -> horizontalSet,
@@ -103,7 +113,9 @@ object StampSet {
         KeyTypedData('(') -> leftShipSet,
         KeyTypedData(')') -> rightShipSet,
         KeyTypedData('n') -> upShipSet,
+        KeyTypedData('N') -> upShipSet,
         KeyTypedData('u') -> downShipSet,
+        KeyTypedData('U') -> downShipSet,
         KeyTypedData('?') -> questionSet,
         KeyTypedData('!') -> bangSet,
         KeyTypedData('*') -> starSet,
@@ -112,6 +124,13 @@ object StampSet {
         KeyTypedData('X') -> smallCrossSet
       )
     HashMap((basicMappings ++ digitMappings): _*)
+  }
+  val caseFlippedMap: Map[KeyData, StampSet] = {
+    def caseFlip(c: Char): Char = if (c.isUpper) c.toLower else if (c.isLower) c.toUpper else c
+    defaultMap.map({
+      case (KeyTypedData(c), v) => (KeyTypedData(caseFlip(c)), v)
+      case x => x
+    })
   }
   val alphaMap: Map[KeyData, StampSet] = defaultMap ++ letterMappings
 
